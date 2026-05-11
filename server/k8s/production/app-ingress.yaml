@@ -1,0 +1,18 @@
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+    name: transvirex
+    namespace: production
+spec:
+    entryPoints:
+        - web
+        - websecure
+    routes:
+        - match: Host(`transvirex.com`) || Host(`www.transvirex.com`)
+          kind: Rule
+          services:
+              - name: transvirex
+                namespace: production
+                port: 80
+    tls:
+        secretName: certs
