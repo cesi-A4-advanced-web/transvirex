@@ -1,0 +1,9 @@
+{
+    "name": "cesi-a4-devweb",
+    "private": true,
+    "scripts": {
+        "dev": "pnpm -r --parallel --filter ./src/* run dev",
+        "build": "pnpm -r --filter ./src/* run build",
+        "prod": "pnpm build && pnpm -r --parallel --filter ./src/* run prod"
+    }
+}

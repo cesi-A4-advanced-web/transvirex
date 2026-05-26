@@ -49,6 +49,16 @@ cd /your/vps
 # Follow ./docs/04-GITHUB-SECRETS.md
 ```
 
+## 🧩 Root Workspace Commands
+
+From the repository root, pnpm now manages both the backend and frontend packages together:
+
+```bash
+pnpm dev   # start backend + frontend in development
+pnpm build # build both packages
+pnpm prod  # build both, then start them in production mode
+```
+
 ---
 
 ## 📋 Project Structure

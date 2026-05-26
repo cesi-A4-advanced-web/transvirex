@@ -1,0 +1,8 @@
+packages:
+  - "src/backend"
+  - "src/frontend"
+allowBuilds:
+  '@nestjs/core': true
+  '@parcel/watcher': true
+  esbuild: true
+  unrs-resolver: true

@@ -3,16 +3,20 @@
     "type": "module",
     "private": true,
     "scripts": {
-        "build": "nuxt build",
         "dev": "nuxt dev",
+        "build": "nuxt build",
+        "prod": "nuxt preview",
         "generate": "nuxt generate",
         "preview": "nuxt preview",
         "postinstall": "nuxt prepare"
     },
     "dependencies": {
+        "@nuxtjs/tailwindcss": "^6.12.1",
         "nuxt": "^4.4.6",
         "vue": "^3.5.34",
-        "vue-router": "^5.0.7",
-        "@nuxtjs/tailwindcss": "^6.12.1"
+        "vue-router": "^5.0.7"
+    },
+    "devDependencies": {
+        "shadcn-nuxt": "^2.7.3"
     }
 }
