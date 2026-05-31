@@ -20,6 +20,10 @@ resources:
     # - services/backend/users-service.yaml
     # - services/backend/gateway-service.yaml
     - services/frontend.yaml
+
+    # Traefik
+    - https://raw.githubusercontent.com/traefik/traefik/v2.10/docs/content/reference/dynamic-configuration/kubernetes-crd-definition-v1.yml
+    - https://raw.githubusercontent.com/traefik/traefik/v2.10/docs/content/reference/dynamic-configuration/kubernetes-crd-rbac.yml
     - services/traefik.yaml
 
     # Ingresses
