@@ -22,12 +22,7 @@ data:
           insecure: true
 
         providers:
-          kubernetesIngress: {}
-
-        pilot:
-          # Helm had global.sendAnonymousUsage=false / checkNewVersion=false
-          # Disable Traefik Pilot by default when converting from Helm values
-          enabled: false
+          kubernetesCRD: {}
 
         log:
           level: INFO
