@@ -60,7 +60,7 @@ spec:
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-    namespace: default
+    namespace: production
     name: transvirex-traefik-ingress-controller
 
 ---
