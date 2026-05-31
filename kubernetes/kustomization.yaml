@@ -26,4 +26,4 @@ resources:
     - ingresses/frontend-ingress.yaml
     - ingresses/kubernetes-ingress.yaml
     - ingresses/traefik-ingress.yaml
-    # - ghcr-secret.yaml
+    - ghcr-secret.yaml

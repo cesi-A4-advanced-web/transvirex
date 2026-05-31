@@ -9,10 +9,10 @@ metadata:
         managed-by: kubernetes
 ---
 # Databases namespace - for data storage
-apiVersion: v1
-kind: Namespace
-metadata:
-    name: databases
-    labels:
-        environment: data
-        managed-by: kubernetes
+# apiVersion: v1
+# kind: Namespace
+# metadata:
+#     name: databases
+#     labels:
+#         environment: data
+#         managed-by: kubernetes
