@@ -1,88 +1,144 @@
 services:
-    # <=> K8s namespace: Production
+    # ===================================
+    # 🌐 Frontend Service
+    # ===================================
     frontend:
-        build:
-            context: ./src/frontend
-            dockerfile: Dockerfile
-        ports:
-            - '5173:5173'
-        environment:
-            PORT: 5173
-            HOST: 0.0.0.0
-            NODE_ENV: production
-            API_BASE_URL: https://localhost:3000/
-            REDIS_HOST: redis
-            REDIS_PORT: 6379
-        restart: unless-stopped
-        depends_on:
-            - backend
-            - redis
+        extends:
+            file: ./packages/frontend/docker-compose.yml
+            service: frontend
 
-    backend:
-        build:
-            context: ./src/backend
-            dockerfile: Dockerfile
-        ports:
-            - '3000:3000'
-        environment:
-            PORT: 3000
-            NODE_ENV: production
+    # ===================================
+    # 🔌 API Gateway / Main Service
+    # ===================================
+    gateway-service:
+        extends:
+            file: ./packages/backend/apps/gateway/docker-compose.yml
+            service: gateway-service
 
-            # Postgres connection settings
-            POSTGRES_HOST: postgres
-            POSTGRES_USER: user
-            POSTGRES_PASSWORD: password
-            POSTGRES_DB: mydb
+    # ===================================
+    # 🐝 Microservices (Separate Containers)
+    # ===================================
+    authentication-service:
+        extends:
+            file: ./packages/backend/apps/authentication/docker-compose.yml
+            service: authentication-service
+    stock-service:
+        extends:
+            file: ./packages/backend/apps/stock/docker-compose.yml
+            service: stock-service
+    tours-service:
+        extends:
+            file: ./packages/backend/apps/tours/docker-compose.yml
+            service: tours-service
+    billing-service:
+        extends:
+            file: ./packages/backend/apps/billing/docker-compose.yml
+            service: billing-service
 
-            # RabbitMQ connection settings
-            RABBITMQ_HOST: rabbitmq
-            RABBITMQ_PORT: 5672
-            RABBITMQ_USER: guest
-            RABBITMQ_PASSWORD: guest
-
-            # Redis connection settings
-            REDIS_HOST: redis
-            REDIS_PORT: 6379
-        restart: unless-stopped
-        depends_on:
-            - postgres
-            - rabbitmq
-            - redis
-
-    # <=> K8s namespace: Databases
+    # ===================================
+    # 💾 Databases & Message Brokers
+    # ===================================
     postgres:
-        image: postgres:15
+        image: postgres:16-alpine
+        container_name: transvirex-postgres
         environment:
-            POSTGRES_USER: user
-            POSTGRES_PASSWORD: password
-            POSTGRES_DB: mydb
-        ports:
-            - '5432:5432'
+            POSTGRES_USER: ${POSTGRES_USER:-postgres_user}
+            POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres_password}
+            POSTGRES_DB: ${POSTGRES_DB:-transvirex}
+            POSTGRES_INITDB_ARGS: '-E UTF8 -c max_connections=200'
         volumes:
             - postgres_data:/var/lib/postgresql/data
         restart: unless-stopped
+        healthcheck:
+            test:
+                [
+                    'CMD-SHELL',
+                    'pg_isready -U ${POSTGRES_USER:-postgres_user} -d ${POSTGRES_DB:-transvirex} -h localhost',
+                ]
+            interval: 10s
+            timeout: 5s
+            retries: 5
+        networks:
+            - transvirex-network
 
     rabbitmq:
-        image: rabbitmq:3-management
-        ports:
-            - '5672:5672' # RabbitMQ main port
-            - '15672:15672' # RabbitMQ management UI
+        image: rabbitmq:3.13-management-alpine
+        container_name: transvirex-rabbitmq
         environment:
-            RABBITMQ_DEFAULT_USER: guest
-            RABBITMQ_DEFAULT_PASS: guest
+            RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-rabbitmq_user}
+            RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-rabbitmq_password}
         volumes:
             - rabbitmq_data:/var/lib/rabbitmq
         restart: unless-stopped
+        healthcheck:
+            test: ['CMD', 'rabbitmq-diagnostics', '-q', 'ping']
+            interval: 10s
+            timeout: 5s
+            retries: 5
+        networks:
+            - transvirex-network
 
     redis:
-        image: redis:7
-        ports:
-            - '6379:6379'
+        image: redis:7-alpine
+        container_name: transvirex-redis
+        environment:
+            - REDIS_PASSWORD=${REDIS_PASSWORD:-redis_password}
+            - REDIS_HOST=${REDIS_HOST:-redis}
+            - REDIS_PORT=${REDIS_PORT:-6379}
+            - REDIS_DB=${REDIS_DB:-0}
         volumes:
             - redis_data:/data
         restart: unless-stopped
+        command: redis-server --appendonly yes
+        healthcheck:
+            test: ['CMD', 'redis-cli', 'ping']
+            interval: 10s
+            timeout: 5s
+            retries: 5
+        networks:
+            - transvirex-network
+
+    nginx:
+        image: nginx:alpine
+        container_name: transvirex-nginx
+        ports:
+            - '80:80'
+        # volumes:
+        # - ./development/nginx.conf:/etc/nginx/nginx.conf:ro
+        restart: unless-stopped
+        depends_on:
+            - frontend
+            - gateway-service
+            - rabbitmq
+        healthcheck:
+            test:
+                [
+                    'CMD',
+                    'wget',
+                    '--quiet',
+                    '--tries=1',
+                    '--spider',
+                    'http://localhost:8080/health',
+                ]
+            interval: 10s
+            timeout: 5s
+            retries: 5
+        networks:
+            - transvirex-network
+        develop:
+            watch:
+                - path: ./development/nginx.conf
+                  action: sync+restart
+                  target: /etc/nginx/nginx.conf
 
 volumes:
     postgres_data:
+        driver: local
     rabbitmq_data:
+        driver: local
     redis_data:
+        driver: local
+
+networks:
+    transvirex-network:
+        driver: bridge

@@ -1,0 +1,97 @@
+{
+    "author": "",
+    "dependencies": {
+        "@nestjs/common": "^11.0.1",
+        "@nestjs/core": "^11.0.1",
+        "@nestjs/microservices": "^11.1.24",
+        "@nestjs/platform-express": "^11.0.1",
+        "reflect-metadata": "^0.2.2",
+        "rxjs": "^7.8.1"
+    },
+    "description": "",
+    "devDependencies": {
+        "@eslint/eslintrc": "^3.2.0",
+        "@eslint/js": "^9.18.0",
+        "@nestjs/cli": "^11.0.0",
+        "@nestjs/schematics": "^11.0.0",
+        "@nestjs/testing": "^11.0.1",
+        "@types/express": "^5.0.0",
+        "@types/jest": "^30.0.0",
+        "@types/node": "^24.0.0",
+        "@types/supertest": "^7.0.0",
+        "eslint": "^9.18.0",
+        "eslint-config-prettier": "^10.0.1",
+        "eslint-plugin-prettier": "^5.2.2",
+        "globals": "^17.0.0",
+        "jest": "^30.0.0",
+        "prettier": "^3.4.2",
+        "source-map-support": "^0.5.21",
+        "supertest": "^7.0.0",
+        "ts-jest": "^29.2.5",
+        "ts-loader": "^9.5.2",
+        "ts-node": "^10.9.2",
+        "tsconfig-paths": "^4.2.0",
+        "typescript": "^5.7.3",
+        "typescript-eslint": "^8.20.0"
+    },
+    "jest": {
+        "collectCoverageFrom": [
+            "**/*.(t|j)s"
+        ],
+        "coverageDirectory": "./coverage",
+        "moduleFileExtensions": [
+            "js",
+            "json",
+            "ts"
+        ],
+        "rootDir": ".",
+        "roots": [
+            "<rootDir>/apps/"
+        ],
+        "testEnvironment": "node",
+        "testRegex": ".*\\.spec\\.ts$",
+        "transform": {
+            "^.+\\.(t|j)s$": "ts-jest"
+        }
+    },
+    "license": "UNLICENSED",
+    "name": "transvirex-backend",
+    "private": true,
+    "scripts": {
+        "build": "nest build",
+        "build:authentication": "nest build authentication",
+        "build:billing": "nest build billing",
+        "build:gateway": "nest build gateway",
+        "build:stock": "nest build stock",
+        "build:tours": "nest build tours",
+        "build:users": "nest build users",
+        "debug": "nest start --debug --watch",
+        "dev": "nest start --watch",
+        "dev:authentication": "nest start authentication --watch",
+        "dev:billing": "nest start billing --watch",
+        "dev:gateway": "nest start gateway --watch",
+        "dev:stock": "nest start stock --watch",
+        "dev:tours": "nest start tours --watch",
+        "dev:users": "nest start users --watch",
+        "e2e:authentication": "jest --config ./apps/authentication/test/jest-e2e.json",
+        "e2e:billing": "jest --config ./apps/billing/test/jest-e2e.json",
+        "e2e:gateway": "jest --config ./apps/gateway/test/jest-e2e.json",
+        "e2e:stock": "jest --config ./apps/stock/test/jest-e2e.json",
+        "e2e:tours": "jest --config ./apps/tours/test/jest-e2e.json",
+        "e2e:users": "jest --config ./apps/users/test/jest-e2e.json",
+        "format": "prettier --write \"apps/**/*.ts\" \"libs/**/*.ts\"",
+        "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
+        "start": "nest start",
+        "start:authentication": "node dist/apps/authentication/main",
+        "start:billing": "node dist/apps/billing/main",
+        "start:gateway": "node dist/apps/gateway/main",
+        "start:stock": "node dist/apps/stock/main",
+        "start:tours": "node dist/apps/tours/main",
+        "start:users": "node dist/apps/users/main",
+        "test": "jest",
+        "test:cov": "jest --coverage",
+        "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
+        "test:watch": "jest --watch"
+    },
+    "version": "0.0.1"
+}

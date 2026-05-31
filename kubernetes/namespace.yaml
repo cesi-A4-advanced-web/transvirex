@@ -1,0 +1,18 @@
+---
+# Production namespace - for running microservices
+apiVersion: v1
+kind: Namespace
+metadata:
+    name: production
+    labels:
+        environment: production
+        managed-by: kubernetes
+---
+# Databases namespace - for data storage
+apiVersion: v1
+kind: Namespace
+metadata:
+    name: databases
+    labels:
+        environment: data
+        managed-by: kubernetes

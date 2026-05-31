@@ -1,0 +1,29 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+metadata:
+    name: app-kustomization
+    namespace: production
+
+resources:
+    - namespace.yaml
+    - env.yaml
+
+    # Deployments & Services
+    # - services/postgres.yaml
+    # - services/redis.yaml
+    # - services/rabbitmq.yaml
+    # - services/mongo.yaml
+    # - services/backend/authentication-service.yaml
+    # - services/backend/billing-service.yaml
+    # - services/backend/stock-service.yaml
+    # - services/backend/tours-service.yaml
+    # - services/backend/users-service.yaml
+    # - services/backend/gateway-service.yaml
+    - services/frontend.yaml
+    - services/traefik.yaml
+
+    # Ingresses
+    - ingresses/frontend-ingress.yaml
+    - ingresses/kubernetes-ingress.yaml
+    - ingresses/traefik-ingress.yaml
+    - ghcr-secret.yaml

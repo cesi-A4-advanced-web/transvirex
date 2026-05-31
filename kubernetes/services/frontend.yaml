@@ -1,0 +1,76 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: transvirex-frontend
+    namespace: production
+    labels:
+        app: transvirex-frontend
+spec:
+    replicas: 2
+    selector:
+        matchLabels:
+            app: transvirex-frontend
+    template:
+        metadata:
+            labels:
+                app: transvirex-frontend
+        spec:
+            imagePullSecrets:
+                - name: ghcr-secret
+            containers:
+                - name: frontend
+                  image: ghcr.io/alecfoucher/transvirex-frontend:latest
+                  imagePullPolicy: Always
+                  env:
+                      - name: NODE_ENV
+                        valueFrom:
+                            configMapKeyRef:
+                                name: transvirex-config
+                                key: NODE_ENV
+                      - name: FRONTEND_HOST
+                        valueFrom:
+                            configMapKeyRef:
+                                name: transvirex-config
+                                key: FRONTEND_HOST
+                      - name: FRONTEND_PORT
+                        valueFrom:
+                            configMapKeyRef:
+                                name: transvirex-config
+                                key: FRONTEND_PORT
+                      - name: API_HOST
+                        valueFrom:
+                            configMapKeyRef:
+                                name: transvirex-config
+                                key: API_HOST
+                      - name: API_PORT
+                        valueFrom:
+                            configMapKeyRef:
+                                name: transvirex-config
+                                key: API_PORT
+                  ports:
+                      - containerPort: 3000
+                        name: http
+                  resources:
+                      requests:
+                          cpu: 100m
+                          memory: 128Mi
+                      limits:
+                          cpu: 500m
+                          memory: 512Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+    name: transvirex-frontend
+    namespace: production
+    labels:
+        app: transvirex-frontend
+spec:
+    type: ClusterIP
+    selector:
+        app: transvirex-frontend
+    ports:
+        - port: 80
+          targetPort: 3000
+          name: http
+          protocol: TCP

@@ -1,0 +1,31 @@
+services:
+    billing-service:
+        build:
+            # Context set to the root of the backend monorepo
+            context: ../../
+            dockerfile: ./apps/billing/Dockerfile
+            target: development
+        container_name: transvirex-billing-service
+        environment:
+            - NODE_ENV=${NODE_ENV:-development}
+            - LOG_LEVEL=${LOG_LEVEL:-info}
+            - DEBUG=${DEBUG:-*}
+            - POSTGRES_HOST=${POSTGRES_HOST:-postgres}
+            - POSTGRES_PORT=${POSTGRES_PORT:-5432}
+            - POSTGRES_USER=${POSTGRES_USER:-postgres_user}
+            - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-postgres_password}
+            - POSTGRES_DB=${POSTGRES_DB:-transvirex}
+            - RABBITMQ_HOST=${RABBITMQ_HOST:-rabbitmq}
+            - RABBITMQ_PORT=${RABBITMQ_PORT:-5672}
+            - RABBITMQ_USER=${RABBITMQ_USER:-rabbitmq_user}
+            - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD:-rabbitmq_password}
+        volumes:
+            - ./:/app/apps/billing
+            - /app/node_modules
+            - /app/dist
+        depends_on:
+            - postgres
+            - rabbitmq
+        restart: unless-stopped
+        networks:
+            - transvirex-network

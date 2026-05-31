@@ -1,0 +1,96 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+    name: transvirex-traefik-config
+    namespace: production
+    labels:
+        app: traefik
+data:
+    traefik.yml: |
+        entryPoints:
+          web:
+            address: ":80"
+          websecure:
+            address: ":443"
+          traefik:
+            address: ":9000"
+          k8s-dashboard:
+            address: ":8443"
+
+        api:
+          dashboard: true
+          insecure: true
+
+        providers:
+          kubernetesIngress: {}
+
+        pilot:
+          # Helm had global.sendAnonymousUsage=false / checkNewVersion=false
+          # Disable Traefik Pilot by default when converting from Helm values
+          enabled: false
+
+        log:
+          level: INFO
+
+        serversTransport:
+          insecureSkipVerify: false
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+    name: transvirex-traefik
+    namespace: production
+    labels:
+        app: traefik
+
+spec:
+    ports:
+        - protocol: TCP
+          name: web
+          port: 80
+    type: LoadBalancer
+    selector:
+        app: traefik
+
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+    namespace: default
+    name: transvirex-traefik-ingress-controller
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    namespace: default
+    name: transvirex-traefik
+    labels:
+        app: traefik
+
+spec:
+    replicas: 1
+    selector:
+        matchLabels:
+            app: traefik
+    template:
+        metadata:
+            labels:
+                app: traefik
+        spec:
+            serviceAccountName: transvirex-traefik-ingress-controller
+            containers:
+                - name: traefik
+                  image: traefik:v2.2
+                  imagePullPolicy: Always
+                  volumeMounts:
+                      - name: transvirex-traefik-config
+                        mountPath: /etc/traefik/
+                  ports:
+                      - name: web
+                        containerPort: 80
+            volumes:
+                - name: transvirex-traefik-config
+                  configMap:
+                      name: transvirex-traefik-config
