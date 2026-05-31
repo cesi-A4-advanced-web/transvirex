@@ -11,7 +11,7 @@ spec:
         - match: Host(`transvirex.com`) || Host(`www.transvirex.com`)
           kind: Rule
           services:
-              - name: transvirex
+              - name: transvirex-frontend
                 namespace: production
                 port: 80
     tls:
