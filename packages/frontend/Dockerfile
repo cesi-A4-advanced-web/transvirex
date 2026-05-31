@@ -13,7 +13,7 @@ RUN pnpm run build
 # +--------------------------------------------------------+
 # |                         RUNTIME                        |
 # +--------------------------------------------------------+
-FROM node:26-slim AS runner
+FROM node:26-slim AS production
 WORKDIR /app
 COPY --from=builder /app/dist ./dist
 CMD ["node", "dist/server/index.mjs"]
