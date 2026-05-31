@@ -1,3 +1,37 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+    name: traefik-ingress-controller-role
+rules:
+    - apiGroups: ['']
+      resources: ['services', 'endpoints', 'secrets']
+      verbs: ['get', 'list', 'watch']
+    - apiGroups: ['traefik.io']
+      resources:
+          [
+              'ingressroutes',
+              'ingressroutelines',
+              'middlewares',
+              'tlsoptions',
+              'tlsstores',
+              'traefikservices',
+          ]
+      verbs: ['get', 'list', 'watch']
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+    name: traefik-ingress-controller-binding
+subjects:
+    - kind: ServiceAccount
+      name: transvirex-traefik-ingress-controller
+      namespace: production
+roleRef:
+    kind: ClusterRole
+    name: traefik-ingress-controller-role
+    apiGroup: rbac.authorization.k8s.io
+
+---
 apiVersion: v1
 kind: ConfigMap
 metadata:
