@@ -6,7 +6,7 @@ RUN pnpm runtime set node 26 -g
 WORKDIR /app
 # Copy package files and install dependencies
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
-RUN pnpm install --frozen-lockfile
+RUN pnpm install --no-frozen-lockfile
 # Copy source code and build the application
 COPY . .
 RUN pnpm build gateway
@@ -28,7 +28,7 @@ RUN pnpm runtime set node 26 -g
 WORKDIR /app
 # Copy package files and install all dependencies
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
-RUN pnpm install --frozen-lockfile
+RUN pnpm install --no-frozen-lockfile
 # Copy source code for development
 COPY . .
 # Start the development server

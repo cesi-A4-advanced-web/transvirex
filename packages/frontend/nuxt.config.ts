@@ -20,6 +20,11 @@ export default defineNuxtConfig({
         port: Number(process.env.FRONTEND_PORT) || 5173,
         host: process.env.FRONTEND_HOST || 'localhost',
     },
+    routeRules: {
+        '/api/**': {
+            proxy: 'http://gateway-service:3000/api/**'
+        }
+    },
     nitro: {
         preset: 'node-server',
         output: {

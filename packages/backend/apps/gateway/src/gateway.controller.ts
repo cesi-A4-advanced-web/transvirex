@@ -9,4 +9,14 @@ export class GatewayController {
     getHello(): string {
         return this.gatewayService.getHello();
     }
+
+    @Get('gateway/health')
+    getGatewayHealth() {
+        return this.gatewayService.getGatewayHealth()
+    }
+
+    @Get('auth/health')
+    getAuthHealth() {
+    return this.gatewayService.getAuthHealth()
+}
 }

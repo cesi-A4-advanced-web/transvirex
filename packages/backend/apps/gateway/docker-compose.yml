@@ -25,6 +25,8 @@ services:
             - ./:/app/apps/gateway
             - /app/node_modules
             - /app/dist
+        ports:
+            - '3001:3000'
         depends_on:
             - postgres
             - rabbitmq
