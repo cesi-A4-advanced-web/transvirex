@@ -26,6 +26,36 @@ import { ClientsModule, Transport } from '@nestjs/microservices'
                     noAck: true,
                 }
             },
+            {
+                name: 'STOCK_SERVICE',
+                transport: Transport.RMQ,
+                options: {
+                    urls: [`amqp://${process.env.RABBITMQ_USER}:${process.env.RABBITMQ_PASSWORD}@${process.env.RABBITMQ_HOST}:5672`],
+                    queue: 'stock_queue',
+                    queueOptions: { durable: true },
+                    noAck: true,
+                }
+            },
+            {
+                name: 'TOURS_SERVICE',
+                transport: Transport.RMQ,
+                options: {
+                    urls: [`amqp://${process.env.RABBITMQ_USER}:${process.env.RABBITMQ_PASSWORD}@${process.env.RABBITMQ_HOST}:5672`],
+                    queue: 'tours_queue',
+                    queueOptions: { durable: true },
+                    noAck: true,
+                }
+            },
+            {
+                name: 'USERS_SERVICE',
+                transport: Transport.RMQ,
+                options: {
+                    urls: [`amqp://${process.env.RABBITMQ_USER}:${process.env.RABBITMQ_PASSWORD}@${process.env.RABBITMQ_HOST}:5672`],
+                    queue: 'users_queue',
+                    queueOptions: { durable: true },
+                    noAck: true,
+                }
+            },
         ])],
     controllers: [GatewayController],
     providers: [GatewayService],

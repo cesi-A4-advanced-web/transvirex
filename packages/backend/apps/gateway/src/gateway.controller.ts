@@ -24,4 +24,19 @@ export class GatewayController {
     getBillingHealth() {
         return this.gatewayService.getBillingHealth()
     }
+
+    @Get('stock/health')
+    getStockHealth() {
+        return this.gatewayService.getStockHealth()
+    }
+
+    @Get('tours/health')
+    getToursHealth() {
+        return this.gatewayService.getToursHealth()
+    }
+
+    @Get('users/health')
+    getUsersHealth() {
+        return this.gatewayService.getUsersHealth()
+    }
 }

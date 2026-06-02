@@ -30,6 +30,10 @@ services:
         extends:
             file: ./packages/backend/apps/tours/docker-compose.yml
             service: tours-service
+    users-service:
+        extends:
+            file: ./packages/backend/apps/users/docker-compose.yml
+            service: users-service
     billing-service:
         extends:
             file: ./packages/backend/apps/billing/docker-compose.yml

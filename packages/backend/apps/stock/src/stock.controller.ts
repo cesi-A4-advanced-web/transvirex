@@ -1,12 +1,13 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller } from '@nestjs/common';
+import { MessagePattern } from '@nestjs/microservices';
 import { StockService } from './stock.service';
 
 @Controller()
 export class StockController {
     constructor(private readonly stockService: StockService) {}
 
-    @Get()
-    getHello(): string {
-        return this.stockService.getHello();
+    @MessagePattern('health')
+    getHealth() {
+        return { status: 'ok', service: 'stock' }
     }
 }
