@@ -5,7 +5,7 @@ import { firstValueFrom, lastValueFrom, timeout } from 'rxjs';
 @Injectable()
 export class GatewayService {
 
-    constructor(@Inject('AUTH_SERVICE') private authClient: ClientProxy) {}
+    constructor(@Inject('AUTH_SERVICE') private authClient: ClientProxy, @Inject('BILLING_SERVICE') private billingClient: ClientProxy) {}
 
     getHello(): string {
         return 'Hello World!';
@@ -16,8 +16,10 @@ export class GatewayService {
     }
 
     async getAuthHealth() {
-    return firstValueFrom(this.authClient.send('health', {}).pipe(timeout(5000)))
-}
-}
+        return firstValueFrom(this.authClient.send('health', {}).pipe(timeout(5000)))
+    }
 
-
+    async getBillingHealth() {
+        return firstValueFrom(this.billingClient.send('health', {}).pipe(timeout(5000)))
+    }
+}

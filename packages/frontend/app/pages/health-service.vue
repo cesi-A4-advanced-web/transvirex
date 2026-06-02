@@ -76,6 +76,7 @@ interface ServiceHealth {
 const services = ref<ServiceHealth[]>([
     { name: 'API Gateway',  url: '/api/gateway/health', status: 'pending', responseTime: null, detail: null },
     { name: 'Auth Service', url: '/api/auth/health',   status: 'pending', responseTime: null, detail: null },
+    { name: 'Billing Service', url: '/api/billing/health',   status: 'pending', responseTime: null, detail: null },
 ])
 
 const loading = ref(false)

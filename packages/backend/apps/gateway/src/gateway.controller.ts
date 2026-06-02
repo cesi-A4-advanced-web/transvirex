@@ -17,6 +17,11 @@ export class GatewayController {
 
     @Get('auth/health')
     getAuthHealth() {
-    return this.gatewayService.getAuthHealth()
-}
+        return this.gatewayService.getAuthHealth()
+    }
+
+    @Get('billing/health')
+    getBillingHealth() {
+        return this.gatewayService.getBillingHealth()
+    }
 }
