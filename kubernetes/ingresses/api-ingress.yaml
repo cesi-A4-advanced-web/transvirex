@@ -10,7 +10,6 @@ spec:
     routes:
         - match: (Host(`transvirex.com`) || Host(`www.transvirex.com`)) && PathPrefix(`/api`)
           kind: Rule
-          priority: 10
           services:
               - name: transvirex-gateway
                 namespace: production
