@@ -44,13 +44,13 @@
                 "tsConfigPath": "apps/stock/tsconfig.app.json"
             }
         },
-        "tours": {
+        "delivery": {
             "type": "application",
-            "root": "apps/tours",
+            "root": "apps/delivery",
             "entryFile": "main",
-            "sourceRoot": "apps/tours/src",
+            "sourceRoot": "apps/delivery/src",
             "compilerOptions": {
-                "tsConfigPath": "apps/tours/tsconfig.app.json"
+                "tsConfigPath": "apps/delivery/tsconfig.app.json"
             }
         },
         "users": {

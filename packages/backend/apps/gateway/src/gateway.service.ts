@@ -9,7 +9,7 @@ export class GatewayService {
         @Inject('AUTH_SERVICE') private authClient: ClientProxy,
         @Inject('BILLING_SERVICE') private billingClient: ClientProxy,
         @Inject('STOCK_SERVICE') private stockClient: ClientProxy,
-        @Inject('TOURS_SERVICE') private toursClient: ClientProxy,
+        @Inject('DELIVERY_SERVICE') private deliveryClient: ClientProxy,
         @Inject('USERS_SERVICE') private usersClient: ClientProxy,
     ) {}
 
@@ -33,8 +33,8 @@ export class GatewayService {
         return firstValueFrom(this.stockClient.send('health', {}).pipe(timeout(5000)))
     }
 
-    async getToursHealth() {
-        return firstValueFrom(this.toursClient.send('health', {}).pipe(timeout(5000)))
+    async getDeliveryHealth() {
+        return firstValueFrom(this.deliveryClient.send('health', {}).pipe(timeout(5000)))
     }
 
     async getUsersHealth() {

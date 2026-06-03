@@ -9,7 +9,7 @@ COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 RUN pnpm install --frozen-lockfile
 # Copy source code and build the application
 COPY . .
-RUN pnpm build tours
+RUN pnpm build delivery
 
 # +--------------------------------------------------------+
 # |                         RUNTIME                        |
@@ -17,8 +17,8 @@ RUN pnpm build tours
 FROM node:26-alpine AS runtime
 WORKDIR /app
 # Copy built application from the build stage
-COPY --from=build /app/dist/apps/tours/ ./dist/apps/tours
-CMD ["node", "dist/apps/tours/main.js"]
+COPY --from=build /app/dist/apps/delivery/ ./dist/apps/delivery
+CMD ["node", "dist/apps/delivery/main.js"]
 
 # +--------------------------------------------------------+
 # |                      DEVELOPMENT                       |
@@ -32,4 +32,4 @@ RUN pnpm install --frozen-lockfile
 # Copy source code for development
 COPY . .
 # Start the development server
-CMD ["pnpm", "run", "dev:tours"]
+CMD ["pnpm", "run", "dev:delivery"]

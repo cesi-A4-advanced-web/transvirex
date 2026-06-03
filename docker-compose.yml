@@ -26,10 +26,10 @@ services:
         extends:
             file: ./packages/backend/apps/stock/docker-compose.yml
             service: stock-service
-    tours-service:
+    delivery-service:
         extends:
-            file: ./packages/backend/apps/tours/docker-compose.yml
-            service: tours-service
+            file: ./packages/backend/apps/delivery/docker-compose.yml
+            service: delivery-service
     users-service:
         extends:
             file: ./packages/backend/apps/users/docker-compose.yml

@@ -30,9 +30,9 @@ export class GatewayController {
         return this.gatewayService.getStockHealth()
     }
 
-    @Get('tours/health')
-    getToursHealth() {
-        return this.gatewayService.getToursHealth()
+    @Get('delivery/health')
+    getDeliveryHealth() {
+        return this.gatewayService.getDeliveryHealth()
     }
 
     @Get('users/health')

@@ -1,11 +1,11 @@
 services:
-    tours-service:
+    delivery-service:
         build:
             # Context set to the root of the backend monorepo
             context: ../../
-            dockerfile: ./apps/tours/Dockerfile
+            dockerfile: ./apps/delivery/Dockerfile
             target: development
-        container_name: transvirex-tours-service
+        container_name: transvirex-delivery-service
         environment:
             - NODE_ENV=${NODE_ENV:-development}
             - LOG_LEVEL=${LOG_LEVEL:-info}
@@ -20,7 +20,7 @@ services:
             - RABBITMQ_USER=${RABBITMQ_USER:-rabbitmq_user}
             - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD:-rabbitmq_password}
         volumes:
-            - ./:/app/apps/tours
+            - ./:/app/apps/delivery
             - /app/node_modules
             - /app/dist
         depends_on:

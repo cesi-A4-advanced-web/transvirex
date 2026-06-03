@@ -78,7 +78,7 @@ const services = ref<ServiceHealth[]>([
     { name: 'Auth Service', url: '/api/auth/health',   status: 'pending', responseTime: null, detail: null },
     { name: 'Billing Service', url: '/api/billing/health',   status: 'pending', responseTime: null, detail: null },
     { name: 'Stock Service', url: '/api/stock/health',   status: 'pending', responseTime: null, detail: null },
-    { name: 'Tours Service', url: '/api/tours/health',   status: 'pending', responseTime: null, detail: null },
+    { name: 'Delivery Service', url: '/api/delivery/health',   status: 'pending', responseTime: null, detail: null },
     { name: 'Users Service', url: '/api/users/health',   status: 'pending', responseTime: null, detail: null },
 ])
 

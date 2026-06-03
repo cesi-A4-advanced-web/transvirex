@@ -37,11 +37,11 @@ import { ClientsModule, Transport } from '@nestjs/microservices'
                 }
             },
             {
-                name: 'TOURS_SERVICE',
+                name: 'DELIVERY_SERVICE',
                 transport: Transport.RMQ,
                 options: {
                     urls: [`amqp://${process.env.RABBITMQ_USER}:${process.env.RABBITMQ_PASSWORD}@${process.env.RABBITMQ_HOST}:5672`],
-                    queue: 'tours_queue',
+                    queue: 'delivery_queue',
                     queueOptions: { durable: true },
                     noAck: true,
                 }
