@@ -9,7 +9,7 @@ resources:
     - env.yaml
 
     # Deployments & Services
-    # - services/postgres.yaml
+    - services/postgres.yaml
     # - services/redis.yaml
     # - services/mongo.yaml
     - services/rabbitmq.yaml
