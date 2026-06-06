@@ -323,12 +323,39 @@ jobs:
         if: always()
 
         steps:
-            - name: ✅ Success
-              if: success()
-              run: echo "✅ Pipeline completed successfully!"
-
-            - name: ❌ Failure
-              if: failure()
+            - name: ✅ Notify Discord - Success
+              if: ${{ !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled') }}
               run: |
-                  echo "❌ Pipeline failed!"
-                  exit 1
+                  curl -H "Content-Type: application/json" \
+                    -d '{
+                      "embeds": [{
+                        "title": "✅ Déploiement réussi",
+                        "color": 3066993,
+                        "fields": [
+                          {"name": "Repo", "value": "${{ github.repository }}", "inline": true},
+                          {"name": "Branche", "value": "${{ github.ref_name }}", "inline": true},
+                          {"name": "Commit", "value": "[`${{ github.sha }}`](${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }})", "inline": false},
+                          {"name": "Déclenché par", "value": "${{ github.actor }}", "inline": true}
+                        ]
+                      }]
+                    }' \
+                    ${{ secrets.DISCORD_WEBHOOK_URL }}
+
+            - name: ❌ Notify Discord - Failure
+              if: ${{ contains(needs.*.result, 'failure') }}
+              run: |
+                  curl -H "Content-Type: application/json" \
+                    -d '{
+                      "embeds": [{
+                        "title": "❌ Déploiement échoué",
+                        "color": 15158332,
+                        "fields": [
+                          {"name": "Repo", "value": "${{ github.repository }}", "inline": true},
+                          {"name": "Branche", "value": "${{ github.ref_name }}", "inline": true},
+                          {"name": "Commit", "value": "[`${{ github.sha }}`](${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }})", "inline": false},
+                          {"name": "Déclenché par", "value": "${{ github.actor }}", "inline": true},
+                          {"name": "Logs", "value": "[${{ github.run_id }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})", "inline": false}
+                        ]
+                      }]
+                    }' \
+                    ${{ secrets.DISCORD_WEBHOOK_URL }}
