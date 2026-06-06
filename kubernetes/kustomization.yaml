@@ -13,6 +13,7 @@ resources:
     # - services/redis.yaml
     # - services/mongo.yaml
     - services/rabbitmq.yaml
+    - services/pgadmin.yaml
     - services/backend/authentication-service.yaml
     - services/backend/billing-service.yaml
     - services/backend/stock-service.yaml
@@ -26,9 +27,13 @@ resources:
     - https://raw.githubusercontent.com/traefik/traefik/v2.10/docs/content/reference/dynamic-configuration/kubernetes-crd-rbac.yml
     - services/traefik.yaml
 
+    # Middlewares
+    - middlewares/basic-auth.yaml
+
     # Ingresses
     - ingresses/api-ingress.yaml
     - ingresses/frontend-ingress.yaml
+    - ingresses/pgadmin-ingress.yaml
     - ingresses/kubernetes-ingress.yaml
     - ingresses/traefik-ingress.yaml
     - ghcr-secret.yaml

@@ -40,6 +40,21 @@ services:
             service: billing-service
 
     # ===================================
+    # 🛠️ Dev Tools
+    # ===================================
+    pgadmin:
+        image: dpage/pgadmin4:latest
+        container_name: transvirex-pgadmin
+        environment:
+            PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@transvirex.com}
+            PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-admin}
+        volumes:
+            - pgadmin_data:/var/lib/pgadmin
+        restart: unless-stopped
+        networks:
+            - transvirex-network
+
+    # ===================================
     # 💾 Databases & Message Brokers
     # ===================================
     postgres:
@@ -115,15 +130,7 @@ services:
             - gateway-service
             - rabbitmq
         healthcheck:
-            test:
-                [
-                    'CMD',
-                    'wget',
-                    '--quiet',
-                    '--tries=1',
-                    '--spider',
-                    'http://localhost:8080/health',
-                ]
+            test: ['CMD', 'nginx', '-t']
             interval: 10s
             timeout: 5s
             retries: 5
@@ -136,6 +143,8 @@ services:
                   target: /etc/nginx/nginx.conf
 
 volumes:
+    pgadmin_data:
+        driver: local
     postgres_data:
         driver: local
     rabbitmq_data:

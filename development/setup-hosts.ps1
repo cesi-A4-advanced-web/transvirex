@@ -6,7 +6,8 @@ $hostsFile = "C:\Windows\System32\drivers\etc\hosts"
 $entries = @(
     "127.0.0.1   transvirex.local",
     "127.0.0.1   www.transvirex.local",
-    "127.0.0.1   rabbitmq.transvirex.local"
+    "127.0.0.1   rabbitmq.transvirex.local",
+    "127.0.0.1   pgadmin.transvirex.local"
 )
 
 if (-not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
