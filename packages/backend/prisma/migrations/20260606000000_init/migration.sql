@@ -31,7 +31,7 @@ CREATE TABLE "Hub" (
 );
 
 CREATE TABLE "User" (
-    "id" UUID,
+    "id" UUID NOT NULL,
     "reference" TEXT NOT NULL,
     "hub_id" UUID,
     "firstname" TEXT,
@@ -65,7 +65,7 @@ CREATE TABLE "Driver" (
 );
 
 CREATE TABLE "Customer" (
-    "id" UUID,
+    "id" UUID NOT NULL,
     "reference" TEXT NOT NULL,
     "hub_id" UUID,
     "address_id" UUID,
@@ -132,6 +132,7 @@ CREATE TABLE "DeliveryEvent" (
 ALTER TABLE "Hub" ADD CONSTRAINT "Hub_address_id_fkey" FOREIGN KEY ("address_id") REFERENCES "Address"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 ALTER TABLE "User" ADD CONSTRAINT "User_hub_id_fkey" FOREIGN KEY ("hub_id") REFERENCES "Hub"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 ALTER TABLE "Vehicle" ADD CONSTRAINT "Vehicle_hub_id_fkey" FOREIGN KEY ("hub_id") REFERENCES "Hub"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+CREATE UNIQUE INDEX "Driver_user_id_key" ON "Driver"("user_id");
 ALTER TABLE "Driver" ADD CONSTRAINT "Driver_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 ALTER TABLE "Driver" ADD CONSTRAINT "Driver_vehicle_id_fkey" FOREIGN KEY ("vehicle_id") REFERENCES "Vehicle"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 ALTER TABLE "Customer" ADD CONSTRAINT "Customer_hub_id_fkey" FOREIGN KEY ("hub_id") REFERENCES "Hub"("id") ON DELETE SET NULL ON UPDATE CASCADE;
