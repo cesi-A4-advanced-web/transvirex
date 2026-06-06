@@ -306,6 +306,7 @@ jobs:
                   username: github-actions
                   key: ${{ secrets.VPS_SSH_KEY }}
                   port: 22
+                  command_timeout: 15m
                   script: |
                       kubectl apply -k /tmp/k8s-manifests/kubernetes --kubeconfig ~/.kube/config
 
@@ -317,13 +318,13 @@ jobs:
                       kubectl rollout restart deployment/transvirex-delivery -n production --kubeconfig ~/.kube/config
                       kubectl rollout restart deployment/transvirex-users -n production --kubeconfig ~/.kube/config
 
-                      kubectl rollout status deployment/transvirex-frontend -n production --timeout=5m --kubeconfig ~/.kube/config
-                      kubectl rollout status deployment/transvirex-gateway -n production --timeout=5m --kubeconfig ~/.kube/config
-                      kubectl rollout status deployment/transvirex-authentication -n production --timeout=5m --kubeconfig ~/.kube/config
-                      kubectl rollout status deployment/transvirex-billing -n production --timeout=5m --kubeconfig ~/.kube/config
-                      kubectl rollout status deployment/transvirex-stock -n production --timeout=5m --kubeconfig ~/.kube/config
-                      kubectl rollout status deployment/transvirex-delivery -n production --timeout=5m --kubeconfig ~/.kube/config
-                      kubectl rollout status deployment/transvirex-users -n production --timeout=5m --kubeconfig ~/.kube/config
+                      kubectl rollout status deployment/transvirex-frontend -n production --timeout=10m --kubeconfig ~/.kube/config
+                      kubectl rollout status deployment/transvirex-gateway -n production --timeout=10m --kubeconfig ~/.kube/config
+                      kubectl rollout status deployment/transvirex-authentication -n production --timeout=10m --kubeconfig ~/.kube/config
+                      kubectl rollout status deployment/transvirex-billing -n production --timeout=10m --kubeconfig ~/.kube/config
+                      kubectl rollout status deployment/transvirex-stock -n production --timeout=10m --kubeconfig ~/.kube/config
+                      kubectl rollout status deployment/transvirex-delivery -n production --timeout=10m --kubeconfig ~/.kube/config
+                      kubectl rollout status deployment/transvirex-users -n production --timeout=10m --kubeconfig ~/.kube/config
 
                       rm -rf /tmp/k8s-manifests
 
