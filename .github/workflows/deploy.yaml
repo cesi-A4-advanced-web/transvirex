@@ -269,19 +269,22 @@ jobs:
 
             - name: 📋 Create production namespace & registry secret
               uses: appleboy/ssh-action@v0.1.7
+              env:
+                  GHCR_USERNAME: ${{ github.actor }}
+                  GHCR_TOKEN: ${{ github.token }}
               with:
                   host: ${{ secrets.VPS_HOST }}
                   username: github-actions
                   key: ${{ secrets.VPS_SSH_KEY }}
                   port: 22
-                  envs: GITHUB_ACTOR,GITHUB_TOKEN
+                  envs: GHCR_USERNAME,GHCR_TOKEN
                   script: |
                       kubectl create namespace production --kubeconfig ~/.kube/config 2>/dev/null || true
                       kubectl delete secret ghcr-secret -n production --kubeconfig ~/.kube/config 2>/dev/null || true
                       kubectl create secret docker-registry ghcr-secret \
                         --docker-server=ghcr.io \
-                        --docker-username=$GITHUB_ACTOR \
-                        --docker-password=$GITHUB_TOKEN \
+                        --docker-username=$GHCR_USERNAME \
+                        --docker-password=$GHCR_TOKEN \
                         -n production \
                         --kubeconfig ~/.kube/config
 
