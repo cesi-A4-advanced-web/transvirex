@@ -19,8 +19,10 @@ async function bootstrap() {
     });
 
     await app.startAllMicroservices();
-    await app.listen(process.env.PORT || 3004);
-    console.log('Stock service listening on port 3004 (HTTP + RabbitMQ)');
+
+    const PORT = process.env.PORT || 3000;
+    await app.listen(PORT);
+    console.log(`Stock service listening on port ${PORT} (HTTP + RabbitMQ)`);
 }
 bootstrap().catch((error) => {
     console.error('Error starting stock service:', error);

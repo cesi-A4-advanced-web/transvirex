@@ -6,12 +6,12 @@ import { MessagePattern } from '@nestjs/microservices';
 export class BillingController {
     constructor(private readonly billingService: BillingService) {}
 
-    @Get('health')
+    @Get('health') // HTTP
     getHealthHttp() {
         return { status: 'ok', service: 'billing' };
     }
 
-    @MessagePattern('health')
+    @MessagePattern('health') // RabbitMQ
     getHealth() {
         return { status: 'ok', service: 'billing' };
     }

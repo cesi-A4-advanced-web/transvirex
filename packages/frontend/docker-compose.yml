@@ -4,6 +4,7 @@ services:
             context: .
             dockerfile: ./Dockerfile
             target: development
+        image: transvirex-frontend
         container_name: transvirex-frontend
         environment:
             - NODE_ENV=${NODE_ENV:-development}

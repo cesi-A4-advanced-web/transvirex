@@ -19,8 +19,10 @@ async function bootstrap() {
     });
 
     await app.startAllMicroservices();
-    await app.listen(process.env.PORT || 3005);
-    console.log('Users service listening on port 3005 (HTTP + RabbitMQ)');
+
+    const PORT = process.env.PORT || 3000;
+    await app.listen(PORT);
+    console.log(`Users service listening on port ${PORT} (HTTP + RabbitMQ)`);
 }
 bootstrap().catch((error) => {
     console.error('Error starting users service:', error);

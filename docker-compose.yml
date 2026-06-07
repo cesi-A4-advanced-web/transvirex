@@ -122,8 +122,10 @@ services:
         container_name: transvirex-nginx
         ports:
             - '80:80'
+            - '443:443'
         volumes:
-            - ./development/nginx.conf:/etc/nginx/nginx.conf:ro
+            - ./development/cert/:/etc/nginx/cert/:ro
+        #     - ./development/nginx.conf:/etc/nginx/nginx.conf:ro
         restart: unless-stopped
         depends_on:
             - frontend

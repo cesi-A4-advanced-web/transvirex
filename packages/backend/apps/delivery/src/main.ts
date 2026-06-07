@@ -19,8 +19,9 @@ async function bootstrap() {
     });
 
     await app.startAllMicroservices();
-    await app.listen(process.env.PORT || 3003);
-    console.log('Delivery service listening on port 3003 (HTTP + RabbitMQ)');
+    const PORT = process.env.PORT || 3000;
+    await app.listen(PORT);
+    console.log(`Delivery service listening on port ${PORT} (HTTP + RabbitMQ)`);
 }
 bootstrap().catch((error) => {
     console.error('Error starting delivery service:', error);

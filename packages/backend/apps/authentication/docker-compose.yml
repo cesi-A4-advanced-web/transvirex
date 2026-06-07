@@ -5,27 +5,28 @@ services:
             context: ../../
             dockerfile: ./apps/authentication/Dockerfile
             target: development
+        image: transvirex-authentication-service
         container_name: transvirex-authentication-service
         environment:
             - NODE_ENV=${NODE_ENV:-development}
             - LOG_LEVEL=${LOG_LEVEL:-info}
             - DEBUG=${DEBUG:-*}
-            - POSTGRES_HOST=${POSTGRES_HOST:-postgres}
+            - PORT=${AUTH_SERVICE_PORT:-3000}
+            - POSTGRES_HOST=${POSTGRES_HOST:-transvirex-postgres}
             - POSTGRES_PORT=${POSTGRES_PORT:-5432}
             - POSTGRES_USER=${POSTGRES_USER:-postgres_user}
             - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-postgres_password}
             - POSTGRES_DB=${POSTGRES_DB:-transvirex}
-            - RABBITMQ_HOST=${RABBITMQ_HOST:-rabbitmq}
+            - RABBITMQ_HOST=${RABBITMQ_HOST:-transvirex-rabbitmq}
             - RABBITMQ_PORT=${RABBITMQ_PORT:-5672}
             - RABBITMQ_USER=${RABBITMQ_USER:-rabbitmq_user}
             - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD:-rabbitmq_password}
-            - REDIS_HOST=${REDIS_HOST:-redis}
+            - REDIS_HOST=${REDIS_HOST:-transvirex-redis}
             - REDIS_PORT=${REDIS_PORT:-6379}
             - REDIS_PASSWORD=${REDIS_PASSWORD:-redis_password}
             - REDIS_DB=${REDIS_DB:-0}
-            - DATABASE_URL=postgresql://${POSTGRES_USER:-postgres_user}:${POSTGRES_PASSWORD:-postgres_password}@transvirex-postgres:5432/${POSTGRES_DB:-transvirex}
         volumes:
-            - ./:/app/apps/authentication
+            # - ./:/app/apps/authentication
             - /app/node_modules
             - /app/dist
         depends_on:
