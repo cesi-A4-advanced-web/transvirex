@@ -40,6 +40,31 @@ services:
             service: billing-service
 
     # ===================================
+    # 🌱 Database Seed (run once, then stops)
+    # ===================================
+    seed:
+        build:
+            context: ./packages/backend
+            dockerfile: ./apps/authentication/Dockerfile
+            target: development
+        container_name: transvirex-seed
+        environment:
+            - POSTGRES_HOST=postgres
+            - POSTGRES_PORT=5432
+            - POSTGRES_USER=${POSTGRES_USER:-postgres_user}
+            - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-postgres_password}
+            - POSTGRES_DB=${POSTGRES_DB:-transvirex}
+        command: >
+            sh -c "export DATABASE_URL=postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@postgres:5432/$POSTGRES_DB
+            && pnpm exec prisma db seed"
+        depends_on:
+            postgres:
+                condition: service_healthy
+        restart: 'no'
+        networks:
+            - transvirex-network
+
+    # ===================================
     # 🛠️ Dev Tools
     # ===================================
     pgadmin:
