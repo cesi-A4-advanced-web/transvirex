@@ -1,5 +1,6 @@
 # Run as Administrator to add local development hosts entries
 # Usage: .\development\setup-hosts.ps1
+# This script will add the following entries to your hosts file:
 
 $hostsFile = "C:\Windows\System32\drivers\etc\hosts"
 
