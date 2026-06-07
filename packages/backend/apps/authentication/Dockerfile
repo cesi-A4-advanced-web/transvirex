@@ -24,7 +24,7 @@ COPY --from=build /app/node_modules ./node_modules
 COPY --from=build /app/dist/apps/authentication/ ./dist/apps/authentication
 # Copy Prisma schema and migrations for migrate deploy
 COPY --from=build /app/prisma ./prisma
-CMD ["sh", "-c", "export DATABASE_URL=postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@$POSTGRES_HOST:$POSTGRES_PORT/$POSTGRES_DB && node_modules/.bin/prisma migrate deploy && node dist/apps/authentication/main.js"]
+CMD ["sh", "-c", " node_modules/.bin/prisma migrate deploy && node dist/apps/authentication/main.js"]
 
 # +--------------------------------------------------------+
 # |                      DEVELOPMENT                       |
@@ -39,4 +39,4 @@ RUN pnpm install --frozen-lockfile
 COPY . .
 RUN pnpm exec prisma generate
 # Run migrations then start the development server
-CMD ["sh", "-c", "export DATABASE_URL=postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@$POSTGRES_HOST:$POSTGRES_PORT/$POSTGRES_DB && pnpm exec prisma migrate deploy && pnpm run dev:authentication"]
+CMD ["sh", "-c", "pnpm exec prisma migrate deploy && pnpm run dev:authentication"]

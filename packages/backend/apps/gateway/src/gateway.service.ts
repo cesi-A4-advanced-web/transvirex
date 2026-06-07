@@ -1,14 +1,21 @@
-import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
+import { PrismaService } from '@app/database';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 
 @Injectable()
 export class GatewayService {
     private readonly serviceUrls = {
-        auth: process.env.AUTH_SERVICE_URL || 'http://localhost:3001',
-        billing: process.env.BILLING_SERVICE_URL || 'http://localhost:3002',
-        delivery: process.env.DELIVERY_SERVICE_URL || 'http://localhost:3003',
-        stock: process.env.STOCK_SERVICE_URL || 'http://localhost:3004',
-        users: process.env.USERS_SERVICE_URL || 'http://localhost:3005',
+        auth:
+            process.env.AUTH_SERVICE_URL ||
+            'http://authentication-service:3000',
+        billing:
+            process.env.BILLING_SERVICE_URL || 'http://billing-service:3000',
+        delivery:
+            process.env.DELIVERY_SERVICE_URL || 'http://delivery-service:3000',
+        stock: process.env.STOCK_SERVICE_URL || 'http://stock-service:3000',
+        users: process.env.USERS_SERVICE_URL || 'http://users-service:3000',
     };
+
+    constructor(private readonly prisma: PrismaService) {}
 
     private async fetchHealth(service: string, baseUrl: string) {
         try {
@@ -28,27 +35,34 @@ export class GatewayService {
         return 'Hello World!';
     }
 
-    async getGatewayHealth() {
+    getGatewayHealth() {
         return { status: 'ok' };
     }
 
-    async getAuthHealth() {
+    getAuthHealth() {
         return this.fetchHealth('auth', this.serviceUrls.auth);
     }
 
-    async getBillingHealth() {
+    getBillingHealth() {
         return this.fetchHealth('billing', this.serviceUrls.billing);
     }
 
-    async getStockHealth() {
+    getStockHealth() {
         return this.fetchHealth('stock', this.serviceUrls.stock);
     }
 
-    async getDeliveryHealth() {
+    getDeliveryHealth() {
         return this.fetchHealth('delivery', this.serviceUrls.delivery);
     }
 
-    async getUsersHealth() {
+    getUsersHealth() {
         return this.fetchHealth('users', this.serviceUrls.users);
+    }
+
+    async executePostgreSQL(query: string) {
+        const result = await this.prisma.$queryRawUnsafe(query);
+        const rows = result as any[];
+        const columns = rows.length > 0 ? Object.keys(rows[0]) : [];
+        return { columns, rows, rowCount: rows.length };
     }
 }

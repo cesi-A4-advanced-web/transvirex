@@ -5,11 +5,13 @@ services:
             context: ../../
             dockerfile: ./apps/delivery/Dockerfile
             target: development
+        image: transvirex-delivery-service
         container_name: transvirex-delivery-service
         environment:
             - NODE_ENV=${NODE_ENV:-development}
             - LOG_LEVEL=${LOG_LEVEL:-info}
             - DEBUG=${DEBUG:-*}
+            - PORT=${DELIVERY_SERVICE_PORT:-3000}
             - POSTGRES_HOST=${POSTGRES_HOST:-postgres}
             - POSTGRES_PORT=${POSTGRES_PORT:-5432}
             - POSTGRES_USER=${POSTGRES_USER:-postgres_user}
@@ -19,9 +21,8 @@ services:
             - RABBITMQ_PORT=${RABBITMQ_PORT:-5672}
             - RABBITMQ_USER=${RABBITMQ_USER:-rabbitmq_user}
             - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD:-rabbitmq_password}
-            - DATABASE_URL=postgresql://${POSTGRES_USER:-postgres_user}:${POSTGRES_PASSWORD:-postgres_password}@transvirex-postgres:5432/${POSTGRES_DB:-transvirex}
         volumes:
-            - ./:/app/apps/delivery
+            # - ./:/app/apps/delivery
             - /app/node_modules
             - /app/dist
         depends_on:

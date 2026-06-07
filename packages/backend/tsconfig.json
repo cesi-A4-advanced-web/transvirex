@@ -14,8 +14,9 @@
         "noImplicitAny": false,
         "outDir": "./dist",
         "paths": {
-            "@app/database": ["libs/database/src"],
-            "@app/database/*": ["libs/database/src/*"]
+            "@app/database": ["./libs/database/src"],
+            "@app/database/*": ["./libs/database/src/*"],
+            "@generated/prisma": ["./prisma/generated/prisma/client"]
         },
         "removeComments": true,
         "resolvePackageJsonExports": true,
@@ -24,7 +25,7 @@
         "sourceMap": true,
         "strictBindCallApply": false,
         "strictNullChecks": true,
-        "target": "ES2023",
-        "baseUrl": "./"
-    }
+        "target": "ES2023"
+    },
+    "include": ["apps/**/*", "libs/**/*", "prisma.config.ts"]
 }

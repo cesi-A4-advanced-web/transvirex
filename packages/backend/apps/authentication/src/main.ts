@@ -1,6 +1,6 @@
 import { NestFactory } from '@nestjs/core';
-import { AuthenticationModule } from './authentication.module';
 import { Transport } from '@nestjs/microservices';
+import { AuthenticationModule } from './authentication.module';
 
 async function bootstrap() {
     const app = await NestFactory.create(AuthenticationModule);
@@ -19,8 +19,12 @@ async function bootstrap() {
     });
 
     await app.startAllMicroservices();
-    await app.listen(process.env.PORT || 3001);
-    console.log('Authentication service listening on port 3001 (HTTP + RabbitMQ)');
+
+    const PORT = process.env.PORT || 3000;
+    await app.listen(PORT);
+    console.log(
+        `Authentication service listening on port ${PORT} (HTTP + RabbitMQ)`,
+    );
 }
 bootstrap().catch((error) => {
     console.error('Error starting authentication service:', error);
