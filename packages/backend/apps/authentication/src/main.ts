@@ -1,9 +1,12 @@
 import { NestFactory } from '@nestjs/core';
+import { INestApplication } from '@nestjs/common';
 import { Transport } from '@nestjs/microservices';
 import { AuthenticationModule } from './authentication.module';
 
+let app: INestApplication;
+
 async function bootstrap() {
-    const app = await NestFactory.create(AuthenticationModule);
+    app = await NestFactory.create(AuthenticationModule);
 
     app.connectMicroservice({
         transport: Transport.RMQ,
@@ -26,6 +29,12 @@ async function bootstrap() {
         `Authentication service listening on port ${PORT} (HTTP + RabbitMQ)`,
     );
 }
+
+process.on('SIGTERM', async () => {
+    if (app) await app.close();
+    process.exit(0);
+});
+
 bootstrap().catch((error) => {
     console.error('Error starting authentication service:', error);
     process.exit(1);

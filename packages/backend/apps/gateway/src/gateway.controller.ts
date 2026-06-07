@@ -60,4 +60,19 @@ export class GatewayController {
         }
         return this.gatewayService.executePostgreSQL(query);
     }
+
+    @Post('auth/login')
+    login(@Body() body: { email: string; password: string }) {
+        return this.gatewayService.login(body);
+    }
+
+    @Post('auth/refresh')
+    refresh(@Body() body: { refresh_token: string }) {
+        return this.gatewayService.refresh(body);
+    }
+
+    @Post('auth/logout')
+    logout(@Body() body: { refresh_token: string }) {
+        return this.gatewayService.logout(body);
+    }
 }
