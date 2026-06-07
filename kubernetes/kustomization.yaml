@@ -14,6 +14,7 @@ resources:
     # - services/mongo.yaml
     - services/rabbitmq.yaml
     - services/pgadmin.yaml
+    - services/redis-commander.yaml
     - services/backend/authentication-service.yaml
     - services/backend/billing-service.yaml
     - services/backend/stock-service.yaml
@@ -34,5 +35,6 @@ resources:
     - ingresses/api-ingress.yaml
     - ingresses/frontend-ingress.yaml
     - ingresses/pgadmin-ingress.yaml
+    - ingresses/redis-commander-ingress.yaml
     - ingresses/kubernetes-ingress.yaml
     - ingresses/traefik-ingress.yaml
