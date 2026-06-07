@@ -44,3 +44,9 @@ services:
                       - dist
                   action: sync
                   target: /app/apps/authentication
+                - path: ../../libs/
+                  ignore:
+                      - node_modules
+                      - dist
+                  action: sync
+                  target: /app/libs

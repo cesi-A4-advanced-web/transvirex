@@ -1,3 +1,17 @@
+export interface PagedResult {
+    columns: string[];
+    rows: any[];
+    totalCount: number;
+    page: number;
+    pageSize: number;
+    totalPages: number;
+}
+
+export interface TableInfo {
+    table_name: string;
+    table_schema: string;
+}
+
 export interface SavedQuery {
     id: string;
     name: string;
@@ -94,6 +108,63 @@ export const useSqlStore = defineStore('sql', () => {
         }
     }
 
+    const tables = ref<TableInfo[]>([]);
+    const selectedTable = ref<string | null>(null);
+    const tableData = ref<PagedResult | null>(null);
+    const tablePage = ref(1);
+    const tablePageSize = ref(25);
+    const tablesLoading = ref(false);
+    const tableDataLoading = ref(false);
+    const tableError = ref<string | null>(null);
+
+    async function fetchTables() {
+        tablesLoading.value = true;
+        tableError.value = null;
+        try {
+            const res = await fetch('/api/debug/postgresql/tables');
+            if (!res.ok) {
+                const body = await res.json().catch(() => null);
+                throw new Error(body?.message ?? `Erreur ${res.status}`);
+            }
+            const data = await res.json();
+            tables.value = data.tables ?? [];
+        } catch (e: any) {
+            tableError.value = e?.message ?? 'Erreur de connexion';
+        } finally {
+            tablesLoading.value = false;
+        }
+    }
+
+    async function fetchTableData(table: string, navigatePage?: number) {
+        const page = navigatePage ?? tablePage.value;
+        tableDataLoading.value = true;
+        tableError.value = null;
+        selectedTable.value = table;
+        try {
+            const res = await fetch(`/api/debug/postgresql/tables/${encodeURIComponent(table)}/data`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ page, pageSize: tablePageSize.value }),
+            });
+            if (!res.ok) {
+                const body = await res.json().catch(() => null);
+                throw new Error(body?.message ?? `Erreur ${res.status}`);
+            }
+            const data = await res.json();
+            tableData.value = data;
+            tablePage.value = data.page;
+        } catch (e: any) {
+            tableError.value = e?.message ?? 'Erreur de connexion';
+        } finally {
+            tableDataLoading.value = false;
+        }
+    }
+
+    function goToTablePage(page: number) {
+        if (!selectedTable.value) return;
+        fetchTableData(selectedTable.value, page);
+    }
+
     return {
         query,
         results,
@@ -105,5 +176,16 @@ export const useSqlStore = defineStore('sql', () => {
         loadQuery,
         deleteQuery,
         renameQuery,
+        tables,
+        selectedTable,
+        tableData,
+        tablePage,
+        tablePageSize,
+        tablesLoading,
+        tableDataLoading,
+        tableError,
+        fetchTables,
+        fetchTableData,
+        goToTablePage,
     };
 });

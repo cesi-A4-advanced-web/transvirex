@@ -1,4 +1,7 @@
 import { PrismaService } from '@app/database';
+import { MongoDBService } from '@app/mongodb';
+import { RabbitMQService } from '@app/rabbitmq';
+import { RedisService } from '@app/redis';
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 
 @Injectable()
@@ -15,7 +18,12 @@ export class GatewayService {
         users: process.env.USERS_SERVICE_URL || 'http://users-service:3000',
     };
 
-    constructor(private readonly prisma: PrismaService) {}
+    constructor(
+        private readonly prisma: PrismaService,
+        private readonly redisService: RedisService,
+        private readonly rabbitMQService: RabbitMQService,
+        private readonly mongoDBService: MongoDBService,
+    ) {}
 
     private async fetchHealth(service: string, baseUrl: string) {
         try {
@@ -96,5 +104,79 @@ export class GatewayService {
         const rows = result as any[];
         const columns = rows.length > 0 ? Object.keys(rows[0]) : [];
         return { columns, rows, rowCount: rows.length };
+    }
+
+    executeRedis(command: string) {
+        return this.redisService.executeCommand(command);
+    }
+
+    listRabbitMQQueues() {
+        return this.rabbitMQService.listQueues();
+    }
+
+    getRabbitMQMessages(queue: string, count: number) {
+        return this.rabbitMQService.getMessages(queue, count);
+    }
+
+    executeMongoDB(command: string) {
+        return this.mongoDBService.executeCommand(command);
+    }
+
+    async listPostgresTables() {
+        const result = await this.prisma.$queryRawUnsafe(
+            `SELECT table_name, table_schema FROM information_schema.tables WHERE table_schema NOT IN ('pg_catalog', 'information_schema') ORDER BY table_schema, table_name`,
+        );
+        return { tables: result as any[] };
+    }
+
+    async getPostgresTableData(table: string, page: number, pageSize: number) {
+        const offset = (page - 1) * pageSize;
+        const rows = await this.prisma.$queryRawUnsafe<
+            { [key: string]: unknown }[]
+        >(`SELECT * FROM "${table}" LIMIT ${pageSize} OFFSET ${offset}`);
+        const countResult = await this.prisma.$queryRawUnsafe<
+            { count: string }[]
+        >(`SELECT COUNT(*) as count FROM "${table}"`);
+        const totalCount = Number(countResult[0]?.count ?? 0);
+        const columns = rows.length > 0 ? Object.keys(rows[0]) : [];
+        return {
+            columns,
+            rows,
+            totalCount,
+            page,
+            pageSize,
+            totalPages: Math.ceil(totalCount / pageSize),
+        };
+    }
+
+    async listMongoCollections() {
+        const db = await this.mongoDBService.getDb();
+        const collections = await db.listCollections().toArray();
+        return { collections: collections.map((c: any) => ({ name: c.name })) };
+    }
+
+    async getMongoCollectionData(
+        collection: string,
+        page: number,
+        pageSize: number,
+    ) {
+        const db = await this.mongoDBService.getDb();
+        const coll = db.collection(collection);
+        const offset = (page - 1) * pageSize;
+        const raw = await coll.find({}).skip(offset).limit(pageSize).toArray();
+        const totalCount = await coll.countDocuments();
+        const rows = raw.map((r: any) => {
+            const { _id, ...rest } = r;
+            return { _id: String(_id ?? ''), ...rest };
+        });
+        const columns = rows.length > 0 ? Object.keys(rows[0]) : [];
+        return {
+            columns,
+            rows,
+            totalCount,
+            page,
+            pageSize,
+            totalPages: Math.ceil(totalCount / pageSize),
+        };
     }
 }

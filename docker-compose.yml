@@ -1,3 +1,5 @@
+name: transvirex
+
 services:
     # ===================================
     # 🌐 Frontend Service
@@ -22,6 +24,8 @@ services:
         extends:
             file: ./packages/backend/apps/authentication/docker-compose.yml
             service: authentication-service
+            volumes:
+                - authentication_service_cache
     stock-service:
         extends:
             file: ./packages/backend/apps/stock/docker-compose.yml
@@ -153,6 +157,24 @@ services:
         networks:
             - transvirex-network
 
+    mongodb:
+        image: mongo:7
+        container_name: transvirex-mongodb
+        environment:
+            MONGO_INITDB_ROOT_USERNAME: ${MONGODB_USER:-mongo_user}
+            MONGO_INITDB_ROOT_PASSWORD: ${MONGODB_PASSWORD:-mongo_password}
+            MONGO_INITDB_DATABASE: ${MONGODB_DB:-transvirex}
+        volumes:
+            - mongodb_data:/data/db
+        restart: unless-stopped
+        healthcheck:
+            test: echo 'db.runCommand("ping").ok' | mongosh --quiet
+            interval: 10s
+            timeout: 5s
+            retries: 5
+        networks:
+            - transvirex-network
+
     nginx:
         image: nginx:alpine
         container_name: transvirex-nginx
@@ -182,12 +204,19 @@ services:
 
 volumes:
     pgadmin_data:
+        name: transvirex_pgadmin_data
         driver: local
     postgres_data:
+        name: transvirex_postgres_data
         driver: local
     rabbitmq_data:
+        name: transvirex_rabbitmq_data
         driver: local
     redis_data:
+        name: transvirex_redis_data
+        driver: local
+    mongodb_data:
+        name: transvirex_mongodb_data
         driver: local
 
 networks:

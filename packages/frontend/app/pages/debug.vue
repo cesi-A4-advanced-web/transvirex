@@ -1,7 +1,6 @@
 <script setup lang="ts">
 const health = useHealthStore();
 const route = useRoute();
-const isProduction = process.env.NODE_ENV === 'production';
 
 onMounted(() => health.checkAll());
 </script>
@@ -68,7 +67,6 @@ onMounted(() => health.checkAll());
 
                 <NuxtLink
                     to="/debug/postgresql"
-                    v-if="!isProduction"
                     class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-300 hover:bg-slate-800 hover:text-white transition"
                 >
                     <svg
@@ -85,6 +83,66 @@ onMounted(() => health.checkAll());
                         />
                     </svg>
                     PostgreSQL
+                </NuxtLink>
+
+                <NuxtLink
+                    to="/debug/redis"
+                    class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-300 hover:bg-slate-800 hover:text-white transition"
+                >
+                    <svg
+                        class="w-5 h-5 shrink-0"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
+                        />
+                    </svg>
+                    Redis
+                </NuxtLink>
+
+                <NuxtLink
+                    to="/debug/rabbitmq"
+                    class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-300 hover:bg-slate-800 hover:text-white transition"
+                >
+                    <svg
+                        class="w-5 h-5 shrink-0"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"
+                        />
+                    </svg>
+                    RabbitMQ
+                </NuxtLink>
+
+                <NuxtLink
+                    to="/debug/mongodb"
+                    class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-300 hover:bg-slate-800 hover:text-white transition"
+                >
+                    <svg
+                        class="w-5 h-5 shrink-0"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"
+                        />
+                    </svg>
+                    MongoDB
                 </NuxtLink>
             </nav>
 

@@ -52,6 +52,33 @@
             "sourceRoot": "apps/gateway/src",
             "type": "application"
         },
+        "redis": {
+            "compilerOptions": {
+                "tsConfigPath": "libs/redis/tsconfig.lib.json"
+            },
+            "entryFile": "index",
+            "root": "libs/redis",
+            "sourceRoot": "libs/redis/src",
+            "type": "library"
+        },
+        "rabbitmq": {
+            "compilerOptions": {
+                "tsConfigPath": "libs/rabbitmq/tsconfig.lib.json"
+            },
+            "entryFile": "index",
+            "root": "libs/rabbitmq",
+            "sourceRoot": "libs/rabbitmq/src",
+            "type": "library"
+        },
+        "mongodb": {
+            "compilerOptions": {
+                "tsConfigPath": "libs/mongodb/tsconfig.lib.json"
+            },
+            "entryFile": "index",
+            "root": "libs/mongodb",
+            "sourceRoot": "libs/mongodb/src",
+            "type": "library"
+        },
         "stock": {
             "compilerOptions": {
                 "tsConfigPath": "apps/stock/tsconfig.app.json"

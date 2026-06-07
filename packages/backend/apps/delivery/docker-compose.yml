@@ -39,3 +39,9 @@ services:
                       - dist
                   action: sync
                   target: /app/apps/delivery
+                - path: ../../libs/
+                  ignore:
+                      - node_modules
+                      - dist
+                  action: sync
+                  target: /app/libs
