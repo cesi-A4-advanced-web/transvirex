@@ -1,0 +1,39 @@
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+    name: redis-commander
+    namespace: production
+spec:
+    entryPoints:
+        - web
+    routes:
+        - match: Host(`redis.transvirex.com`)
+          kind: Rule
+          middlewares:
+              - name: https-redirect
+                namespace: production
+          services:
+              - name: redis-commander
+                namespace: production
+                port: 8081
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+    name: redis-commander-secure
+    namespace: production
+spec:
+    entryPoints:
+        - websecure
+    routes:
+        - match: Host(`redis.transvirex.com`)
+          kind: Rule
+          middlewares:
+              - name: pgadmin-auth
+                namespace: production
+          services:
+              - name: redis-commander
+                namespace: production
+                port: 8081
+    tls:
+        secretName: certs

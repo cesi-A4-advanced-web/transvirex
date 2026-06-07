@@ -112,11 +112,16 @@
                         />
                     </div>
 
+                    <p v-if="error" class="text-sm text-red-500 -mt-1">
+                        {{ error }}
+                    </p>
+
                     <button
                         type="submit"
-                        class="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg text-sm transition"
+                        :disabled="loading"
+                        class="w-full py-3 bg-blue-600 hover:bg-blue-700 disabled:opacity-60 text-white font-semibold rounded-lg text-sm transition"
                     >
-                        Se connecter
+                        {{ loading ? 'Connexion...' : 'Se connecter' }}
                     </button>
                 </form>
 
@@ -146,6 +151,10 @@
 </template>
 
 <script setup lang="ts">
+import { ref } from 'vue';
+import { useCookie, navigateTo } from '#app';
+import { $fetch } from 'ofetch';
+
 definePageMeta({ layout: false });
 
 const roles = [
@@ -157,8 +166,28 @@ const roles = [
 const selectedRole = ref('dispatcher');
 const email = ref('');
 const password = ref('');
+const error = ref('');
+const loading = ref(false);
 
-function handleSubmit() {
-    // TODO: connecter au service-authentication
+const accessToken = useCookie('access_token', { maxAge: 60 * 15, sameSite: 'strict' });
+const refreshToken = useCookie('refresh_token', { maxAge: 60 * 60 * 24 * 7, sameSite: 'strict' });
+
+async function handleSubmit() {
+    loading.value = true;
+    error.value = '';
+    try {
+        const data = await $fetch<{ access_token: string; refresh_token: string }>('/api/auth/login', {
+            method: 'POST',
+            body: { email: email.value, password: password.value },
+        });
+        accessToken.value = data.access_token;
+        refreshToken.value = data.refresh_token;
+        await navigateTo('/health-service');
+    } catch (e: unknown) {
+        const err = e as { data?: { message?: string } };
+        error.value = err?.data?.message || 'Identifiants invalides';
+    } finally {
+        loading.value = false;
+    }
 }
 </script>

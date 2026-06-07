@@ -40,8 +40,44 @@ services:
             service: billing-service
 
     # ===================================
+    # 🌱 Database Seed (run once, then stops)
+    # ===================================
+    seed:
+        build:
+            context: ./packages/backend
+            dockerfile: ./apps/authentication/Dockerfile
+            target: development
+        container_name: transvirex-seed
+        environment:
+            - POSTGRES_HOST=postgres
+            - POSTGRES_PORT=5432
+            - POSTGRES_USER=${POSTGRES_USER:-postgres_user}
+            - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-postgres_password}
+            - POSTGRES_DB=${POSTGRES_DB:-transvirex}
+        command: >
+            sh -c "export DATABASE_URL=postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@postgres:5432/$POSTGRES_DB
+            && pnpm exec prisma db seed"
+        depends_on:
+            postgres:
+                condition: service_healthy
+        restart: 'no'
+        networks:
+            - transvirex-network
+
+    # ===================================
     # 🛠️ Dev Tools
     # ===================================
+    redis-commander:
+        image: rediscommander/redis-commander:latest
+        container_name: transvirex-redis-commander
+        environment:
+            - REDIS_HOSTS=local:redis:6379:0:${REDIS_PASSWORD:-redis_password}
+        restart: unless-stopped
+        depends_on:
+            - redis
+        networks:
+            - transvirex-network
+
     pgadmin:
         image: dpage/pgadmin4:latest
         container_name: transvirex-pgadmin
@@ -108,9 +144,9 @@ services:
         volumes:
             - redis_data:/data
         restart: unless-stopped
-        command: redis-server --appendonly yes
+        command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:-redis_password}
         healthcheck:
-            test: ['CMD', 'redis-cli', 'ping']
+            test: ['CMD', 'redis-cli', '-a', '${REDIS_PASSWORD:-redis_password}', 'ping']
             interval: 10s
             timeout: 5s
             retries: 5

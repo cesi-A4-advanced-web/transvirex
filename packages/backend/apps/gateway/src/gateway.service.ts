@@ -31,6 +31,38 @@ export class GatewayService {
         }
     }
 
+    private async proxyPost(url: string, body: unknown) {
+        try {
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body),
+                signal: AbortSignal.timeout(5000),
+            });
+            const data = await response.json();
+            if (!response.ok) throw new HttpException(data, response.status);
+            return data;
+        } catch (e) {
+            if (e instanceof HttpException) throw e;
+            throw new HttpException(
+                { status: 'error', message: 'Service unreachable' },
+                HttpStatus.SERVICE_UNAVAILABLE,
+            );
+        }
+    }
+
+    async login(body: { email: string; password: string }) {
+        return this.proxyPost(`${this.serviceUrls.auth}/auth/login`, body);
+    }
+
+    async refresh(body: { refresh_token: string }) {
+        return this.proxyPost(`${this.serviceUrls.auth}/auth/refresh`, body);
+    }
+
+    async logout(body: { refresh_token: string }) {
+        return this.proxyPost(`${this.serviceUrls.auth}/auth/logout`, body);
+    }
+
     getHello(): string {
         return 'Hello World!';
     }
