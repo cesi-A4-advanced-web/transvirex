@@ -6,10 +6,11 @@ RUN pnpm runtime set node 26 -g
 WORKDIR /app
 # Copy package files and install dependencies (hoisted = flat node_modules, no symlinks)
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
-RUN pnpm install --no-frozen-lockfile --node-linker=hoisted
-# Copy source code and build the application
+RUN pnpm install --frozen-lockfile --node-linker=hoisted
+# Copy source code, generate Prisma client and build
 COPY . .
-RUN pnpm build gateway
+RUN pnpm exec prisma generate
+RUN pnpm run build:gateway
 
 # +--------------------------------------------------------+
 # |                         RUNTIME                        |
@@ -30,8 +31,9 @@ RUN pnpm runtime set node 26 -g
 WORKDIR /app
 # Copy package files and install all dependencies
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
-RUN pnpm install --no-frozen-lockfile
+RUN pnpm install --frozen-lockfile
 # Copy source code for development
 COPY . .
+RUN pnpm exec prisma generate
 # Start the development server
 CMD ["pnpm", "run", "dev:gateway"]
