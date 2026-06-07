@@ -21,6 +21,15 @@ services:
             - RABBITMQ_PORT=${RABBITMQ_PORT:-5672}
             - RABBITMQ_USER=${RABBITMQ_USER:-rabbitmq_user}
             - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD:-rabbitmq_password}
+            - REDIS_HOST=${REDIS_HOST:-redis}
+            - REDIS_PORT=${REDIS_PORT:-6379}
+            - REDIS_PASSWORD=${REDIS_PASSWORD:-redis_password}
+            - REDIS_DB=${REDIS_DB:-0}
+            - MONGODB_HOST=${MONGODB_HOST:-mongodb}
+            - MONGODB_PORT=${MONGODB_PORT:-27017}
+            - MONGODB_USER=${MONGODB_USER:-mongo_user}
+            - MONGODB_PASSWORD=${MONGODB_PASSWORD:-mongo_password}
+            - MONGODB_DB=${MONGODB_DB:-transvirex}
             - AUTH_SERVICE_URL=http://authentication-service:3000
             - BILLING_SERVICE_URL=http://billing-service:3000
             - DELIVERY_SERVICE_URL=http://delivery-service:3000
@@ -33,6 +42,8 @@ services:
         depends_on:
             - postgres
             - rabbitmq
+            - redis
+            - mongodb
         restart: unless-stopped
         networks:
             - transvirex-network
@@ -44,3 +55,9 @@ services:
                       - dist
                   action: sync
                   target: /app/apps/gateway
+                - path: ../../libs/
+                  ignore:
+                      - node_modules
+                      - dist
+                  action: sync
+                  target: /app/libs

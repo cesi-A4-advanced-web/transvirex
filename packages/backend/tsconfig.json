@@ -16,6 +16,12 @@
         "paths": {
             "@app/database": ["./libs/database/src"],
             "@app/database/*": ["./libs/database/src/*"],
+            "@app/redis": ["./libs/redis/src"],
+            "@app/redis/*": ["./libs/redis/src/*"],
+            "@app/rabbitmq": ["./libs/rabbitmq/src"],
+            "@app/rabbitmq/*": ["./libs/rabbitmq/src/*"],
+            "@app/mongodb": ["./libs/mongodb/src"],
+            "@app/mongodb/*": ["./libs/mongodb/src/*"],
             "@generated/prisma": ["./prisma/generated/prisma/client"]
         },
         "removeComments": true,

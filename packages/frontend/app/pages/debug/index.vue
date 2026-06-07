@@ -244,6 +244,96 @@ const { servicesOk, servicesError, lastChecked, services } =
                             </p>
                         </div>
                     </NuxtLink>
+                    <NuxtLink
+                        to="/debug/redis"
+                        class="flex items-center gap-4 p-4 rounded-lg border border-gray-200 hover:border-blue-400 hover:shadow-sm transition"
+                    >
+                        <div
+                            class="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center shrink-0"
+                        >
+                            <svg
+                                class="w-5 h-5 text-red-600"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
+                                />
+                            </svg>
+                        </div>
+                        <div>
+                            <p class="font-medium text-gray-900 text-sm">
+                                Console Redis
+                            </p>
+                            <p class="text-xs text-gray-500">
+                                Commandes sur le cache Redis
+                            </p>
+                        </div>
+                    </NuxtLink>
+                    <NuxtLink
+                        to="/debug/rabbitmq"
+                        class="flex items-center gap-4 p-4 rounded-lg border border-gray-200 hover:border-blue-400 hover:shadow-sm transition"
+                    >
+                        <div
+                            class="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center shrink-0"
+                        >
+                            <svg
+                                class="w-5 h-5 text-amber-600"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"
+                                />
+                            </svg>
+                        </div>
+                        <div>
+                            <p class="font-medium text-gray-900 text-sm">
+                                RabbitMQ
+                            </p>
+                            <p class="text-xs text-gray-500">
+                                Files d'attente et messages
+                            </p>
+                        </div>
+                    </NuxtLink>
+                    <NuxtLink
+                        to="/debug/mongodb"
+                        class="flex items-center gap-4 p-4 rounded-lg border border-gray-200 hover:border-blue-400 hover:shadow-sm transition"
+                    >
+                        <div
+                            class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center shrink-0"
+                        >
+                            <svg
+                                class="w-5 h-5 text-green-600"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"
+                                />
+                            </svg>
+                        </div>
+                        <div>
+                            <p class="font-medium text-gray-900 text-sm">
+                                Console MongoDB
+                            </p>
+                            <p class="text-xs text-gray-500">
+                                Requêtes sur la base de données
+                            </p>
+                        </div>
+                    </NuxtLink>
                 </div>
             </UiCardContent>
         </UiCard>

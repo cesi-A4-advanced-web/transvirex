@@ -33,11 +33,11 @@ import {
     TabsList,
     TabsTrigger,
 } from '@/components/ui/tabs';
-import { useSqlStore } from '@/stores/sql';
+import { useMongoDBStore } from '@/stores/mongodb';
 
-useHead({ title: 'Console PostgreSQL — Transvirex' });
+useHead({ title: 'Console MongoDB — Transvirex' });
 
-const sql = useSqlStore();
+const mongodb = useMongoDBStore();
 const showSaveDialog = ref(false);
 const showRenameDialog = ref(false);
 const saveName = ref('');
@@ -45,16 +45,66 @@ const renameName = ref('');
 const renamingId = ref<string | null>(null);
 const isProduction = process.env.NODE_ENV === 'production';
 
-onMounted(() => sql.fetchTables());
+const STORAGE_KEY = 'transvirex:saved-mongo-queries';
+
+interface SavedQuery {
+    id: string;
+    name: string;
+    command: string;
+    createdAt: string;
+}
+
+const savedQueries = ref<SavedQuery[]>([]);
+
+function loadSaved() {
+    try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        savedQueries.value = raw ? JSON.parse(raw) : [];
+    } catch {
+        savedQueries.value = [];
+    }
+}
+
+function persistSaved() {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(savedQueries.value));
+}
+
+loadSaved();
+
+onMounted(() => mongodb.fetchCollections());
 
 function handleSave() {
     if (!saveName.value.trim()) return;
-    sql.saveQuery(saveName.value.trim());
+    const existing = savedQueries.value.find((q) => q.name === saveName.value.trim());
+    if (existing) {
+        existing.command = mongodb.command;
+        existing.createdAt = new Date().toISOString();
+    } else {
+        savedQueries.value.push({
+            id: crypto.randomUUID(),
+            name: saveName.value.trim(),
+            command: mongodb.command,
+            createdAt: new Date().toISOString(),
+        });
+    }
+    persistSaved();
     saveName.value = '';
     showSaveDialog.value = false;
 }
 
-function rename(saved: { id: string; name: string }) {
+function loadQuery(id: string) {
+    const saved = savedQueries.value.find((q) => q.id === id);
+    if (saved) {
+        mongodb.command = saved.command;
+    }
+}
+
+function deleteQuery(id: string) {
+    savedQueries.value = savedQueries.value.filter((q) => q.id !== id);
+    persistSaved();
+}
+
+function rename(saved: SavedQuery) {
     renamingId.value = saved.id;
     renameName.value = saved.name;
     showRenameDialog.value = true;
@@ -62,15 +112,19 @@ function rename(saved: { id: string; name: string }) {
 
 function handleRename() {
     if (!renameName.value.trim() || !renamingId.value) return;
-    sql.renameQuery(renamingId.value, renameName.value.trim());
+    const saved = savedQueries.value.find((q) => q.id === renamingId.value);
+    if (saved) {
+        saved.name = renameName.value.trim();
+        persistSaved();
+    }
     renameName.value = '';
     renamingId.value = null;
     showRenameDialog.value = false;
 }
 
-function selectTable(name: string) {
-    sql.tablePage = 1;
-    sql.fetchTableData(name);
+function selectCollection(name: string) {
+    mongodb.collectionPage = 1;
+    mongodb.fetchCollectionData(name);
 }
 </script>
 
@@ -78,16 +132,16 @@ function selectTable(name: string) {
     <div class="max-w-6xl mx-auto space-y-8">
         <div class="space-y-1">
             <h1 class="text-3xl font-bold text-slate-900">
-                Console PostgreSQL
+                Console MongoDB
             </h1>
             <p class="text-gray-500">
-                Exécuter des requêtes SQL sur la base de données PostgreSQL
+                Exécuter des requêtes sur la base de données MongoDB
             </p>
         </div>
 
         <Tabs default-value="query" class="w-full">
             <TabsList>
-                <TabsTrigger value="query">Requête SQL</TabsTrigger>
+                <TabsTrigger value="query">Requête</TabsTrigger>
                 <TabsTrigger value="browse">Parcourir les données</TabsTrigger>
             </TabsList>
 
@@ -98,24 +152,24 @@ function selectTable(name: string) {
                             <CardHeader>
                                 <CardTitle>Requête</CardTitle>
                                 <CardDescription
-                                    >Saisissez votre requête SQL
+                                    >Saisissez votre requête MongoDB
                                     ci-dessous</CardDescription
                                 >
                             </CardHeader>
                             <CardContent>
                                 <Textarea
-                                    v-model="sql.query"
-                                    placeholder='SELECT * FROM "User" LIMIT 10'
+                                    v-model="mongodb.command"
+                                    placeholder="db.users.find({}).limit(10)"
                                     :rows="6"
                                 />
                                 <div class="flex flex-wrap gap-2 mt-4">
                                     <Button
-                                        @click="sql.execute()"
-                                        :disabled="sql.loading"
+                                        @click="mongodb.execute()"
+                                        :disabled="mongodb.loading"
                                     >
                                         <svg
                                             class="w-4 h-4"
-                                            v-if="!sql.loading"
+                                            v-if="!mongodb.loading"
                                             fill="none"
                                             stroke="currentColor"
                                             viewBox="0 0 24 24"
@@ -147,7 +201,7 @@ function selectTable(name: string) {
                                                 d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
                                             />
                                         </svg>
-                                        {{ sql.loading ? 'Exécution...' : 'Exécuter' }}
+                                        {{ mongodb.loading ? 'Exécution...' : 'Exécuter' }}
                                     </Button>
                                     <Button
                                         variant="outline"
@@ -172,31 +226,31 @@ function selectTable(name: string) {
                             </CardContent>
                         </Card>
 
-                        <Card v-if="sql.results || sql.error">
+                        <Card v-if="mongodb.results || mongodb.error">
                             <CardHeader>
                                 <CardTitle>Résultat</CardTitle>
-                                <CardDescription v-if="sql.results">
-                                    {{ sql.results.rowCount }} ligne{{
-                                        sql.results.rowCount > 1 ? 's' : ''
+                                <CardDescription v-if="mongodb.results">
+                                    {{ mongodb.results.rowCount }} document{{
+                                        mongodb.results.rowCount > 1 ? 's' : ''
                                     }}
-                                    retournée{{
-                                        sql.results.rowCount > 1 ? 's' : ''
+                                    retourné{{
+                                        mongodb.results.rowCount > 1 ? 's' : ''
                                     }}
                                 </CardDescription>
                             </CardHeader>
                             <CardContent>
                                 <div
-                                    v-if="sql.error"
+                                    v-if="mongodb.error"
                                     class="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg p-4"
                                 >
-                                    {{ sql.error }}
+                                    {{ mongodb.error }}
                                 </div>
-                                <div v-else-if="sql.results">
+                                <div v-else-if="mongodb.results">
                                     <Table>
                                         <TableHeader>
                                             <TableRow>
                                                 <TableHead
-                                                    v-for="col in sql.results.columns"
+                                                    v-for="col in mongodb.results.columns"
                                                     :key="col"
                                                 >
                                                     {{ col }}
@@ -205,11 +259,11 @@ function selectTable(name: string) {
                                         </TableHeader>
                                         <TableBody>
                                             <TableRow
-                                                v-for="(row, i) in sql.results.rows"
+                                                v-for="(row, i) in mongodb.results.rows"
                                                 :key="i"
                                             >
                                                 <TableCell
-                                                    v-for="col in sql.results.columns"
+                                                    v-for="col in mongodb.results.columns"
                                                     :key="col"
                                                 >
                                                     {{
@@ -226,7 +280,7 @@ function selectTable(name: string) {
                         </Card>
 
                         <Card
-                            v-if="!sql.results && !sql.error && !sql.loading"
+                            v-if="!mongodb.results && !mongodb.error && !mongodb.loading"
                         >
                             <CardContent>
                                 <div class="py-12 text-center">
@@ -240,7 +294,7 @@ function selectTable(name: string) {
                                             stroke-linecap="round"
                                             stroke-linejoin="round"
                                             stroke-width="1.5"
-                                            d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4"
+                                            d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"
                                         />
                                     </svg>
                                     <p class="text-gray-500">
@@ -264,14 +318,14 @@ function selectTable(name: string) {
                             <CardContent>
                                 <ScrollArea>
                                     <div
-                                        v-if="sql.savedQueries.length === 0"
+                                        v-if="savedQueries.length === 0"
                                         class="text-sm text-gray-400 text-center py-8"
                                     >
                                         Aucune requête sauvegardée
                                     </div>
                                     <div v-else class="space-y-3">
                                         <div
-                                            v-for="saved in sql.savedQueries"
+                                            v-for="saved in savedQueries"
                                             :key="saved.id"
                                             class="flex items-start justify-between p-4 rounded-lg border border-gray-200"
                                         >
@@ -284,7 +338,7 @@ function selectTable(name: string) {
                                                 <p
                                                     class="text-xs text-gray-500 truncate max-w-45"
                                                 >
-                                                    {{ saved.query }}
+                                                    {{ saved.command }}
                                                 </p>
                                                 <p
                                                     class="text-xs text-gray-400 mt-1"
@@ -302,9 +356,7 @@ function selectTable(name: string) {
                                                 <Button
                                                     variant="ghost"
                                                     size="sm"
-                                                    @click="
-                                                        sql.loadQuery(saved.id)
-                                                    "
+                                                    @click="loadQuery(saved.id)"
                                                     title="Charger"
                                                 >
                                                     <svg
@@ -344,9 +396,7 @@ function selectTable(name: string) {
                                                 <Button
                                                     variant="ghost"
                                                     size="sm"
-                                                    @click="
-                                                        sql.deleteQuery(saved.id)
-                                                    "
+                                                    @click="deleteQuery(saved.id)"
                                                     title="Supprimer"
                                                 >
                                                     <svg
@@ -383,17 +433,17 @@ function selectTable(name: string) {
                                 <div class="p-4">
                                     <div class="flex items-center justify-between mb-3">
                                         <h3 class="text-sm font-semibold text-gray-900">
-                                            Tables
+                                            Collections
                                         </h3>
                                         <Button
                                             variant="ghost"
                                             size="sm"
-                                            @click="sql.fetchTables()"
-                                            :disabled="sql.tablesLoading"
+                                            @click="mongodb.fetchCollections()"
+                                            :disabled="mongodb.collectionsLoading"
                                         >
                                             <svg
                                                 class="w-4 h-4"
-                                                :class="{ 'animate-spin': sql.tablesLoading }"
+                                                :class="{ 'animate-spin': mongodb.collectionsLoading }"
                                                 fill="none"
                                                 stroke="currentColor"
                                                 viewBox="0 0 24 24"
@@ -408,25 +458,31 @@ function selectTable(name: string) {
                                         </Button>
                                     </div>
                                     <ScrollArea class="h-[500px]">
-                                        <div v-if="sql.tablesLoading" class="text-sm text-gray-400 text-center py-8">
+                                        <div
+                                            v-if="mongodb.collectionsLoading"
+                                            class="text-sm text-gray-400 text-center py-8"
+                                        >
                                             Chargement...
                                         </div>
-                                        <div v-else-if="sql.tables.length === 0" class="text-sm text-gray-400 text-center py-8">
-                                            Aucune table trouvée
+                                        <div
+                                            v-else-if="mongodb.collections.length === 0"
+                                            class="text-sm text-gray-400 text-center py-8"
+                                        >
+                                            Aucune collection trouvée
                                         </div>
                                         <div v-else class="space-y-1">
                                             <button
-                                                v-for="t in sql.tables"
-                                                :key="t.table_name"
-                                                @click="selectTable(t.table_name)"
+                                                v-for="c in mongodb.collections"
+                                                :key="c"
+                                                @click="selectCollection(c)"
                                                 class="w-full text-left px-3 py-2 rounded-md text-sm transition"
                                                 :class="{
-                                                    'bg-blue-50 text-blue-700 font-medium': sql.selectedTable === t.table_name,
-                                                    'text-gray-700 hover:bg-gray-100': sql.selectedTable !== t.table_name,
+                                                    'bg-blue-50 text-blue-700 font-medium': mongodb.selectedCollection === c,
+                                                    'text-gray-700 hover:bg-gray-100': mongodb.selectedCollection !== c,
                                                 }"
                                             >
                                                 <span class="text-xs text-gray-400 mr-1">📦</span>
-                                                {{ t.table_name }}
+                                                {{ c }}
                                             </button>
                                         </div>
                                     </ScrollArea>
@@ -435,7 +491,10 @@ function selectTable(name: string) {
 
                             <div class="lg:col-span-3">
                                 <div class="p-4">
-                                    <div v-if="!sql.selectedTable" class="text-center py-16 text-gray-400">
+                                    <div
+                                        v-if="!mongodb.selectedCollection"
+                                        class="text-center py-16 text-gray-400"
+                                    >
                                         <svg
                                             class="w-16 h-16 mx-auto text-gray-300 mb-4"
                                             fill="none"
@@ -446,29 +505,35 @@ function selectTable(name: string) {
                                                 stroke-linecap="round"
                                                 stroke-linejoin="round"
                                                 stroke-width="1.5"
-                                                d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4"
+                                                d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"
                                             />
                                         </svg>
-                                        <p>Sélectionnez une table dans la liste</p>
+                                        <p>Sélectionnez une collection dans la liste</p>
                                     </div>
 
-                                    <div v-else-if="sql.tableDataLoading" class="text-center py-16 text-gray-400">
+                                    <div
+                                        v-else-if="mongodb.collectionDataLoading"
+                                        class="text-center py-16 text-gray-400"
+                                    >
                                         Chargement des données...
                                     </div>
 
-                                    <div v-else-if="sql.tableError" class="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg p-4">
-                                        {{ sql.tableError }}
+                                    <div
+                                        v-else-if="mongodb.collectionError"
+                                        class="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg p-4"
+                                    >
+                                        {{ mongodb.collectionError }}
                                     </div>
 
-                                    <div v-else-if="sql.tableData">
+                                    <div v-else-if="mongodb.collectionData">
                                         <div class="flex items-center justify-between mb-4">
                                             <div>
                                                 <h3 class="text-lg font-semibold text-gray-900">
-                                                    {{ sql.selectedTable }}
+                                                    {{ mongodb.selectedCollection }}
                                                 </h3>
                                                 <p class="text-sm text-gray-500">
-                                                    {{ sql.tableData.totalCount }} ligne{{
-                                                        sql.tableData.totalCount > 1 ? 's' : ''
+                                                    {{ mongodb.collectionData.totalCount }} document{{
+                                                        mongodb.collectionData.totalCount > 1 ? 's' : ''
                                                     }}
                                                 </p>
                                             </div>
@@ -479,7 +544,7 @@ function selectTable(name: string) {
                                                 <TableHeader>
                                                     <TableRow>
                                                         <TableHead
-                                                            v-for="col in sql.tableData.columns"
+                                                            v-for="col in mongodb.collectionData.columns"
                                                             :key="col"
                                                             class="whitespace-nowrap"
                                                         >
@@ -489,11 +554,11 @@ function selectTable(name: string) {
                                                 </TableHeader>
                                                 <TableBody>
                                                     <TableRow
-                                                        v-for="(row, i) in sql.tableData.rows"
+                                                        v-for="(row, i) in mongodb.collectionData.rows"
                                                         :key="i"
                                                     >
                                                         <TableCell
-                                                            v-for="col in sql.tableData.columns"
+                                                            v-for="col in mongodb.collectionData.columns"
                                                             :key="col"
                                                             class="max-w-60 truncate"
                                                             :title="row[col] != null ? String(row[col]) : 'NULL'"
@@ -511,29 +576,29 @@ function selectTable(name: string) {
 
                                         <div class="flex items-center justify-between mt-4 pt-4 border-t border-gray-200">
                                             <div class="flex items-center gap-2 text-sm text-gray-500">
-                                                <span>Lignes {{ (sql.tablePage - 1) * sql.tablePageSize + 1 }} –
-                                                    {{ Math.min(sql.tablePage * sql.tablePageSize, sql.tableData.totalCount) }}
-                                                    sur {{ sql.tableData.totalCount }}</span>
+                                                <span>Documents {{ (mongodb.collectionPage - 1) * mongodb.collectionPageSize + 1 }} –
+                                                    {{ Math.min(mongodb.collectionPage * mongodb.collectionPageSize, mongodb.collectionData.totalCount) }}
+                                                    sur {{ mongodb.collectionData.totalCount }}</span>
                                             </div>
                                             <div class="flex items-center gap-2">
                                                 <Button
                                                     variant="outline"
                                                     size="sm"
-                                                    :disabled="sql.tablePage <= 1"
-                                                    @click="sql.goToTablePage(sql.tablePage - 1)"
+                                                    :disabled="mongodb.collectionPage <= 1"
+                                                    @click="mongodb.goToCollectionPage(mongodb.collectionPage - 1)"
                                                 >
                                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
                                                     </svg>
                                                 </Button>
                                                 <span class="text-sm text-gray-600 min-w-16 text-center">
-                                                    Page {{ sql.tablePage }} / {{ sql.tableData.totalPages }}
+                                                    Page {{ mongodb.collectionPage }} / {{ mongodb.collectionData.totalPages }}
                                                 </span>
                                                 <Button
                                                     variant="outline"
                                                     size="sm"
-                                                    :disabled="sql.tablePage >= sql.tableData.totalPages"
-                                                    @click="sql.goToTablePage(sql.tablePage + 1)"
+                                                    :disabled="mongodb.collectionPage >= mongodb.collectionData.totalPages"
+                                                    @click="mongodb.goToCollectionPage(mongodb.collectionPage + 1)"
                                                 >
                                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
@@ -544,8 +609,8 @@ function selectTable(name: string) {
                                                 <label class="text-sm text-gray-500" for="page-size">Par page</label>
                                                 <select
                                                     id="page-size"
-                                                    v-model="sql.tablePageSize"
-                                                    @change="sql.fetchTableData(sql.selectedTable!, 1)"
+                                                    v-model="mongodb.collectionPageSize"
+                                                    @change="mongodb.fetchCollectionData(mongodb.selectedCollection!, 1)"
                                                     class="text-sm border border-gray-300 rounded-md px-2 py-1"
                                                 >
                                                     <option :value="10">10</option>
@@ -639,7 +704,7 @@ function selectTable(name: string) {
                 <div class="space-y-4 px-6 py-4">
                     <p class="text-sm text-gray-500">
                         Pour des raisons de sécurité, l'accès à la console
-                        PostgreSQL est restreint en production. Veuillez vous
+                        MongoDB est restreint en production. Veuillez vous
                         connecter à votre environnement de développement local
                         pour utiliser cette fonctionnalité.
                     </p>
