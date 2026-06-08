@@ -1,4 +1,3 @@
-import 'dotenv/config';
 import { defineConfig } from 'prisma/config';
 
 const POSTGRES_USER = process.env.POSTGRES_USER || 'postgres';
