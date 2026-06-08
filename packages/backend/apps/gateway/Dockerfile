@@ -10,7 +10,7 @@ RUN pnpm install --frozen-lockfile --node-linker=hoisted
 # Copy source code, generate Prisma client and build
 COPY . .
 RUN pnpm exec prisma generate
-RUN pnpm run build:gateway && test -f dist/apps/gateway/main.js
+RUN node --version && node_modules/.bin/nest build gateway 2>&1 && test -f dist/apps/gateway/main.js
 
 # +--------------------------------------------------------+
 # |                         RUNTIME                        |
