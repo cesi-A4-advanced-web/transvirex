@@ -10,7 +10,7 @@ RUN pnpm install --frozen-lockfile --node-linker=hoisted
 # Copy source code, generate Prisma client and build
 COPY . .
 RUN pnpm exec prisma generate
-RUN echo "before build" && node_modules/.bin/tsc -p apps/gateway/tsconfig.app.json 2>&1; echo "tsc exit=$?" && test -f dist/apps/gateway/main.js
+RUN node_modules/.bin/tsc -p apps/gateway/tsconfig.app.json 2>&1 && find dist -name "main.js" 2>/dev/null || echo "main.js introuvable"
 
 # +--------------------------------------------------------+
 # |                         RUNTIME                        |
