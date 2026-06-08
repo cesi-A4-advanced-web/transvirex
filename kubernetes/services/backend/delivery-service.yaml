@@ -78,7 +78,7 @@ spec:
                                 name: transvirex-config
                                 key: LOG_LEVEL
                   ports:
-                      - containerPort: 3003
+                      - containerPort: 3000
                         name: http
                   resources:
                       requests:
@@ -100,7 +100,7 @@ spec:
     selector:
         app: transvirex-delivery
     ports:
-        - port: 3003
-          targetPort: 3003
+        - port: 3000
+          targetPort: 3000
           name: http
           protocol: TCP

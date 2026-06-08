@@ -381,7 +381,7 @@ jobs:
                     ${{ secrets.DISCORD_WEBHOOK_URL }}
 
             - name: ❌ Notify Discord - Failure
-              if: ${{ contains(needs.*.result, 'failure') }}
+              if: ${{ contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled') && github.event_name != 'pull_request' }}
               run: |
                   curl -H "Content-Type: application/json" \
                     -d '{
@@ -391,6 +391,44 @@ jobs:
                         "fields": [
                           {"name": "Repo", "value": "${{ github.repository }}", "inline": true},
                           {"name": "Branche", "value": "${{ github.ref_name }}", "inline": true},
+                          {"name": "Commit", "value": "[`${{ github.sha }}`](${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }})", "inline": false},
+                          {"name": "Déclenché par", "value": "${{ github.actor }}", "inline": true},
+                          {"name": "Logs", "value": "[${{ github.run_id }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})", "inline": false}
+                        ]
+                      }]
+                    }' \
+                    ${{ secrets.DISCORD_WEBHOOK_URL }}
+
+            - name: ⚠️ Notify Discord - Cancelled
+              if: ${{ contains(needs.*.result, 'cancelled') && github.event_name != 'pull_request' }}
+              run: |
+                  curl -H "Content-Type: application/json" \
+                    -d '{
+                      "embeds": [{
+                        "title": "⚠️ Déploiement annulé",
+                        "color": 16776960,
+                        "fields": [
+                          {"name": "Repo", "value": "${{ github.repository }}", "inline": true},
+                          {"name": "Branche", "value": "${{ github.ref_name }}", "inline": true},
+                          {"name": "Commit", "value": "[`${{ github.sha }}`](${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }})", "inline": false},
+                          {"name": "Déclenché par", "value": "${{ github.actor }}", "inline": true},
+                          {"name": "Logs", "value": "[${{ github.run_id }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})", "inline": false}
+                        ]
+                      }]
+                    }' \
+                    ${{ secrets.DISCORD_WEBHOOK_URL }}
+
+            - name: ⚠️ Notify Discord - PR Build failure
+              if: ${{ contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled') && github.event_name == 'pull_request' }}
+              run: |
+                  curl -H "Content-Type: application/json" \
+                    -d '{
+                      "embeds": [{
+                        "title": "❌ Build de PR échoué",
+                        "color": 15158332,
+                        "fields": [
+                          {"name": "Repo", "value": "${{ github.repository }}", "inline": true},
+                          {"name": "PR", "value": "[#${{ github.event.pull_request.number }}](${{ github.event.pull_request.html_url }})", "inline": true},
                           {"name": "Commit", "value": "[`${{ github.sha }}`](${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }})", "inline": false},
                           {"name": "Déclenché par", "value": "${{ github.actor }}", "inline": true},
                           {"name": "Logs", "value": "[${{ github.run_id }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})", "inline": false}

@@ -9,13 +9,14 @@ export class GatewayService {
     private readonly serviceUrls = {
         auth:
             process.env.AUTH_SERVICE_URL ||
-            'http://authentication-service:3000',
+            'http://transvirex-authentication:3000',
         billing:
-            process.env.BILLING_SERVICE_URL || 'http://billing-service:3000',
+            process.env.BILLING_SERVICE_URL || 'http://transvirex-billing:3000',
         delivery:
-            process.env.DELIVERY_SERVICE_URL || 'http://delivery-service:3000',
-        stock: process.env.STOCK_SERVICE_URL || 'http://stock-service:3000',
-        users: process.env.USERS_SERVICE_URL || 'http://users-service:3000',
+            process.env.DELIVERY_SERVICE_URL ||
+            'http://transvirex-delivery:3000',
+        stock: process.env.STOCK_SERVICE_URL || 'http://transvirex-stock:3000',
+        users: process.env.USERS_SERVICE_URL || 'http://transvirex-users:3000',
     };
 
     constructor(
