@@ -26,13 +26,8 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
-import {
-    Tabs,
-    TabsContent,
-    TabsList,
-    TabsTrigger,
-} from '@/components/ui/tabs';
 import { useMongoDBStore } from '@/stores/mongodb';
 
 useHead({ title: 'Console MongoDB — Transvirex' });
@@ -43,7 +38,6 @@ const showRenameDialog = ref(false);
 const saveName = ref('');
 const renameName = ref('');
 const renamingId = ref<string | null>(null);
-const isProduction = process.env.NODE_ENV === 'production';
 
 const STORAGE_KEY = 'transvirex:saved-mongo-queries';
 
@@ -75,7 +69,9 @@ onMounted(() => mongodb.fetchCollections());
 
 function handleSave() {
     if (!saveName.value.trim()) return;
-    const existing = savedQueries.value.find((q) => q.name === saveName.value.trim());
+    const existing = savedQueries.value.find(
+        (q) => q.name === saveName.value.trim(),
+    );
     if (existing) {
         existing.command = mongodb.command;
         existing.createdAt = new Date().toISOString();
@@ -131,9 +127,7 @@ function selectCollection(name: string) {
 <template>
     <div class="max-w-6xl mx-auto space-y-8">
         <div class="space-y-1">
-            <h1 class="text-3xl font-bold text-slate-900">
-                Console MongoDB
-            </h1>
+            <h1 class="text-3xl font-bold text-slate-900">Console MongoDB</h1>
             <p class="text-gray-500">
                 Exécuter des requêtes sur la base de données MongoDB
             </p>
@@ -201,7 +195,11 @@ function selectCollection(name: string) {
                                                 d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
                                             />
                                         </svg>
-                                        {{ mongodb.loading ? 'Exécution...' : 'Exécuter' }}
+                                        {{
+                                            mongodb.loading
+                                                ? 'Exécution...'
+                                                : 'Exécuter'
+                                        }}
                                     </Button>
                                     <Button
                                         variant="outline"
@@ -250,7 +248,8 @@ function selectCollection(name: string) {
                                         <TableHeader>
                                             <TableRow>
                                                 <TableHead
-                                                    v-for="col in mongodb.results.columns"
+                                                    v-for="col in mongodb
+                                                        .results.columns"
                                                     :key="col"
                                                 >
                                                     {{ col }}
@@ -259,11 +258,13 @@ function selectCollection(name: string) {
                                         </TableHeader>
                                         <TableBody>
                                             <TableRow
-                                                v-for="(row, i) in mongodb.results.rows"
+                                                v-for="(row, i) in mongodb
+                                                    .results.rows"
                                                 :key="i"
                                             >
                                                 <TableCell
-                                                    v-for="col in mongodb.results.columns"
+                                                    v-for="col in mongodb
+                                                        .results.columns"
                                                     :key="col"
                                                 >
                                                     {{
@@ -280,7 +281,11 @@ function selectCollection(name: string) {
                         </Card>
 
                         <Card
-                            v-if="!mongodb.results && !mongodb.error && !mongodb.loading"
+                            v-if="
+                                !mongodb.results &&
+                                !mongodb.error &&
+                                !mongodb.loading
+                            "
                         >
                             <CardContent>
                                 <div class="py-12 text-center">
@@ -346,7 +351,9 @@ function selectCollection(name: string) {
                                                     {{
                                                         new Date(
                                                             saved.createdAt,
-                                                        ).toLocaleDateString('fr-FR')
+                                                        ).toLocaleDateString(
+                                                            'fr-FR',
+                                                        )
                                                     }}
                                                 </p>
                                             </div>
@@ -396,7 +403,9 @@ function selectCollection(name: string) {
                                                 <Button
                                                     variant="ghost"
                                                     size="sm"
-                                                    @click="deleteQuery(saved.id)"
+                                                    @click="
+                                                        deleteQuery(saved.id)
+                                                    "
                                                     title="Supprimer"
                                                 >
                                                     <svg
@@ -431,19 +440,28 @@ function selectCollection(name: string) {
                                 class="lg:col-span-1 border-b lg:border-b-0 lg:border-r border-gray-200"
                             >
                                 <div class="p-4">
-                                    <div class="flex items-center justify-between mb-3">
-                                        <h3 class="text-sm font-semibold text-gray-900">
+                                    <div
+                                        class="flex items-center justify-between mb-3"
+                                    >
+                                        <h3
+                                            class="text-sm font-semibold text-gray-900"
+                                        >
                                             Collections
                                         </h3>
                                         <Button
                                             variant="ghost"
                                             size="sm"
                                             @click="mongodb.fetchCollections()"
-                                            :disabled="mongodb.collectionsLoading"
+                                            :disabled="
+                                                mongodb.collectionsLoading
+                                            "
                                         >
                                             <svg
                                                 class="w-4 h-4"
-                                                :class="{ 'animate-spin': mongodb.collectionsLoading }"
+                                                :class="{
+                                                    'animate-spin':
+                                                        mongodb.collectionsLoading,
+                                                }"
                                                 fill="none"
                                                 stroke="currentColor"
                                                 viewBox="0 0 24 24"
@@ -465,7 +483,9 @@ function selectCollection(name: string) {
                                             Chargement...
                                         </div>
                                         <div
-                                            v-else-if="mongodb.collections.length === 0"
+                                            v-else-if="
+                                                mongodb.collections.length === 0
+                                            "
                                             class="text-sm text-gray-400 text-center py-8"
                                         >
                                             Aucune collection trouvée
@@ -477,11 +497,18 @@ function selectCollection(name: string) {
                                                 @click="selectCollection(c)"
                                                 class="w-full text-left px-3 py-2 rounded-md text-sm transition"
                                                 :class="{
-                                                    'bg-blue-50 text-blue-700 font-medium': mongodb.selectedCollection === c,
-                                                    'text-gray-700 hover:bg-gray-100': mongodb.selectedCollection !== c,
+                                                    'bg-blue-50 text-blue-700 font-medium':
+                                                        mongodb.selectedCollection ===
+                                                        c,
+                                                    'text-gray-700 hover:bg-gray-100':
+                                                        mongodb.selectedCollection !==
+                                                        c,
                                                 }"
                                             >
-                                                <span class="text-xs text-gray-400 mr-1">📦</span>
+                                                <span
+                                                    class="text-xs text-gray-400 mr-1"
+                                                    >📦</span
+                                                >
                                                 {{ c }}
                                             </button>
                                         </div>
@@ -508,11 +535,16 @@ function selectCollection(name: string) {
                                                 d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"
                                             />
                                         </svg>
-                                        <p>Sélectionnez une collection dans la liste</p>
+                                        <p>
+                                            Sélectionnez une collection dans la
+                                            liste
+                                        </p>
                                     </div>
 
                                     <div
-                                        v-else-if="mongodb.collectionDataLoading"
+                                        v-else-if="
+                                            mongodb.collectionDataLoading
+                                        "
                                         class="text-center py-16 text-gray-400"
                                     >
                                         Chargement des données...
@@ -526,14 +558,29 @@ function selectCollection(name: string) {
                                     </div>
 
                                     <div v-else-if="mongodb.collectionData">
-                                        <div class="flex items-center justify-between mb-4">
+                                        <div
+                                            class="flex items-center justify-between mb-4"
+                                        >
                                             <div>
-                                                <h3 class="text-lg font-semibold text-gray-900">
-                                                    {{ mongodb.selectedCollection }}
+                                                <h3
+                                                    class="text-lg font-semibold text-gray-900"
+                                                >
+                                                    {{
+                                                        mongodb.selectedCollection
+                                                    }}
                                                 </h3>
-                                                <p class="text-sm text-gray-500">
-                                                    {{ mongodb.collectionData.totalCount }} document{{
-                                                        mongodb.collectionData.totalCount > 1 ? 's' : ''
+                                                <p
+                                                    class="text-sm text-gray-500"
+                                                >
+                                                    {{
+                                                        mongodb.collectionData
+                                                            .totalCount
+                                                    }}
+                                                    document{{
+                                                        mongodb.collectionData
+                                                            .totalCount > 1
+                                                            ? 's'
+                                                            : ''
                                                     }}
                                                 </p>
                                             </div>
@@ -544,7 +591,9 @@ function selectCollection(name: string) {
                                                 <TableHeader>
                                                     <TableRow>
                                                         <TableHead
-                                                            v-for="col in mongodb.collectionData.columns"
+                                                            v-for="col in mongodb
+                                                                .collectionData
+                                                                .columns"
                                                             :key="col"
                                                             class="whitespace-nowrap"
                                                         >
@@ -554,18 +603,36 @@ function selectCollection(name: string) {
                                                 </TableHeader>
                                                 <TableBody>
                                                     <TableRow
-                                                        v-for="(row, i) in mongodb.collectionData.rows"
+                                                        v-for="(
+                                                            row, i
+                                                        ) in mongodb
+                                                            .collectionData
+                                                            .rows"
                                                         :key="i"
                                                     >
                                                         <TableCell
-                                                            v-for="col in mongodb.collectionData.columns"
+                                                            v-for="col in mongodb
+                                                                .collectionData
+                                                                .columns"
                                                             :key="col"
                                                             class="max-w-60 truncate"
-                                                            :title="row[col] != null ? String(row[col]) : 'NULL'"
+                                                            :title="
+                                                                row[col] != null
+                                                                    ? String(
+                                                                          row[
+                                                                              col
+                                                                          ],
+                                                                      )
+                                                                    : 'NULL'
+                                                            "
                                                         >
                                                             {{
                                                                 row[col] != null
-                                                                    ? String(row[col])
+                                                                    ? String(
+                                                                          row[
+                                                                              col
+                                                                          ],
+                                                                      )
                                                                     : 'NULL'
                                                             }}
                                                         </TableCell>
@@ -574,49 +641,142 @@ function selectCollection(name: string) {
                                             </Table>
                                         </ScrollArea>
 
-                                        <div class="flex items-center justify-between mt-4 pt-4 border-t border-gray-200">
-                                            <div class="flex items-center gap-2 text-sm text-gray-500">
-                                                <span>Documents {{ (mongodb.collectionPage - 1) * mongodb.collectionPageSize + 1 }} –
-                                                    {{ Math.min(mongodb.collectionPage * mongodb.collectionPageSize, mongodb.collectionData.totalCount) }}
-                                                    sur {{ mongodb.collectionData.totalCount }}</span>
+                                        <div
+                                            class="flex items-center justify-between mt-4 pt-4 border-t border-gray-200"
+                                        >
+                                            <div
+                                                class="flex items-center gap-2 text-sm text-gray-500"
+                                            >
+                                                <span
+                                                    >Documents
+                                                    {{
+                                                        (mongodb.collectionPage -
+                                                            1) *
+                                                            mongodb.collectionPageSize +
+                                                        1
+                                                    }}
+                                                    –
+                                                    {{
+                                                        Math.min(
+                                                            mongodb.collectionPage *
+                                                                mongodb.collectionPageSize,
+                                                            mongodb
+                                                                .collectionData
+                                                                .totalCount,
+                                                        )
+                                                    }}
+                                                    sur
+                                                    {{
+                                                        mongodb.collectionData
+                                                            .totalCount
+                                                    }}</span
+                                                >
                                             </div>
-                                            <div class="flex items-center gap-2">
+                                            <div
+                                                class="flex items-center gap-2"
+                                            >
                                                 <Button
                                                     variant="outline"
                                                     size="sm"
-                                                    :disabled="mongodb.collectionPage <= 1"
-                                                    @click="mongodb.goToCollectionPage(mongodb.collectionPage - 1)"
+                                                    :disabled="
+                                                        mongodb.collectionPage <=
+                                                        1
+                                                    "
+                                                    @click="
+                                                        mongodb.goToCollectionPage(
+                                                            mongodb.collectionPage -
+                                                                1,
+                                                        )
+                                                    "
                                                 >
-                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                                                    <svg
+                                                        class="w-4 h-4"
+                                                        fill="none"
+                                                        stroke="currentColor"
+                                                        viewBox="0 0 24 24"
+                                                    >
+                                                        <path
+                                                            stroke-linecap="round"
+                                                            stroke-linejoin="round"
+                                                            stroke-width="2"
+                                                            d="M15 19l-7-7 7-7"
+                                                        />
                                                     </svg>
                                                 </Button>
-                                                <span class="text-sm text-gray-600 min-w-16 text-center">
-                                                    Page {{ mongodb.collectionPage }} / {{ mongodb.collectionData.totalPages }}
+                                                <span
+                                                    class="text-sm text-gray-600 min-w-16 text-center"
+                                                >
+                                                    Page
+                                                    {{ mongodb.collectionPage }}
+                                                    /
+                                                    {{
+                                                        mongodb.collectionData
+                                                            .totalPages
+                                                    }}
                                                 </span>
                                                 <Button
                                                     variant="outline"
                                                     size="sm"
-                                                    :disabled="mongodb.collectionPage >= mongodb.collectionData.totalPages"
-                                                    @click="mongodb.goToCollectionPage(mongodb.collectionPage + 1)"
+                                                    :disabled="
+                                                        mongodb.collectionPage >=
+                                                        mongodb.collectionData
+                                                            .totalPages
+                                                    "
+                                                    @click="
+                                                        mongodb.goToCollectionPage(
+                                                            mongodb.collectionPage +
+                                                                1,
+                                                        )
+                                                    "
                                                 >
-                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                                                    <svg
+                                                        class="w-4 h-4"
+                                                        fill="none"
+                                                        stroke="currentColor"
+                                                        viewBox="0 0 24 24"
+                                                    >
+                                                        <path
+                                                            stroke-linecap="round"
+                                                            stroke-linejoin="round"
+                                                            stroke-width="2"
+                                                            d="M9 5l7 7-7 7"
+                                                        />
                                                     </svg>
                                                 </Button>
                                             </div>
-                                            <div class="flex items-center gap-2">
-                                                <label class="text-sm text-gray-500" for="page-size">Par page</label>
+                                            <div
+                                                class="flex items-center gap-2"
+                                            >
+                                                <label
+                                                    class="text-sm text-gray-500"
+                                                    for="page-size"
+                                                    >Par page</label
+                                                >
                                                 <select
                                                     id="page-size"
-                                                    v-model="mongodb.collectionPageSize"
-                                                    @change="mongodb.fetchCollectionData(mongodb.selectedCollection!, 1)"
+                                                    v-model="
+                                                        mongodb.collectionPageSize
+                                                    "
+                                                    @change="
+                                                        mongodb.fetchCollectionData(
+                                                            mongodb.selectedCollection!,
+                                                            1,
+                                                        )
+                                                    "
                                                     class="text-sm border border-gray-300 rounded-md px-2 py-1"
                                                 >
-                                                    <option :value="10">10</option>
-                                                    <option :value="25">25</option>
-                                                    <option :value="50">50</option>
-                                                    <option :value="100">100</option>
+                                                    <option :value="10">
+                                                        10
+                                                    </option>
+                                                    <option :value="25">
+                                                        25
+                                                    </option>
+                                                    <option :value="50">
+                                                        50
+                                                    </option>
+                                                    <option :value="100">
+                                                        100
+                                                    </option>
                                                 </select>
                                             </div>
                                         </div>
@@ -683,35 +843,11 @@ function selectCollection(name: string) {
                     <Button variant="outline" @click="showRenameDialog = false"
                         >Annuler</Button
                     >
-                    <Button
-                        @click="handleRename"
-                        :disabled="!renameName.trim()"
+                    <Button @click="handleRename" :disabled="!renameName.trim()"
                         >Renommer</Button
                     >
                 </DialogFooter>
             </DialogContent>
-        </Dialog>
-
-        <Dialog v-if="isProduction" open modal>
-            <DialogContent>
-                <DialogHeader>
-                    <DialogTitle>Accès restreint</DialogTitle>
-                    <DialogDescription
-                        >Cette page est uniquement accessible en
-                        développement.</DialogDescription
-                    >
-                </DialogHeader>
-                <div class="space-y-4 px-6 py-4">
-                    <p class="text-sm text-gray-500">
-                        Pour des raisons de sécurité, l'accès à la console
-                        MongoDB est restreint en production. Veuillez vous
-                        connecter à votre environnement de développement local
-                        pour utiliser cette fonctionnalité.
-                    </p>
-                    <Button @click="$router.push('/debug')">Retour</Button>
-                </div>
-            </DialogContent>
-            <DialogFooter></DialogFooter>
         </Dialog>
     </div>
 </template>
