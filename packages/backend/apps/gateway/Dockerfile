@@ -20,7 +20,7 @@ WORKDIR /app
 COPY --from=build /app/node_modules ./node_modules
 COPY --from=build /app/dist/apps/gateway/ ./dist/apps/gateway/
 COPY --from=build /app/dist/libs/ ./libs/
-COPY --from=build /app/dist/prisma/ ./prisma/
+COPY --from=build /app/prisma ./prisma
 COPY --from=build /app/tsconfig.json ./tsconfig.json
 CMD ["node", "-r", "tsconfig-paths/register", "dist/apps/gateway/src/main.js"]
 
