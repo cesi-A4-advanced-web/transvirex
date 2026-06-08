@@ -6,11 +6,11 @@ RUN pnpm runtime set node 26 -g
 WORKDIR /app
 # Copy package files and install dependencies (hoisted = flat node_modules, no symlinks)
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
-RUN pnpm install --frozen-lockfile --node-linker=hoisted
+RUN pnpm install --node-linker=hoisted
 # Copy source code, generate Prisma client and build
 COPY . .
 RUN pnpm exec prisma generate
-RUN node_modules/.bin/tsc -p tsconfig.build.json 2>&1
+RUN node_modules/.bin/tsc -p tsconfig.build.json 2>&1 && mkdir -p dist/prisma
 
 # +--------------------------------------------------------+
 # |                         RUNTIME                        |
