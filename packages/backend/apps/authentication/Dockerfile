@@ -6,7 +6,7 @@ RUN pnpm runtime set node 26 -g
 WORKDIR /app
 # Copy package files and install dependencies (hoisted = flat node_modules, no symlinks)
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
-RUN pnpm install --node-linker=hoisted
+RUN pnpm install --no-frozen-lockfile --node-linker=hoisted
 # Copy source code and generate Prisma client
 COPY . .
 RUN pnpm exec prisma generate
