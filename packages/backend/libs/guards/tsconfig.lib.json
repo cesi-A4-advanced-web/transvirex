@@ -1,0 +1,9 @@
+{
+    "compilerOptions": {
+        "declaration": true,
+        "outDir": "../../dist/libs/guards"
+    },
+    "exclude": ["node_modules", "dist", "**/*spec.ts"],
+    "extends": "../../tsconfig.json",
+    "include": ["src/**/*"]
+}
