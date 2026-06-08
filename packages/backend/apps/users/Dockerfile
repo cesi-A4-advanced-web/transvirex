@@ -21,6 +21,7 @@ COPY --from=build /app/node_modules ./node_modules
 COPY --from=build /app/dist/apps/users/ ./dist/apps/users/
 COPY --from=build /app/dist/libs/ ./libs/
 COPY --from=build /app/prisma ./prisma
+COPY --from=build /app/dist/prisma/ ./prisma/
 COPY --from=build /app/prisma.config.ts ./prisma.config.ts
 COPY --from=build /app/tsconfig.json ./tsconfig.json
 CMD ["sh", "-c", "node_modules/.bin/prisma migrate deploy && node -r tsconfig-paths/register dist/apps/users/src/main.js"]
