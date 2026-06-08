@@ -11,7 +11,7 @@ RUN pnpm install --frozen-lockfile --node-linker=hoisted
 COPY . .
 RUN pnpm exec prisma generate
 # Build the application
-RUN pnpm build authentication
+RUN node_modules/.bin/tsc -p apps/authentication/tsconfig.app.json 2>&1
 
 # +--------------------------------------------------------+
 # |                         RUNTIME                        |
@@ -24,7 +24,7 @@ COPY --from=build /app/node_modules ./node_modules
 COPY --from=build /app/dist/apps/authentication/ ./dist/apps/authentication
 # Copy Prisma schema and migrations for migrate deploy
 COPY --from=build /app/prisma ./prisma
-CMD ["sh", "-c", " node_modules/.bin/prisma migrate deploy && node dist/apps/authentication/main.js"]
+CMD ["sh", "-c", " node_modules/.bin/prisma migrate deploy && node dist/apps/authentication/src/main.js"]
 
 # +--------------------------------------------------------+
 # |                      DEVELOPMENT                       |

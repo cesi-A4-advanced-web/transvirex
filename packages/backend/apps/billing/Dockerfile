@@ -10,7 +10,7 @@ RUN pnpm install --frozen-lockfile --node-linker=hoisted
 # Copy source code, generate Prisma client and build
 COPY . .
 RUN pnpm exec prisma generate
-RUN pnpm build billing
+RUN node_modules/.bin/tsc -p apps/billing/tsconfig.app.json 2>&1
 
 # +--------------------------------------------------------+
 # |                         RUNTIME                        |
@@ -20,7 +20,7 @@ WORKDIR /app
 COPY --from=build /app/node_modules ./node_modules
 COPY --from=build /app/dist/apps/billing/ ./dist/apps/billing
 COPY --from=build /app/prisma ./prisma
-CMD ["sh", "-c", " node_modules/.bin/prisma migrate deploy && node dist/apps/billing/main.js"]
+CMD ["sh", "-c", " node_modules/.bin/prisma migrate deploy && node dist/apps/billing/src/main.js"]
 
 # +--------------------------------------------------------+
 # |                      DEVELOPMENT                       |
