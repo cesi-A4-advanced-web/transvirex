@@ -38,6 +38,12 @@
             "@app/mongodb/*": [
                 "./libs/mongodb/src/*"
             ],
+            "@app/guards": [
+                "./libs/guards/src"
+            ],
+            "@app/guards/*": [
+                "./libs/guards/src/*"
+            ],
             "@generated/prisma": [
                 "./prisma/generated/prisma/client"
             ]

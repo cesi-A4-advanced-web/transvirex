@@ -26,13 +26,8 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
-import {
-    Tabs,
-    TabsContent,
-    TabsList,
-    TabsTrigger,
-} from '@/components/ui/tabs';
 import { useSqlStore } from '@/stores/sql';
 
 useHead({ title: 'Console PostgreSQL — Transvirex' });
@@ -43,7 +38,6 @@ const showRenameDialog = ref(false);
 const saveName = ref('');
 const renameName = ref('');
 const renamingId = ref<string | null>(null);
-const isProduction = process.env.NODE_ENV === 'production';
 
 onMounted(() => sql.fetchTables());
 
@@ -147,7 +141,11 @@ function selectTable(name: string) {
                                                 d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
                                             />
                                         </svg>
-                                        {{ sql.loading ? 'Exécution...' : 'Exécuter' }}
+                                        {{
+                                            sql.loading
+                                                ? 'Exécution...'
+                                                : 'Exécuter'
+                                        }}
                                     </Button>
                                     <Button
                                         variant="outline"
@@ -196,7 +194,8 @@ function selectTable(name: string) {
                                         <TableHeader>
                                             <TableRow>
                                                 <TableHead
-                                                    v-for="col in sql.results.columns"
+                                                    v-for="col in sql.results
+                                                        .columns"
                                                     :key="col"
                                                 >
                                                     {{ col }}
@@ -205,11 +204,13 @@ function selectTable(name: string) {
                                         </TableHeader>
                                         <TableBody>
                                             <TableRow
-                                                v-for="(row, i) in sql.results.rows"
+                                                v-for="(row, i) in sql.results
+                                                    .rows"
                                                 :key="i"
                                             >
                                                 <TableCell
-                                                    v-for="col in sql.results.columns"
+                                                    v-for="col in sql.results
+                                                        .columns"
                                                     :key="col"
                                                 >
                                                     {{
@@ -225,9 +226,7 @@ function selectTable(name: string) {
                             </CardContent>
                         </Card>
 
-                        <Card
-                            v-if="!sql.results && !sql.error && !sql.loading"
-                        >
+                        <Card v-if="!sql.results && !sql.error && !sql.loading">
                             <CardContent>
                                 <div class="py-12 text-center">
                                     <svg
@@ -292,7 +291,9 @@ function selectTable(name: string) {
                                                     {{
                                                         new Date(
                                                             saved.createdAt,
-                                                        ).toLocaleDateString('fr-FR')
+                                                        ).toLocaleDateString(
+                                                            'fr-FR',
+                                                        )
                                                     }}
                                                 </p>
                                             </div>
@@ -345,7 +346,9 @@ function selectTable(name: string) {
                                                     variant="ghost"
                                                     size="sm"
                                                     @click="
-                                                        sql.deleteQuery(saved.id)
+                                                        sql.deleteQuery(
+                                                            saved.id,
+                                                        )
                                                     "
                                                     title="Supprimer"
                                                 >
@@ -381,8 +384,12 @@ function selectTable(name: string) {
                                 class="lg:col-span-1 border-b lg:border-b-0 lg:border-r border-gray-200"
                             >
                                 <div class="p-4">
-                                    <div class="flex items-center justify-between mb-3">
-                                        <h3 class="text-sm font-semibold text-gray-900">
+                                    <div
+                                        class="flex items-center justify-between mb-3"
+                                    >
+                                        <h3
+                                            class="text-sm font-semibold text-gray-900"
+                                        >
                                             Tables
                                         </h3>
                                         <Button
@@ -393,7 +400,10 @@ function selectTable(name: string) {
                                         >
                                             <svg
                                                 class="w-4 h-4"
-                                                :class="{ 'animate-spin': sql.tablesLoading }"
+                                                :class="{
+                                                    'animate-spin':
+                                                        sql.tablesLoading,
+                                                }"
                                                 fill="none"
                                                 stroke="currentColor"
                                                 viewBox="0 0 24 24"
@@ -407,25 +417,40 @@ function selectTable(name: string) {
                                             </svg>
                                         </Button>
                                     </div>
-                                    <ScrollArea class="h-[500px]">
-                                        <div v-if="sql.tablesLoading" class="text-sm text-gray-400 text-center py-8">
+                                    <ScrollArea class="h-125">
+                                        <div
+                                            v-if="sql.tablesLoading"
+                                            class="text-sm text-gray-400 text-center py-8"
+                                        >
                                             Chargement...
                                         </div>
-                                        <div v-else-if="sql.tables.length === 0" class="text-sm text-gray-400 text-center py-8">
+                                        <div
+                                            v-else-if="sql.tables.length === 0"
+                                            class="text-sm text-gray-400 text-center py-8"
+                                        >
                                             Aucune table trouvée
                                         </div>
                                         <div v-else class="space-y-1">
                                             <button
                                                 v-for="t in sql.tables"
                                                 :key="t.table_name"
-                                                @click="selectTable(t.table_name)"
+                                                @click="
+                                                    selectTable(t.table_name)
+                                                "
                                                 class="w-full text-left px-3 py-2 rounded-md text-sm transition"
                                                 :class="{
-                                                    'bg-blue-50 text-blue-700 font-medium': sql.selectedTable === t.table_name,
-                                                    'text-gray-700 hover:bg-gray-100': sql.selectedTable !== t.table_name,
+                                                    'bg-blue-50 text-blue-700 font-medium':
+                                                        sql.selectedTable ===
+                                                        t.table_name,
+                                                    'text-gray-700 hover:bg-gray-100':
+                                                        sql.selectedTable !==
+                                                        t.table_name,
                                                 }"
                                             >
-                                                <span class="text-xs text-gray-400 mr-1">📦</span>
+                                                <span
+                                                    class="text-xs text-gray-400 mr-1"
+                                                    >📦</span
+                                                >
                                                 {{ t.table_name }}
                                             </button>
                                         </div>
@@ -435,7 +460,10 @@ function selectTable(name: string) {
 
                             <div class="lg:col-span-3">
                                 <div class="p-4">
-                                    <div v-if="!sql.selectedTable" class="text-center py-16 text-gray-400">
+                                    <div
+                                        v-if="!sql.selectedTable"
+                                        class="text-center py-16 text-gray-400"
+                                    >
                                         <svg
                                             class="w-16 h-16 mx-auto text-gray-300 mb-4"
                                             fill="none"
@@ -449,26 +477,46 @@ function selectTable(name: string) {
                                                 d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4"
                                             />
                                         </svg>
-                                        <p>Sélectionnez une table dans la liste</p>
+                                        <p>
+                                            Sélectionnez une table dans la liste
+                                        </p>
                                     </div>
 
-                                    <div v-else-if="sql.tableDataLoading" class="text-center py-16 text-gray-400">
+                                    <div
+                                        v-else-if="sql.tableDataLoading"
+                                        class="text-center py-16 text-gray-400"
+                                    >
                                         Chargement des données...
                                     </div>
 
-                                    <div v-else-if="sql.tableError" class="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg p-4">
+                                    <div
+                                        v-else-if="sql.tableError"
+                                        class="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg p-4"
+                                    >
                                         {{ sql.tableError }}
                                     </div>
 
                                     <div v-else-if="sql.tableData">
-                                        <div class="flex items-center justify-between mb-4">
+                                        <div
+                                            class="flex items-center justify-between mb-4"
+                                        >
                                             <div>
-                                                <h3 class="text-lg font-semibold text-gray-900">
+                                                <h3
+                                                    class="text-lg font-semibold text-gray-900"
+                                                >
                                                     {{ sql.selectedTable }}
                                                 </h3>
-                                                <p class="text-sm text-gray-500">
-                                                    {{ sql.tableData.totalCount }} ligne{{
-                                                        sql.tableData.totalCount > 1 ? 's' : ''
+                                                <p
+                                                    class="text-sm text-gray-500"
+                                                >
+                                                    {{
+                                                        sql.tableData.totalCount
+                                                    }}
+                                                    ligne{{
+                                                        sql.tableData
+                                                            .totalCount > 1
+                                                            ? 's'
+                                                            : ''
                                                     }}
                                                 </p>
                                             </div>
@@ -479,7 +527,9 @@ function selectTable(name: string) {
                                                 <TableHeader>
                                                     <TableRow>
                                                         <TableHead
-                                                            v-for="col in sql.tableData.columns"
+                                                            v-for="col in sql
+                                                                .tableData
+                                                                .columns"
                                                             :key="col"
                                                             class="whitespace-nowrap"
                                                         >
@@ -489,18 +539,33 @@ function selectTable(name: string) {
                                                 </TableHeader>
                                                 <TableBody>
                                                     <TableRow
-                                                        v-for="(row, i) in sql.tableData.rows"
+                                                        v-for="(row, i) in sql
+                                                            .tableData.rows"
                                                         :key="i"
                                                     >
                                                         <TableCell
-                                                            v-for="col in sql.tableData.columns"
+                                                            v-for="col in sql
+                                                                .tableData
+                                                                .columns"
                                                             :key="col"
                                                             class="max-w-60 truncate"
-                                                            :title="row[col] != null ? String(row[col]) : 'NULL'"
+                                                            :title="
+                                                                row[col] != null
+                                                                    ? String(
+                                                                          row[
+                                                                              col
+                                                                          ],
+                                                                      )
+                                                                    : 'NULL'
+                                                            "
                                                         >
                                                             {{
                                                                 row[col] != null
-                                                                    ? String(row[col])
+                                                                    ? String(
+                                                                          row[
+                                                                              col
+                                                                          ],
+                                                                      )
                                                                     : 'NULL'
                                                             }}
                                                         </TableCell>
@@ -509,49 +574,130 @@ function selectTable(name: string) {
                                             </Table>
                                         </ScrollArea>
 
-                                        <div class="flex items-center justify-between mt-4 pt-4 border-t border-gray-200">
-                                            <div class="flex items-center gap-2 text-sm text-gray-500">
-                                                <span>Lignes {{ (sql.tablePage - 1) * sql.tablePageSize + 1 }} –
-                                                    {{ Math.min(sql.tablePage * sql.tablePageSize, sql.tableData.totalCount) }}
-                                                    sur {{ sql.tableData.totalCount }}</span>
+                                        <div
+                                            class="flex items-center justify-between mt-4 pt-4 border-t border-gray-200"
+                                        >
+                                            <div
+                                                class="flex items-center gap-2 text-sm text-gray-500"
+                                            >
+                                                <span
+                                                    >Lignes
+                                                    {{
+                                                        (sql.tablePage - 1) *
+                                                            sql.tablePageSize +
+                                                        1
+                                                    }}
+                                                    –
+                                                    {{
+                                                        Math.min(
+                                                            sql.tablePage *
+                                                                sql.tablePageSize,
+                                                            sql.tableData
+                                                                .totalCount,
+                                                        )
+                                                    }}
+                                                    sur
+                                                    {{
+                                                        sql.tableData.totalCount
+                                                    }}</span
+                                                >
                                             </div>
-                                            <div class="flex items-center gap-2">
+                                            <div
+                                                class="flex items-center gap-2"
+                                            >
                                                 <Button
                                                     variant="outline"
                                                     size="sm"
-                                                    :disabled="sql.tablePage <= 1"
-                                                    @click="sql.goToTablePage(sql.tablePage - 1)"
+                                                    :disabled="
+                                                        sql.tablePage <= 1
+                                                    "
+                                                    @click="
+                                                        sql.goToTablePage(
+                                                            sql.tablePage - 1,
+                                                        )
+                                                    "
                                                 >
-                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                                                    <svg
+                                                        class="w-4 h-4"
+                                                        fill="none"
+                                                        stroke="currentColor"
+                                                        viewBox="0 0 24 24"
+                                                    >
+                                                        <path
+                                                            stroke-linecap="round"
+                                                            stroke-linejoin="round"
+                                                            stroke-width="2"
+                                                            d="M15 19l-7-7 7-7"
+                                                        />
                                                     </svg>
                                                 </Button>
-                                                <span class="text-sm text-gray-600 min-w-16 text-center">
-                                                    Page {{ sql.tablePage }} / {{ sql.tableData.totalPages }}
+                                                <span
+                                                    class="text-sm text-gray-600 min-w-16 text-center"
+                                                >
+                                                    Page {{ sql.tablePage }} /
+                                                    {{
+                                                        sql.tableData.totalPages
+                                                    }}
                                                 </span>
                                                 <Button
                                                     variant="outline"
                                                     size="sm"
-                                                    :disabled="sql.tablePage >= sql.tableData.totalPages"
-                                                    @click="sql.goToTablePage(sql.tablePage + 1)"
+                                                    :disabled="
+                                                        sql.tablePage >=
+                                                        sql.tableData.totalPages
+                                                    "
+                                                    @click="
+                                                        sql.goToTablePage(
+                                                            sql.tablePage + 1,
+                                                        )
+                                                    "
                                                 >
-                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                                                    <svg
+                                                        class="w-4 h-4"
+                                                        fill="none"
+                                                        stroke="currentColor"
+                                                        viewBox="0 0 24 24"
+                                                    >
+                                                        <path
+                                                            stroke-linecap="round"
+                                                            stroke-linejoin="round"
+                                                            stroke-width="2"
+                                                            d="M9 5l7 7-7 7"
+                                                        />
                                                     </svg>
                                                 </Button>
                                             </div>
-                                            <div class="flex items-center gap-2">
-                                                <label class="text-sm text-gray-500" for="page-size">Par page</label>
+                                            <div
+                                                class="flex items-center gap-2"
+                                            >
+                                                <label
+                                                    class="text-sm text-gray-500"
+                                                    for="page-size"
+                                                    >Par page</label
+                                                >
                                                 <select
                                                     id="page-size"
                                                     v-model="sql.tablePageSize"
-                                                    @change="sql.fetchTableData(sql.selectedTable!, 1)"
+                                                    @change="
+                                                        sql.fetchTableData(
+                                                            sql.selectedTable!,
+                                                            1,
+                                                        )
+                                                    "
                                                     class="text-sm border border-gray-300 rounded-md px-2 py-1"
                                                 >
-                                                    <option :value="10">10</option>
-                                                    <option :value="25">25</option>
-                                                    <option :value="50">50</option>
-                                                    <option :value="100">100</option>
+                                                    <option :value="10">
+                                                        10
+                                                    </option>
+                                                    <option :value="25">
+                                                        25
+                                                    </option>
+                                                    <option :value="50">
+                                                        50
+                                                    </option>
+                                                    <option :value="100">
+                                                        100
+                                                    </option>
                                                 </select>
                                             </div>
                                         </div>
@@ -618,35 +764,11 @@ function selectTable(name: string) {
                     <Button variant="outline" @click="showRenameDialog = false"
                         >Annuler</Button
                     >
-                    <Button
-                        @click="handleRename"
-                        :disabled="!renameName.trim()"
+                    <Button @click="handleRename" :disabled="!renameName.trim()"
                         >Renommer</Button
                     >
                 </DialogFooter>
             </DialogContent>
-        </Dialog>
-
-        <Dialog v-if="isProduction" open modal>
-            <DialogContent>
-                <DialogHeader>
-                    <DialogTitle>Accès restreint</DialogTitle>
-                    <DialogDescription
-                        >Cette page est uniquement accessible en
-                        développement.</DialogDescription
-                    >
-                </DialogHeader>
-                <div class="space-y-4 px-6 py-4">
-                    <p class="text-sm text-gray-500">
-                        Pour des raisons de sécurité, l'accès à la console
-                        PostgreSQL est restreint en production. Veuillez vous
-                        connecter à votre environnement de développement local
-                        pour utiliser cette fonctionnalité.
-                    </p>
-                    <Button @click="$router.push('/debug')">Retour</Button>
-                </div>
-            </DialogContent>
-            <DialogFooter></DialogFooter>
         </Dialog>
     </div>
 </template>

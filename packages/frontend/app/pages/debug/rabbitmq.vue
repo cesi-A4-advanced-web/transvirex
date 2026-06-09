@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { storeToRefs } from 'pinia';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
     Card,
@@ -8,7 +8,7 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import {
     Table,
     TableBody,
@@ -17,14 +17,20 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { useRabbitMQStore } from '@/stores/rabbitmq';
+import { storeToRefs } from 'pinia';
 
 useHead({ title: 'RabbitMQ — Transvirex' });
 
 const rabbitmq = useRabbitMQStore();
-const { queues, selectedQueue, messages, loadingQueues, loadingMessages, error } =
-    storeToRefs(rabbitmq);
+const {
+    queues,
+    selectedQueue,
+    messages,
+    loadingQueues,
+    loadingMessages,
+    error,
+} = storeToRefs(rabbitmq);
 
 onMounted(() => rabbitmq.fetchQueues());
 
@@ -44,9 +50,7 @@ function formatContent(raw: string): string {
 <template>
     <div class="max-w-6xl mx-auto space-y-8">
         <div class="space-y-1">
-            <h1 class="text-3xl font-bold text-slate-900">
-                RabbitMQ
-            </h1>
+            <h1 class="text-3xl font-bold text-slate-900">RabbitMQ</h1>
             <p class="text-gray-500">
                 Visualiser les files d'attente et les messages
             </p>
@@ -84,7 +88,10 @@ function formatContent(raw: string): string {
                 </CardDescription>
             </CardHeader>
             <CardContent>
-                <div v-if="loadingQueues" class="text-center py-8 text-gray-400">
+                <div
+                    v-if="loadingQueues"
+                    class="text-center py-8 text-gray-400"
+                >
                     Chargement des files d'attente...
                 </div>
                 <div
@@ -104,7 +111,9 @@ function formatContent(raw: string): string {
                         <TableRow>
                             <TableHead>Nom</TableHead>
                             <TableHead class="text-right">Messages</TableHead>
-                            <TableHead class="text-right">Consommateurs</TableHead>
+                            <TableHead class="text-right"
+                                >Consommateurs</TableHead
+                            >
                             <TableHead>État</TableHead>
                             <TableHead></TableHead>
                         </TableRow>
@@ -122,7 +131,9 @@ function formatContent(raw: string): string {
                             </TableCell>
                             <TableCell class="text-right">
                                 <Badge
-                                    :variant="q.messages > 0 ? 'default' : 'secondary'"
+                                    :variant="
+                                        q.messages > 0 ? 'default' : 'secondary'
+                                    "
                                 >
                                     {{ q.messages }}
                                 </Badge>
@@ -132,7 +143,11 @@ function formatContent(raw: string): string {
                             </TableCell>
                             <TableCell>
                                 <Badge
-                                    :variant="q.state === 'running' ? 'outline' : 'secondary'"
+                                    :variant="
+                                        q.state === 'running'
+                                            ? 'outline'
+                                            : 'secondary'
+                                    "
                                 >
                                     {{ q.state }}
                                 </Badge>
@@ -153,9 +168,7 @@ function formatContent(raw: string): string {
             </CardContent>
         </Card>
 
-        <Card
-            v-if="selectedQueue"
-        >
+        <Card v-if="selectedQueue">
             <CardHeader>
                 <CardTitle>
                     Messages —
@@ -188,16 +201,28 @@ function formatContent(raw: string): string {
                             :key="i"
                             class="border border-gray-200 rounded-lg p-4"
                         >
-                            <div class="flex items-center gap-2 text-xs text-gray-500 mb-2">
+                            <div
+                                class="flex items-center gap-2 text-xs text-gray-500 mb-2"
+                            >
                                 <Badge variant="outline" class="text-xs">
                                     #{{ i + 1 }}
                                 </Badge>
-                                <span>Routing: <code class="font-mono">{{ msg.routingKey || '(vide)' }}</code></span>
-                                <span>Exchange: <code class="font-mono">{{ msg.exchange || '(vide)' }}</code></span>
+                                <span
+                                    >Routing:
+                                    <code class="font-mono">{{
+                                        msg.routingKey || '(vide)'
+                                    }}</code></span
+                                >
+                                <span
+                                    >Exchange:
+                                    <code class="font-mono">{{
+                                        msg.exchange || '(vide)'
+                                    }}</code></span
+                                >
                             </div>
                             <pre
-                                class="text-sm bg-slate-50 rounded p-3 overflow-x-auto whitespace-pre-wrap font-mono text-xs"
-                            >{{ formatContent(msg.content) }}</pre
+                                class="text-sm bg-slate-50 rounded p-3 overflow-x-auto whitespace-pre-wrap font-mono"
+                                >{{ formatContent(msg.content) }}</pre
                             >
                         </div>
                     </div>

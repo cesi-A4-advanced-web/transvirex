@@ -6,6 +6,7 @@ import {
     Param,
     Post,
 } from '@nestjs/common';
+import { BlockInProduction } from '@app/guards';
 import { GatewayService } from './gateway.service';
 
 @Controller()
@@ -48,12 +49,8 @@ export class GatewayController {
     }
 
     @Post('debug/postgresql')
+    @BlockInProduction()
     async executePostgreSQL(@Body('query') query: string) {
-        if (process.env.NODE_ENV !== 'development') {
-            throw new ForbiddenException(
-                'Debug endpoints are only available in development mode',
-            );
-        }
         if (!query || typeof query !== 'string') {
             throw new ForbiddenException(
                 'query is required and must be a string',
@@ -78,12 +75,8 @@ export class GatewayController {
     }
 
     @Post('debug/redis')
+    @BlockInProduction()
     async executeRedis(@Body('command') command: string) {
-        if (process.env.NODE_ENV !== 'development') {
-            throw new ForbiddenException(
-                'Debug endpoints are only available in development mode',
-            );
-        }
         if (!command || typeof command !== 'string') {
             throw new ForbiddenException(
                 'command is required and must be a string',
@@ -93,35 +86,23 @@ export class GatewayController {
     }
 
     @Get('debug/rabbitmq/queues')
+    @BlockInProduction()
     async listRabbitMQQueues() {
-        if (process.env.NODE_ENV !== 'development') {
-            throw new ForbiddenException(
-                'Debug endpoints are only available in development mode',
-            );
-        }
         return this.gatewayService.listRabbitMQQueues();
     }
 
     @Post('debug/rabbitmq/queues/:queue/messages')
+    @BlockInProduction()
     async getRabbitMQMessages(
         @Param('queue') queue: string,
         @Body('count') count?: number,
     ) {
-        if (process.env.NODE_ENV !== 'development') {
-            throw new ForbiddenException(
-                'Debug endpoints are only available in development mode',
-            );
-        }
         return this.gatewayService.getRabbitMQMessages(queue, count ?? 10);
     }
 
     @Post('debug/mongodb')
+    @BlockInProduction()
     async executeMongoDB(@Body('command') command: string) {
-        if (process.env.NODE_ENV !== 'development') {
-            throw new ForbiddenException(
-                'Debug endpoints are only available in development mode',
-            );
-        }
         if (!command || typeof command !== 'string') {
             throw new ForbiddenException(
                 'command is required and must be a string',
@@ -131,26 +112,18 @@ export class GatewayController {
     }
 
     @Get('debug/postgresql/tables')
+    @BlockInProduction()
     async listPostgresTables() {
-        if (process.env.NODE_ENV !== 'development') {
-            throw new ForbiddenException(
-                'Debug endpoints are only available in development mode',
-            );
-        }
         return this.gatewayService.listPostgresTables();
     }
 
     @Post('debug/postgresql/tables/:table/data')
+    @BlockInProduction()
     async getPostgresTableData(
         @Param('table') table: string,
         @Body('page') page: number = 1,
         @Body('pageSize') pageSize: number = 25,
     ) {
-        if (process.env.NODE_ENV !== 'development') {
-            throw new ForbiddenException(
-                'Debug endpoints are only available in development mode',
-            );
-        }
         return this.gatewayService.getPostgresTableData(table, page, pageSize);
     }
 
@@ -160,26 +133,18 @@ export class GatewayController {
     }
 
     @Get('debug/mongodb/collections')
+    @BlockInProduction()
     async listMongoCollections() {
-        if (process.env.NODE_ENV !== 'development') {
-            throw new ForbiddenException(
-                'Debug endpoints are only available in development mode',
-            );
-        }
         return this.gatewayService.listMongoCollections();
     }
 
     @Post('debug/mongodb/collections/:collection/data')
+    @BlockInProduction()
     async getMongoCollectionData(
         @Param('collection') collection: string,
         @Body('page') page: number = 1,
         @Body('pageSize') pageSize: number = 25,
     ) {
-        if (process.env.NODE_ENV !== 'development') {
-            throw new ForbiddenException(
-                'Debug endpoints are only available in development mode',
-            );
-        }
         return this.gatewayService.getMongoCollectionData(
             collection,
             page,
