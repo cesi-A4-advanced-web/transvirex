@@ -10,6 +10,7 @@ import {
 } from '@nestjs/common';
 import type { Request, Response } from 'express';
 import { GatewayService } from './gateway.service';
+import { Public } from './decorators/public.decorator';
 
 const ACCESS_TOKEN_TTL = 15 * 60 * 1000;
 const REFRESH_TOKEN_TTL = 7 * 24 * 60 * 60 * 1000;
@@ -25,36 +26,43 @@ const cookieOptions = (maxAge: number) => ({
 export class GatewayController {
     constructor(private readonly gatewayService: GatewayService) {}
 
+    @Public()
     @Get()
     getHello(): string {
         return this.gatewayService.getHello();
     }
 
+    @Public()
     @Get('gateway/health')
     getGatewayHealth() {
         return this.gatewayService.getGatewayHealth();
     }
 
+    @Public()
     @Get('auth/health')
     getAuthHealth() {
         return this.gatewayService.getAuthHealth();
     }
 
+    @Public()
     @Get('billing/health')
     getBillingHealth() {
         return this.gatewayService.getBillingHealth();
     }
 
+    @Public()
     @Get('stock/health')
     getStockHealth() {
         return this.gatewayService.getStockHealth();
     }
 
+    @Public()
     @Get('delivery/health')
     getDeliveryHealth() {
         return this.gatewayService.getDeliveryHealth();
     }
 
+    @Public()
     @Get('users/health')
     getUsersHealth() {
         return this.gatewayService.getUsersHealth();
@@ -75,6 +83,7 @@ export class GatewayController {
         return this.gatewayService.executePostgreSQL(query);
     }
 
+    @Public()
     @Post('auth/login')
     async login(
         @Body() body: { email: string; password: string },
@@ -86,6 +95,7 @@ export class GatewayController {
         return { success: true };
     }
 
+    @Public()
     @Post('auth/refresh')
     async refresh(
         @Req() req: Request,
@@ -98,6 +108,7 @@ export class GatewayController {
         return { success: true };
     }
 
+    @Public()
     @Post('auth/logout')
     async logout(
         @Req() req: Request,
