@@ -1,5 +1,5 @@
 import { NestFactory } from '@nestjs/core';
-import * as cookieParser from 'cookie-parser';
+import cookieParser = require('cookie-parser');
 import { GatewayModule } from './gateway.module';
 
 async function bootstrap() {
