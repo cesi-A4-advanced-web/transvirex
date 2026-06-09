@@ -8,14 +8,17 @@ import { Observable, tap } from 'rxjs';
 import { MongoDBService } from '@app/mongodb';
 import { Collection } from 'mongodb';
 
+/** Name of the MongoDB collection used for backend logs. */
 const COLLECTION_NAME = 'banckend_logs';
 
+/** Interceptor that logs every HTTP request (success and error) to MongoDB. */
 @Injectable()
 export class LoggingInterceptor implements NestInterceptor {
     private collection: Collection | null = null;
 
     constructor(private readonly mongodbService: MongoDBService) {}
 
+    /** Lazily resolve the MongoDB collection handle. */
     private async getCollection(): Promise<Collection> {
         if (!this.collection) {
             const db = await this.mongodbService.getDb();
@@ -24,6 +27,7 @@ export class LoggingInterceptor implements NestInterceptor {
         return this.collection;
     }
 
+    /** Log request details on success or error. */
     intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
         const request = context.switchToHttp().getRequest();
         const { method, url } = request;

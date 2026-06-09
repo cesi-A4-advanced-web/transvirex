@@ -2,6 +2,7 @@ import { faker } from '@faker-js/faker';
 import type { PrismaClient } from '@generated/prisma';
 import { nextCustomerRef } from './helpers';
 
+/** Seed a given number of random customers linked to hubs and addresses. */
 export async function seedCustomers(
     prisma: PrismaClient,
     count: number,

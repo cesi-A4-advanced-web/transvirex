@@ -5,8 +5,10 @@ import * as bcrypt from 'bcryptjs';
 import { randomUUID } from 'crypto';
 import type { Redis } from 'ioredis';
 
+/** TTL in seconds for refresh tokens (defaults to 7 days). */
 const REFRESH_TTL = parseInt(process.env.JWT_REFRESH_TTL || '604800');
 
+/** Service handling user authentication, token generation, refresh, and logout. */
 @Injectable()
 export class AuthenticationService {
     constructor(
@@ -15,6 +17,7 @@ export class AuthenticationService {
         @Inject('REDIS') private readonly redis: Redis,
     ) {}
 
+    /** Validate credentials and return access + refresh tokens. */
     async login(email: string, password: string) {
         const user = await this.prisma.user.findFirst({
             where: { email },
@@ -32,6 +35,7 @@ export class AuthenticationService {
         return this.generateTokens(user.id, user.email, user.role);
     }
 
+    /** Issue a new access token using a valid refresh token. */
     async refresh(refreshToken: string) {
         const userId = await this.redis.get(`refresh:${refreshToken}`);
         if (!userId) throw new UnauthorizedException('Refresh token invalide');
@@ -43,11 +47,13 @@ export class AuthenticationService {
         return this.generateTokens(user.id, user.email, user.role);
     }
 
+    /** Invalidate a refresh token. */
     async logout(refreshToken: string) {
         await this.redis.del(`refresh:${refreshToken}`);
         return { message: 'Déconnecté' };
     }
 
+    /** Create a JWT access token and a UUID refresh token, persisting the latter in Redis. */
     private async generateTokens(id: string, email: string | null, role: string | null) {
         const payload = { sub: id, email, role };
         const accessToken = this.jwt.sign(payload);

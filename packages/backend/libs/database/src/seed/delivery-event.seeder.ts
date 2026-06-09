@@ -1,6 +1,7 @@
 import { faker } from '@faker-js/faker';
 import type { PrismaClient } from '@generated/prisma';
 
+/** Seed random delivery events for each delivery. */
 export async function seedDeliveryEvents(
     prisma: PrismaClient,
     deliveries: { id: string }[],

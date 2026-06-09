@@ -1,6 +1,7 @@
 import { IsEmail, IsString, MinLength } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
+/** DTO for login requests via the gateway. */
 export class LoginDto {
     @ApiProperty({
         description: 'User email address',

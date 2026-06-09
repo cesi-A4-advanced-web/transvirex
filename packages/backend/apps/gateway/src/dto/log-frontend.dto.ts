@@ -1,6 +1,7 @@
 import { IsOptional, IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
+/** DTO for ingesting log entries from the frontend. */
 export class LogFrontendDto {
     @ApiProperty({
         description: 'Log level',

@@ -12,6 +12,7 @@ import { GatewayController } from './gateway.controller';
 import { GatewayService } from './gateway.service';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 
+/** Root module for the API gateway microservice. */
 @Module({
     imports: [
         GuardsModule,

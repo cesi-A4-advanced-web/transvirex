@@ -6,6 +6,7 @@ import { AuthenticationController } from './authentication.controller';
 import { AuthenticationService } from './authentication.service';
 import Redis from 'ioredis';
 
+/** Provider factory for a Redis connection used to store refresh tokens. */
 const RedisProvider = {
     provide: 'REDIS',
     useFactory: () =>
@@ -17,6 +18,7 @@ const RedisProvider = {
         }),
 };
 
+/** Root module for the authentication microservice. */
 @Module({
     imports: [
         LoggingModule,

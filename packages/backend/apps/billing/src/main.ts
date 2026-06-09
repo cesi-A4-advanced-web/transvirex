@@ -4,6 +4,7 @@ import { Transport } from '@nestjs/microservices';
 import { LoggingService, LoggingInterceptor } from '@app/logging';
 import { BillingModule } from './billing.module';
 
+/** Bootstrap the billing microservice with HTTP + RabbitMQ transport. */
 async function bootstrap() {
     const app = await NestFactory.create(BillingModule, { bufferLogs: true });
 

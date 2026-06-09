@@ -4,6 +4,7 @@ import { LoggingModule } from '@app/logging';
 import { BillingController } from './billing.controller';
 import { BillingService } from './billing.service';
 
+/** Root module for the billing microservice. */
 @Module({
     imports: [DatabaseModule, LoggingModule],
     controllers: [BillingController],

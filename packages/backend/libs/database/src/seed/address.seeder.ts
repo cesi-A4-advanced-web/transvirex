@@ -1,6 +1,7 @@
 import { faker } from '@faker-js/faker';
 import type { PrismaClient } from '@generated/prisma';
 
+/** Seed a given number of random addresses and return their IDs. */
 export async function seedAddresses(prisma: PrismaClient, count: number) {
     const ids: string[] = [];
 

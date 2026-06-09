@@ -4,6 +4,7 @@ import { Transport } from '@nestjs/microservices';
 import { LoggingService, LoggingInterceptor } from '@app/logging';
 import { UsersModule } from './users.module';
 
+/** Bootstrap the users microservice with HTTP + RabbitMQ transport. */
 async function bootstrap() {
     const app = await NestFactory.create(UsersModule, { bufferLogs: true });
 

@@ -2,6 +2,7 @@ import { faker } from '@faker-js/faker';
 import type { PrismaClient } from '@generated/prisma';
 import { nextHubRef } from './helpers';
 
+/** Seed a given number of random hubs. */
 export async function seedHubs(
     prisma: PrismaClient,
     count: number,

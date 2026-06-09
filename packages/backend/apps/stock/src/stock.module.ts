@@ -4,6 +4,7 @@ import { LoggingModule } from '@app/logging';
 import { StockController } from './stock.controller';
 import { StockService } from './stock.service';
 
+/** Root module for the stock microservice. */
 @Module({
     imports: [DatabaseModule, LoggingModule],
     controllers: [StockController],

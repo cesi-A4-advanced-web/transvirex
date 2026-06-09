@@ -5,8 +5,10 @@ import { RabbitMQService } from '@app/rabbitmq';
 import { RedisService } from '@app/redis';
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 
+/** Service aggregating health checks, auth proxy, and debug operations for the gateway. */
 @Injectable()
 export class GatewayService {
+    /** Internal URLs of each microservice. */
     private readonly serviceUrls = {
         auth:
             process.env.AUTH_SERVICE_URL ||
@@ -27,6 +29,7 @@ export class GatewayService {
         private readonly mongoDBService: MongoDBService,
     ) {}
 
+    /** Fetch the health status of a downstream service. */
     private async fetchHealth(service: string, baseUrl: string) {
         try {
             const response = await fetch(`${baseUrl}/health`, {
@@ -41,6 +44,7 @@ export class GatewayService {
         }
     }
 
+    /** Build headers to propagate user identity to downstream services. */
     private buildUserHeaders(user?: {
         sub: string;
         email: string;
@@ -54,6 +58,7 @@ export class GatewayService {
         };
     }
 
+    /** Proxy a POST request to a downstream microservice. */
     private async proxyPost(
         url: string,
         body: unknown,
@@ -81,6 +86,7 @@ export class GatewayService {
         }
     }
 
+    /** Proxy a GET request to a downstream microservice. */
     private async proxyGet(
         url: string,
         user?: { sub: string; email: string; role: string },
@@ -123,39 +129,48 @@ export class GatewayService {
         ) as Promise<{ success: boolean }>;
     }
 
+    /** Return a simple greeting message. */
     getHello(): string {
         return 'Hello World!';
     }
 
+    /** Return the gateway's own health status. */
     getGatewayHealth() {
         return { status: 'ok' };
     }
 
+    /** Proxy health check to the authentication service. */
     getAuthHealth() {
         return this.fetchHealth('auth', this.serviceUrls.auth);
     }
 
+    /** Proxy health check to the billing service. */
     getBillingHealth() {
         return this.fetchHealth('billing', this.serviceUrls.billing);
     }
 
+    /** Proxy health check to the stock service. */
     getStockHealth() {
         return this.fetchHealth('stock', this.serviceUrls.stock);
     }
 
+    /** Proxy health check to the delivery service. */
     getDeliveryHealth() {
         return this.fetchHealth('delivery', this.serviceUrls.delivery);
     }
 
+    /** Proxy health check to the users service. */
     getUsersHealth() {
         return this.fetchHealth('users', this.serviceUrls.users);
     }
 
+    /** Seed the database with test data (force re-seed). */
     async seedDatabase() {
         const result = await runSeed(this.prisma, true);
         return { success: true, ...result };
     }
 
+    /** Execute a raw SQL query on PostgreSQL. */
     async executePostgreSQL(query: string) {
         const result = await this.prisma.$queryRawUnsafe(query);
         const rows = result as Record<string, unknown>[];
@@ -163,22 +178,27 @@ export class GatewayService {
         return { columns, rows, rowCount: rows.length };
     }
 
+    /** Execute a Redis command. */
     executeRedis(command: string) {
         return this.redisService.executeCommand(command);
     }
 
+    /** List all RabbitMQ queues. */
     listRabbitMQQueues() {
         return this.rabbitMQService.listQueues();
     }
 
+    /** Fetch messages from a RabbitMQ queue. */
     getRabbitMQMessages(queue: string, count: number) {
         return this.rabbitMQService.getMessages(queue, count);
     }
 
+    /** Execute a MongoDB command. */
     executeMongoDB(command: string) {
         return this.mongoDBService.executeCommand(command);
     }
 
+    /** List all PostgreSQL tables. */
     async listPostgresTables() {
         const result = await this.prisma.$queryRawUnsafe(
             `SELECT table_name, table_schema FROM information_schema.tables WHERE table_schema NOT IN ('pg_catalog', 'information_schema') ORDER BY table_schema, table_name`,
@@ -186,6 +206,7 @@ export class GatewayService {
         return { tables: result as any[] };
     }
 
+    /** Fetch paginated data from a PostgreSQL table. */
     async getPostgresTableData(table: string, page: number, pageSize: number) {
         const offset = (page - 1) * pageSize;
         const rows = await this.prisma.$queryRawUnsafe<
@@ -206,6 +227,7 @@ export class GatewayService {
         };
     }
 
+    /** List all MongoDB collections. */
     async listMongoCollections() {
         const db = await this.mongoDBService.getDb();
         const collections = await db.listCollections().toArray();
@@ -216,6 +238,7 @@ export class GatewayService {
         };
     }
 
+    /** Fetch paginated documents from a MongoDB collection. */
     async getMongoCollectionData(
         collection: string,
         page: number,
@@ -241,6 +264,7 @@ export class GatewayService {
         };
     }
 
+    /** Persist a frontend log entry to MongoDB. */
     async logFromFrontend(body: {
         level: string;
         message: string;
@@ -256,6 +280,7 @@ export class GatewayService {
         return { success: true };
     }
 
+    /** Retrieve paginated logs from a MongoDB collection with optional filters. */
     async getLogs(
         collectionName: string,
         level?: string,
@@ -293,6 +318,7 @@ export class GatewayService {
         };
     }
 
+    /** Delete all documents from a log collection. */
     async clearLogs(collectionName: string) {
         const db = await this.mongoDBService.getDb();
         const result = await db.collection(collectionName).deleteMany({});

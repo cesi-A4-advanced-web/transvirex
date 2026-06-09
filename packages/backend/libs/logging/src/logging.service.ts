@@ -2,8 +2,10 @@ import { Injectable, LoggerService } from '@nestjs/common';
 import { MongoDBService } from '@app/mongodb';
 import { Collection } from 'mongodb';
 
+/** Name of the MongoDB collection used for backend logs. */
 const COLLECTION_NAME = 'banckend_logs';
 
+/** Shape of a log entry persisted to MongoDB. */
 export interface LogEntry {
     level: 'log' | 'warn' | 'error' | 'debug' | 'verbose';
     message: string;
@@ -13,6 +15,7 @@ export interface LogEntry {
     metadata?: Record<string, unknown>;
 }
 
+/** Service implementing NestJS LoggerService to write logs to MongoDB. */
 @Injectable()
 export class LoggingService implements LoggerService {
     private collection: Collection | null = null;
@@ -22,10 +25,12 @@ export class LoggingService implements LoggerService {
         this.serviceName = process.env.APP_NAME || 'transvirex';
     }
 
+    /** Override the service name used in log entries. */
     setServiceName(name: string) {
         this.serviceName = name;
     }
 
+    /** Lazily resolve the MongoDB collection handle. */
     private async getCollection(): Promise<Collection> {
         if (!this.collection) {
             const db = await this.mongodbService.getDb();
@@ -34,6 +39,7 @@ export class LoggingService implements LoggerService {
         return this.collection;
     }
 
+    /** Persist a log entry to MongoDB. Failures are silently ignored. */
     private async write(entry: LogEntry) {
         try {
             const col = await this.getCollection();
@@ -43,6 +49,7 @@ export class LoggingService implements LoggerService {
         }
     }
 
+    /** Write a standard log entry. */
     log(message: any, context?: string, metadata?: Record<string, unknown>) {
         const entry: LogEntry = {
             level: 'log',
@@ -55,6 +62,7 @@ export class LoggingService implements LoggerService {
         this.write(entry);
     }
 
+    /** Write a warning log entry. */
     warn(message: any, context?: string, metadata?: Record<string, unknown>) {
         const entry: LogEntry = {
             level: 'warn',
@@ -67,6 +75,7 @@ export class LoggingService implements LoggerService {
         this.write(entry);
     }
 
+    /** Write an error log entry. */
     error(message: any, trace?: string, context?: string, metadata?: Record<string, unknown>) {
         const entry: LogEntry = {
             level: 'error',
@@ -79,6 +88,7 @@ export class LoggingService implements LoggerService {
         this.write(entry);
     }
 
+    /** Write a debug log entry. */
     debug(message: any, context?: string, metadata?: Record<string, unknown>) {
         const entry: LogEntry = {
             level: 'debug',
@@ -91,6 +101,7 @@ export class LoggingService implements LoggerService {
         this.write(entry);
     }
 
+    /** Write a verbose log entry. */
     verbose(message: any, context?: string, metadata?: Record<string, unknown>) {
         const entry: LogEntry = {
             level: 'verbose',

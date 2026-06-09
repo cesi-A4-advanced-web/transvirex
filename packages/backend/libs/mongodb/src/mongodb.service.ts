@@ -1,6 +1,7 @@
 import { Injectable, OnModuleDestroy } from '@nestjs/common';
 import { Db, MongoClient } from 'mongodb';
 
+/** MongoDB connection credentials (from environment or defaults). */
 const MONGODB_DB = process.env.MONGODB_DB || 'transvirex';
 const MONGODB_HOST = process.env.MONGODB_HOST || 'mongodb';
 const MONGODB_PORT = process.env.MONGODB_PORT || '27017';
@@ -8,17 +9,20 @@ const MONGODB_USER = process.env.MONGODB_USER || 'mongo_user';
 const MONGODB_PASSWORD = process.env.MONGODB_PASSWORD || 'mongo_password';
 const MONGODB_URI = `mongodb://${MONGODB_USER}:${MONGODB_PASSWORD}@${MONGODB_HOST}:${MONGODB_PORT}/${MONGODB_DB}?authSource=admin`;
 
+/** Service providing a MongoDB connection and a helper to execute shell-like commands. */
 @Injectable()
 export class MongoDBService implements OnModuleDestroy {
     private client: MongoClient | null = null;
     private db: Db | null = null;
 
+    /** Close the MongoDB connection on module destroy. */
     async onModuleDestroy() {
         if (this.client) {
             await this.client.close();
         }
     }
 
+    /** Get (or create) the MongoDB database handle. */
     async getDb(): Promise<Db> {
         if (!this.client) {
             this.client = new MongoClient(MONGODB_URI);
@@ -28,6 +32,7 @@ export class MongoDBService implements OnModuleDestroy {
         return this.db!;
     }
 
+    /** Parse and execute a MongoDB shell-like command string, returning tabular results. */
     async executeCommand(
         command: string,
     ): Promise<{ columns: string[]; rows: any[]; rowCount: number }> {

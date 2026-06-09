@@ -2,6 +2,7 @@ import { seedDatabase } from '@app/database/seed';
 import { PrismaClient } from '@generated/prisma';
 import { PrismaPg } from '@prisma/adapter-pg';
 
+/** PostgreSQL connection credentials (from environment or defaults). */
 const POSTGRES_USER = process.env.POSTGRES_USER || 'postgres';
 const POSTGRES_PASSWORD = process.env.POSTGRES_PASSWORD || 'postgres';
 const POSTGRES_HOST = process.env.POSTGRES_HOST || 'postgres';
@@ -12,6 +13,7 @@ const URL = `postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}
 const adapter = new PrismaPg(URL);
 const prisma = new PrismaClient({ adapter });
 
+/** Run the database seed and log the result. */
 async function main() {
     try {
         const result = await seedDatabase(prisma);

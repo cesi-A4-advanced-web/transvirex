@@ -2,6 +2,7 @@ import { faker } from '@faker-js/faker';
 import type { PrismaClient } from '@generated/prisma';
 import { nextVehicleRef } from './helpers';
 
+/** Seed a given number of random vehicles. */
 export async function seedVehicles(
     prisma: PrismaClient,
     count: number,

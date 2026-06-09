@@ -1,11 +1,13 @@
 import { Injectable, OnModuleDestroy } from '@nestjs/common';
 import { connect, ChannelModel } from 'amqplib';
 
+/** RabbitMQ connection credentials (from environment or defaults). */
 const RABBITMQ_HOST = process.env.RABBITMQ_HOST || 'rabbitmq';
 const RABBITMQ_PORT = process.env.RABBITMQ_PORT || '5672';
 const RABBITMQ_USER = process.env.RABBITMQ_USER || 'rabbitmq_user';
 const RABBITMQ_PASSWORD = process.env.RABBITMQ_PASSWORD || 'rabbitmq_password';
 
+/** Information about a RabbitMQ queue. */
 export interface QueueInfo {
     name: string;
     messages: number;
@@ -13,6 +15,7 @@ export interface QueueInfo {
     state: string;
 }
 
+/** Information about a RabbitMQ message. */
 export interface MessageInfo {
     routingKey: string;
     exchange: string;
@@ -20,14 +23,17 @@ export interface MessageInfo {
     content: string;
 }
 
+/** Service for interacting with RabbitMQ — listing queues, fetching messages, and inspecting queues. */
 @Injectable()
 export class RabbitMQService implements OnModuleDestroy {
     private client: ChannelModel | null = null;
 
+    /** Build the AMQP connection URL from environment variables. */
     private get url() {
         return `amqp://${RABBITMQ_USER}:${RABBITMQ_PASSWORD}@${RABBITMQ_HOST}:${RABBITMQ_PORT}`;
     }
 
+    /** Get (or create) the amqplib connection. */
     private async getClient(): Promise<ChannelModel> {
         if (!this.client) {
             this.client = await connect(this.url);
@@ -35,12 +41,14 @@ export class RabbitMQService implements OnModuleDestroy {
         return this.client;
     }
 
+    /** Close the connection on module destroy. */
     async onModuleDestroy() {
         if (this.client) {
             await this.client.close();
         }
     }
 
+    /** List all queues by querying the RabbitMQ management via a temporary response queue. */
     async listQueues(): Promise<QueueInfo[]> {
         const client = await this.getClient();
         const channel = await client.createChannel();
@@ -75,6 +83,7 @@ export class RabbitMQService implements OnModuleDestroy {
         return result;
     }
 
+    /** Fetch up to `count` messages from a queue without acknowledging. */
     async getMessages(queue: string, count: number = 10): Promise<MessageInfo[]> {
         const client = await this.getClient();
         const channel = await client.createChannel();
@@ -102,6 +111,7 @@ export class RabbitMQService implements OnModuleDestroy {
         return messages;
     }
 
+    /** Get info for a specific queue by name. */
     async getQueueInfo(queue: string): Promise<QueueInfo | null> {
         const queues = await this.listQueues();
         return queues.find((q) => q.name === queue) ?? null;

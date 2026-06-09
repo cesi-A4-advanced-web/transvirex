@@ -3,6 +3,7 @@ import { MongoDBModule } from '@app/mongodb';
 import { LoggingService } from './logging.service';
 import { LoggingInterceptor } from './logging.interceptor';
 
+/** Global module providing centralized logging to MongoDB. */
 @Global()
 @Module({
     imports: [MongoDBModule],

@@ -9,6 +9,7 @@ import {
 import cookieParser from 'cookie-parser';
 import { GatewayModule } from './gateway.module';
 
+/** Bootstrap the API gateway with Swagger docs, cookie parsing, and global validation. */
 async function bootstrap() {
     const app = await NestFactory.create(GatewayModule, { bufferLogs: true });
 
@@ -23,7 +24,6 @@ async function bootstrap() {
     );
     app.setGlobalPrefix('api');
 
-    // Swagger / OpenAPI documentation
     const swaggerConfig = new DocumentBuilder()
         .setTitle('Transvirex ERP - Gateway API')
         .setDescription(

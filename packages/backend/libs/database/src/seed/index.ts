@@ -12,6 +12,7 @@ import { seedParcels } from './parcel.seeder';
 import { seedUsers } from './user.seeder';
 import { seedVehicles } from './vehicle.seeder';
 
+/** Result of a database seeding operation. */
 export interface SeedResult {
     addresses: number;
     hubs: number;
@@ -23,6 +24,7 @@ export interface SeedResult {
     deliveries: number;
 }
 
+/** Seed the database with realistic fake data. When `force` is true, existing data is deleted first. */
 export async function seedDatabase(
     prisma: PrismaClient,
     force: boolean = false,

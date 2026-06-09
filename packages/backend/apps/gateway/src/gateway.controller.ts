@@ -20,9 +20,12 @@ import { LogFrontendDto } from './dto/log-frontend.dto';
 import { LoginDto } from './dto/login.dto';
 import { GatewayService } from './gateway.service';
 
+/** Access token cookie max-age in milliseconds. */
 const ACCESS_TOKEN_TTL = parseInt(process.env.JWT_ACCESS_TTL || '180') * 1000;
+/** Refresh token cookie max-age in milliseconds. */
 const REFRESH_TOKEN_TTL = parseInt(process.env.JWT_REFRESH_TTL || '604800') * 1000;
 
+/** Returns cookie options for the access_token cookie. */
 const accessTokenCookieOptions = (maxAge: number) => ({
     httpOnly: false,
     secure: process.env.NODE_ENV === 'production',
@@ -30,6 +33,7 @@ const accessTokenCookieOptions = (maxAge: number) => ({
     maxAge,
 });
 
+/** Returns cookie options for the refresh_token cookie. */
 const refreshTokenCookieOptions = (maxAge: number) => ({
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
@@ -37,6 +41,7 @@ const refreshTokenCookieOptions = (maxAge: number) => ({
     maxAge,
 });
 
+/** Main API gateway controller exposing public, auth, debug, and logging endpoints. */
 @Controller()
 export class GatewayController {
     constructor(private readonly gatewayService: GatewayService) {}
@@ -57,6 +62,7 @@ export class GatewayController {
         return this.gatewayService.getHello();
     }
 
+    /** Health check for the gateway itself. */
     @ApiTags('Gateway')
     @Public()
     @Get('gateway/health')
@@ -66,6 +72,7 @@ export class GatewayController {
         return this.gatewayService.getGatewayHealth();
     }
 
+    /** Health check for the authentication service. */
     @ApiTags('Health')
     @Public()
     @Get('auth/health')
@@ -78,6 +85,7 @@ export class GatewayController {
         return this.gatewayService.getAuthHealth();
     }
 
+    /** Health check for the billing service. */
     @ApiTags('Health')
     @Public()
     @Get('billing/health')
@@ -87,6 +95,7 @@ export class GatewayController {
         return this.gatewayService.getBillingHealth();
     }
 
+    /** Health check for the stock service. */
     @ApiTags('Health')
     @Public()
     @Get('stock/health')
@@ -96,6 +105,7 @@ export class GatewayController {
         return this.gatewayService.getStockHealth();
     }
 
+    /** Health check for the delivery service. */
     @ApiTags('Health')
     @Public()
     @Get('delivery/health')
@@ -105,6 +115,7 @@ export class GatewayController {
         return this.gatewayService.getDeliveryHealth();
     }
 
+    /** Health check for the users service. */
     @ApiTags('Health')
     @Public()
     @Get('users/health')
@@ -114,6 +125,7 @@ export class GatewayController {
         return this.gatewayService.getUsersHealth();
     }
 
+    /** Return the authenticated user's JWT payload. */
     @ApiTags('Authentication')
     @Get('auth/me')
     @ApiBearerAuth('JWT-auth')
@@ -130,6 +142,7 @@ export class GatewayController {
         return (req as any).user;
     }
 
+    /** Authenticate user, set access_token and refresh_token cookies. */
     @ApiTags('Authentication')
     @Public()
     @UseGuards(ThrottlerGuard)
@@ -156,6 +169,7 @@ export class GatewayController {
         return { success: true };
     }
 
+    /** Refresh tokens using the refresh_token cookie. */
     @ApiTags('Authentication')
     @Public()
     @Post('auth/refresh')
@@ -181,6 +195,7 @@ export class GatewayController {
         return { success: true };
     }
 
+    /** Invalidate the refresh token and clear auth cookies. */
     @ApiTags('Authentication')
     @Public()
     @Post('auth/logout')
@@ -200,6 +215,7 @@ export class GatewayController {
         return { success: true };
     }
 
+    /** Execute an arbitrary SQL query on PostgreSQL (non-production only). */
     @ApiTags('Debug')
     @Public()
     @Post('debug/postgresql')
@@ -234,6 +250,7 @@ export class GatewayController {
         return this.gatewayService.executePostgreSQL(query);
     }
 
+    /** List all PostgreSQL tables (non-production only). */
     @ApiTags('Debug')
     @Public()
     @Get('debug/postgresql/tables')
@@ -284,6 +301,7 @@ export class GatewayController {
         return this.gatewayService.getPostgresTableData(table, page, pageSize);
     }
 
+    /** Execute an arbitrary Redis command (non-production only). */
     @ApiTags('Debug')
     @Public()
     @Post('debug/redis')
@@ -317,6 +335,7 @@ export class GatewayController {
         return this.gatewayService.executeRedis(command);
     }
 
+    /** List all RabbitMQ queues (non-production only). */
     @ApiTags('Debug')
     @Public()
     @Get('debug/rabbitmq/queues')
@@ -361,6 +380,7 @@ export class GatewayController {
         return this.gatewayService.getRabbitMQMessages(queue, count ?? 10);
     }
 
+    /** Execute an arbitrary MongoDB command (non-production only). */
     @ApiTags('Debug')
     @Public()
     @Post('debug/mongodb')
@@ -394,6 +414,7 @@ export class GatewayController {
         return this.gatewayService.executeMongoDB(command);
     }
 
+    /** List all MongoDB collections (non-production only). */
     @ApiTags('Debug')
     @Public()
     @Get('debug/mongodb/collections')
@@ -449,6 +470,7 @@ export class GatewayController {
         return this.gatewayService.getMongoCollectionData(collection, page, pageSize);
     }
 
+    /** Seed the database with test data (non-production only). */
     @ApiTags('Debug')
     @Public()
     @Post('debug/seed')
@@ -462,6 +484,7 @@ export class GatewayController {
         return this.gatewayService.seedDatabase();
     }
 
+    /** Ingest a log entry from the frontend application. */
     @ApiTags('Logging')
     @Post('logs/frontend')
     @ApiBearerAuth('JWT-auth')
@@ -479,6 +502,7 @@ export class GatewayController {
         return this.gatewayService.logFromFrontend(body);
     }
 
+    /** Fetch backend service logs with optional filters (non-production only). */
     @ApiTags('Debug')
     @Public()
     @Get('debug/logs/backend')
@@ -522,6 +546,7 @@ export class GatewayController {
         return this.gatewayService.getLogs('banckend_logs', level, service, parseInt(page), parseInt(pageSize));
     }
 
+    /** Fetch frontend application logs with optional filters (non-production only). */
     @ApiTags('Debug')
     @Public()
     @Get('debug/logs/frontend')
@@ -558,6 +583,7 @@ export class GatewayController {
         return this.gatewayService.getLogs('frontend_logs', level, undefined, parseInt(page), parseInt(pageSize));
     }
 
+    /** Delete all backend service logs (non-production only). */
     @ApiTags('Debug')
     @Delete('debug/logs/backend')
     @BlockInProduction()
@@ -570,6 +596,7 @@ export class GatewayController {
         return this.gatewayService.clearLogs('banckend_logs');
     }
 
+    /** Delete all frontend application logs (non-production only). */
     @ApiTags('Debug')
     @Delete('debug/logs/frontend')
     @BlockInProduction()
