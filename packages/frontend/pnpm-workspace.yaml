@@ -2,5 +2,6 @@ allowBuilds:
     '@parcel/watcher': true
     esbuild: true
     vue-demi: true
+    core-js: true
 minimumReleaseAge: 0
 confirmModulesPurge: false
