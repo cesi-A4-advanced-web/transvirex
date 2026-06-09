@@ -41,12 +41,12 @@ export class GatewayService {
         }
     }
 
-    private buildUserHeaders(user?: { sub: string; email: string; role: string }) {
+    private buildUserHeaders(user?: { sub: string; email: string; role: string }): Record<string, string> {
         if (!user) return {};
         return {
             'X-User-Id': user.sub,
-            'X-User-Email': user.email,
-            'X-User-Role': user.role,
+            'X-User-Email': user.email ?? '',
+            'X-User-Role': user.role ?? '',
         };
     }
 
