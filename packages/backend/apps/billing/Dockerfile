@@ -10,7 +10,7 @@ RUN pnpm install --no-frozen-lockfile --node-linker=hoisted
 # Copy source code, generate Prisma client and build
 COPY . .
 RUN pnpm exec prisma generate
-RUN node_modules/.bin/tsc -p tsconfig.build.json 2>&1 && mkdir -p dist/prisma
+RUN pnpm run build:billing
 
 # +--------------------------------------------------------+
 # |                         RUNTIME                        |
