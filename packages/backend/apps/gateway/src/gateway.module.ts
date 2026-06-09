@@ -8,6 +8,10 @@ import { Module } from '@nestjs/common';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtModule } from '@nestjs/jwt';
 import { ThrottlerModule } from '@nestjs/throttler';
+import { AuthController } from './controllers/auth.controller';
+import { DebugController } from './controllers/debug.controller';
+import { HealthController } from './controllers/health.controller';
+import { LoggingController } from './controllers/logging.controller';
 import { GatewayController } from './gateway.controller';
 import { GatewayService } from './gateway.service';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
@@ -24,7 +28,7 @@ import { JwtAuthGuard } from './guards/jwt-auth.guard';
         LoggingModule,
         ThrottlerModule.forRoot([{ ttl: 60000, limit: 5 }]),
     ],
-    controllers: [GatewayController],
+    controllers: [GatewayController, HealthController, AuthController, DebugController, LoggingController],
     providers: [
         GatewayService,
         {
