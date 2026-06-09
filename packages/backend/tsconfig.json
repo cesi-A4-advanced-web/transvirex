@@ -14,17 +14,39 @@
         "noImplicitAny": false,
         "outDir": "./dist",
         "paths": {
-            "@app/database": ["./libs/database/src"],
-            "@app/database/*": ["./libs/database/src/*"],
-            "@app/redis": ["./libs/redis/src"],
-            "@app/redis/*": ["./libs/redis/src/*"],
-            "@app/rabbitmq": ["./libs/rabbitmq/src"],
-            "@app/rabbitmq/*": ["./libs/rabbitmq/src/*"],
-            "@app/mongodb": ["./libs/mongodb/src"],
-            "@app/mongodb/*": ["./libs/mongodb/src/*"],
-            "@app/guards": ["./libs/guards/src"],
-            "@app/guards/*": ["./libs/guards/src/*"],
-            "@generated/prisma": ["./prisma/generated/prisma/client"]
+            "@app/database": [
+                "./libs/database/src"
+            ],
+            "@app/database/*": [
+                "./libs/database/src/*"
+            ],
+            "@app/redis": [
+                "./libs/redis/src"
+            ],
+            "@app/redis/*": [
+                "./libs/redis/src/*"
+            ],
+            "@app/rabbitmq": [
+                "./libs/rabbitmq/src"
+            ],
+            "@app/rabbitmq/*": [
+                "./libs/rabbitmq/src/*"
+            ],
+            "@app/mongodb": [
+                "./libs/mongodb/src"
+            ],
+            "@app/mongodb/*": [
+                "./libs/mongodb/src/*"
+            ],
+            "@app/guards": [
+                "./libs/guards/src"
+            ],
+            "@app/guards/*": [
+                "./libs/guards/src/*"
+            ],
+            "@generated/prisma": [
+                "./prisma/generated/prisma/client"
+            ]
         },
         "removeComments": true,
         "resolvePackageJsonExports": true,
@@ -35,5 +57,10 @@
         "strictNullChecks": true,
         "target": "ES2023"
     },
-    "include": ["apps/**/*", "libs/**/*", "prisma.config.ts"]
+    "include": [
+        "apps/**/*",
+        "libs/**/*",
+        "prisma/**/*",
+        "prisma.config.ts"
+    ]
 }

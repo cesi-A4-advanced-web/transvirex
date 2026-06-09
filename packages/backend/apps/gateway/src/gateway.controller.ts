@@ -127,6 +127,12 @@ export class GatewayController {
         return this.gatewayService.getPostgresTableData(table, page, pageSize);
     }
 
+    @Post('debug/seed')
+    @BlockInProduction()
+    async seedDatabase() {
+        return this.gatewayService.seedDatabase();
+    }
+
     @Get('debug/mongodb/collections')
     @BlockInProduction()
     async listMongoCollections() {
