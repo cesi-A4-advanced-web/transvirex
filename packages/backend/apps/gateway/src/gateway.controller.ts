@@ -5,8 +5,21 @@ import {
     Get,
     Param,
     Post,
+    Req,
+    Res,
 } from '@nestjs/common';
+import { Request, Response } from 'express';
 import { GatewayService } from './gateway.service';
+
+const ACCESS_TOKEN_TTL = 15 * 60 * 1000;
+const REFRESH_TOKEN_TTL = 7 * 24 * 60 * 60 * 1000;
+
+const cookieOptions = (maxAge: number) => ({
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'strict' as const,
+    maxAge,
+});
 
 @Controller()
 export class GatewayController {
@@ -63,18 +76,38 @@ export class GatewayController {
     }
 
     @Post('auth/login')
-    login(@Body() body: { email: string; password: string }) {
-        return this.gatewayService.login(body);
+    async login(
+        @Body() body: { email: string; password: string },
+        @Res({ passthrough: true }) res: Response,
+    ) {
+        const data = await this.gatewayService.login(body);
+        res.cookie('access_token', data.access_token, cookieOptions(ACCESS_TOKEN_TTL));
+        res.cookie('refresh_token', data.refresh_token, cookieOptions(REFRESH_TOKEN_TTL));
+        return { success: true };
     }
 
     @Post('auth/refresh')
-    refresh(@Body() body: { refresh_token: string }) {
-        return this.gatewayService.refresh(body);
+    async refresh(
+        @Req() req: Request,
+        @Res({ passthrough: true }) res: Response,
+    ) {
+        const refreshToken = req.cookies?.refresh_token;
+        const data = await this.gatewayService.refresh({ refresh_token: refreshToken });
+        res.cookie('access_token', data.access_token, cookieOptions(ACCESS_TOKEN_TTL));
+        res.cookie('refresh_token', data.refresh_token, cookieOptions(REFRESH_TOKEN_TTL));
+        return { success: true };
     }
 
     @Post('auth/logout')
-    logout(@Body() body: { refresh_token: string }) {
-        return this.gatewayService.logout(body);
+    async logout(
+        @Req() req: Request,
+        @Res({ passthrough: true }) res: Response,
+    ) {
+        const refreshToken = req.cookies?.refresh_token;
+        await this.gatewayService.logout({ refresh_token: refreshToken });
+        res.clearCookie('access_token');
+        res.clearCookie('refresh_token');
+        return { success: true };
     }
 
     @Post('debug/redis')
