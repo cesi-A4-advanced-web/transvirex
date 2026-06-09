@@ -84,10 +84,8 @@ export const useLogsStore = defineStore('logs', () => {
                 page: String(backendFilters.page),
                 pageSize: String(backendFilters.pageSize),
             });
-            if (backendFilters.level !== 'all')
-                params.set('level', backendFilters.level);
-            if (backendFilters.service)
-                params.set('service', backendFilters.service);
+            if (backendFilters.level !== 'all') params.set('level', backendFilters.level);
+            if (backendFilters.service) params.set('service', backendFilters.service);
 
             const res = await fetch(`/api/debug/logs/backend?${params}`);
             if (!res.ok) {
@@ -125,8 +123,7 @@ export const useLogsStore = defineStore('logs', () => {
                 page: String(frontendFilters.page),
                 pageSize: String(frontendFilters.pageSize),
             });
-            if (frontendFilters.level !== 'all')
-                params.set('level', frontendFilters.level);
+            if (frontendFilters.level !== 'all') params.set('level', frontendFilters.level);
 
             const res = await fetch(`/api/debug/logs/frontend?${params}`);
             if (!res.ok) {

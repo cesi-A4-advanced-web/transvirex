@@ -508,3 +508,4 @@ function selectCollection(name: string) {
         </Dialog>
     </div>
 </template>
+
