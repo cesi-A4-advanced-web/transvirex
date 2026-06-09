@@ -85,12 +85,11 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
-import { useCookie, navigateTo } from '#app';
-import { $fetch } from 'ofetch';
+import { navigateTo } from '#app';
 
 definePageMeta({ layout: false });
 
-const { login } = useAuth();
+const { login, user } = useAuth();
 
 const roles = [
     { label: 'Dispatcher', value: 'dispatcher' },
@@ -103,16 +102,8 @@ const password = ref('');
 const error = ref('');
 const loading = ref(false);
 
-function parseJwt(token: string): Record<string, unknown> | null {
-    try {
-        const b64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
-        return JSON.parse(atob(b64));
-    } catch { return null; }
-}
-
-function redirectByRole(token: string) {
-    const payload = parseJwt(token);
-    const role = payload?.role as string;
+function redirectByRole() {
+    const role = user.value?.role;
     if (role === 'admin' || role === 'business_manager') return '/admin/dashboard';
     if (role === 'dispatcher') return '/dispatcher/dashboard';
     if (role === 'driver') return '/livreur/dashboard';
@@ -124,8 +115,7 @@ async function handleSubmit() {
     error.value = '';
     try {
         await login(email.value, password.value);
-        const tokenCookie = useCookie('access_token');
-        await navigateTo(redirectByRole(tokenCookie.value ?? ''));
+        await navigateTo(redirectByRole());
     } catch (e: unknown) {
         const err = e as { data?: { message?: string } };
         error.value = err?.data?.message || 'Identifiants invalides';
