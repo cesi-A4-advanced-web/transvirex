@@ -36,11 +36,11 @@ services:
                   ignore:
                       - node_modules
                       - dist
-                  action: sync
+                  action: sync+restart
                   target: /app/apps/users
                 - path: ../../libs/
                   ignore:
                       - node_modules
                       - dist
-                  action: sync
+                  action: sync+restart
                   target: /app/libs

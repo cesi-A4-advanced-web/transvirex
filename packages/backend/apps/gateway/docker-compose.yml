@@ -53,11 +53,11 @@ services:
                   ignore:
                       - node_modules
                       - dist
-                  action: sync
+                  action: sync+restart
                   target: /app/apps/gateway
                 - path: ../../libs/
                   ignore:
                       - node_modules
                       - dist
-                  action: sync
+                  action: sync+restart
                   target: /app/libs
