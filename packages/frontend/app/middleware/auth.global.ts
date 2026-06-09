@@ -1,13 +1,44 @@
-const PUBLIC_PATHS = ['/', '/debug'];
+import type { UserRole } from '~/composables/useAuth';
+
+const ROLE_DASHBOARD: Record<UserRole, string> = {
+    admin: '/admin/dashboard',
+    dispatcher: '/dispatcher/dashboard',
+    driver: '/livreur/dashboard',
+    business_manager: '/business/dashboard',
+};
+
+const ROLE_ALLOWED_PREFIX: Record<UserRole, string> = {
+    admin: '/admin',
+    dispatcher: '/dispatcher',
+    driver: '/livreur',
+    business_manager: '/business',
+};
 
 export default defineNuxtRouteMiddleware(async (to) => {
-    if (PUBLIC_PATHS.some((p) => to.path === p || to.path.startsWith(p + '/')))
-        return;
+    // Pages toujours accessibles sans authentification
+    if (to.path.startsWith('/debug')) return;
 
     const { user, fetchMe } = useAuth();
 
-    if (!user.value) {
-        const ok = await fetchMe();
-        if (!ok) return navigateTo('/');
+    // Tenter une reconnexion silencieuse si pas de session en mémoire
+    if (!user.value) await fetchMe();
+
+    // Page de login : rediriger vers le dashboard si déjà connecté
+    if (to.path === '/') {
+        if (user.value) return navigateTo(ROLE_DASHBOARD[user.value.role]);
+        return;
+    }
+
+    // Routes protégées : rediriger vers le login si pas connecté
+    if (!user.value) return navigateTo('/');
+
+    // Vérifier que l'utilisateur accède uniquement aux pages de son rôle
+    const allowedPrefix = ROLE_ALLOWED_PREFIX[user.value.role];
+    const isProtectedRoute = Object.values(ROLE_ALLOWED_PREFIX).some((prefix) =>
+        to.path.startsWith(prefix),
+    );
+
+    if (isProtectedRoute && !to.path.startsWith(allowedPrefix)) {
+        return navigateTo('/');
     }
 });

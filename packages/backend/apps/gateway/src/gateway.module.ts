@@ -7,6 +7,7 @@ import { RedisModule } from '@app/redis';
 import { Module } from '@nestjs/common';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtModule } from '@nestjs/jwt';
+import { ThrottlerModule } from '@nestjs/throttler';
 import { GatewayController } from './gateway.controller';
 import { GatewayService } from './gateway.service';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
@@ -20,6 +21,7 @@ import { JwtAuthGuard } from './guards/jwt-auth.guard';
         MongoDBModule,
         JwtModule.register({}),
         LoggingModule,
+        ThrottlerModule.forRoot([{ ttl: 60000, limit: 5 }]),
     ],
     controllers: [GatewayController],
     providers: [

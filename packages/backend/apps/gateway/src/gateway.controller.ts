@@ -10,14 +10,16 @@ import {
     Query,
     Req,
     Res,
+    UseGuards,
 } from '@nestjs/common';
+import { Throttle, ThrottlerGuard } from '@nestjs/throttler';
 import type { Request, Response } from 'express';
 import { Public } from './decorators/public.decorator';
 import { LoginDto } from './dto/login.dto';
 import { GatewayService } from './gateway.service';
 
-const ACCESS_TOKEN_TTL = 15 * 60 * 1000;
-const REFRESH_TOKEN_TTL = 7 * 24 * 60 * 60 * 1000;
+const ACCESS_TOKEN_TTL = parseInt(process.env.JWT_ACCESS_TTL || '180') * 1000;
+const REFRESH_TOKEN_TTL = parseInt(process.env.JWT_REFRESH_TTL || '604800') * 1000;
 
 const accessTokenCookieOptions = (maxAge: number) => ({
     httpOnly: false,
@@ -85,6 +87,8 @@ export class GatewayController {
     }
 
     @Public()
+    @UseGuards(ThrottlerGuard)
+    @Throttle({ default: { limit: 5, ttl: 60000 } })
     @Post('auth/login')
     async login(
         @Body() body: LoginDto,

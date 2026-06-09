@@ -5,7 +5,7 @@ import * as bcrypt from 'bcryptjs';
 import { randomUUID } from 'crypto';
 import type { Redis } from 'ioredis';
 
-const REFRESH_TTL = 60 * 60 * 24 * 7; // 7 jours en secondes
+const REFRESH_TTL = parseInt(process.env.JWT_REFRESH_TTL || '604800');
 
 @Injectable()
 export class AuthenticationService {

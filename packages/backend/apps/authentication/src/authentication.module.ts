@@ -22,8 +22,8 @@ const RedisProvider = {
         LoggingModule,
         DatabaseModule,
         JwtModule.register({
-            secret: process.env.JWT_SECRET || 'dev_secret',
-            signOptions: { expiresIn: '15m' },
+            secret: process.env.JWT_SECRET,
+            signOptions: { expiresIn: (process.env.JWT_ACCESS_TTL ? `${process.env.JWT_ACCESS_TTL}s` : '180s') as any },
         }),
     ],
     controllers: [AuthenticationController],
