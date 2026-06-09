@@ -152,10 +152,10 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
-import { useCookie, navigateTo } from '#app';
-import { $fetch } from 'ofetch';
 
 definePageMeta({ layout: false });
+
+const { login } = useAuth();
 
 const roles = [
     { label: 'Dispatcher', value: 'dispatcher' },
@@ -169,19 +169,11 @@ const password = ref('');
 const error = ref('');
 const loading = ref(false);
 
-const accessToken = useCookie('access_token', { maxAge: 60 * 15, sameSite: 'strict' });
-const refreshToken = useCookie('refresh_token', { maxAge: 60 * 60 * 24 * 7, sameSite: 'strict' });
-
 async function handleSubmit() {
     loading.value = true;
     error.value = '';
     try {
-        const data = await $fetch<{ access_token: string; refresh_token: string }>('/api/auth/login', {
-            method: 'POST',
-            body: { email: email.value, password: password.value },
-        });
-        accessToken.value = data.access_token;
-        refreshToken.value = data.refresh_token;
+        await login(email.value, password.value);
         await navigateTo('/health-service');
     } catch (e: unknown) {
         const err = e as { data?: { message?: string } };
