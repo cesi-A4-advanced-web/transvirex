@@ -14,7 +14,6 @@ import {
 import SidebarLink from '~/components/debug/SidebarLink.vue';
 
 const health = useHealthStore();
-const route = useRoute();
 const seeding = ref(false);
 
 onMounted(() => health.checkAll());
@@ -90,7 +89,7 @@ async function handleSeed() {
         </aside>
 
         <main class="flex-1 overflow-auto p-8">
-            <NuxtPage />
+            <slot />
         </main>
     </div>
 </template>
