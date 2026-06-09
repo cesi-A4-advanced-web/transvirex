@@ -89,6 +89,11 @@ export class GatewayController {
         return this.gatewayService.executePostgreSQL(query);
     }
 
+    @Get('auth/me')
+    me(@Req() req: Request) {
+        return (req as any).user;
+    }
+
     @Public()
     @Post('auth/login')
     async login(

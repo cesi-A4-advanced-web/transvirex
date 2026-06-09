@@ -152,10 +152,10 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
-import { navigateTo } from '#app';
-import { $fetch } from 'ofetch';
 
 definePageMeta({ layout: false });
+
+const { login } = useAuth();
 
 const roles = [
     { label: 'Dispatcher', value: 'dispatcher' },
@@ -173,11 +173,7 @@ async function handleSubmit() {
     loading.value = true;
     error.value = '';
     try {
-        await $fetch('/api/auth/login', {
-            method: 'POST',
-            body: { email: email.value, password: password.value },
-            credentials: 'include',
-        });
+        await login(email.value, password.value);
         await navigateTo('/health-service');
     } catch (e: unknown) {
         const err = e as { data?: { message?: string } };
