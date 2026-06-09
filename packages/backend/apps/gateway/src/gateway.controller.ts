@@ -10,6 +10,7 @@ import {
 } from '@nestjs/common';
 import { BlockInProduction } from '@app/guards';
 import { Request, Response } from 'express';
+import type { Request, Response } from 'express';
 import { GatewayService } from './gateway.service';
 
 const ACCESS_TOKEN_TTL = 15 * 60 * 1000;
