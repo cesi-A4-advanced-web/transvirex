@@ -40,12 +40,42 @@ export class GatewayService {
         }
     }
 
-    private async proxyPost(url: string, body: unknown) {
+    private buildUserHeaders(user?: { sub: string; email: string; role: string }) {
+        if (!user) return {};
+        return {
+            'X-User-Id': user.sub,
+            'X-User-Email': user.email,
+            'X-User-Role': user.role,
+        };
+    }
+
+    private async proxyPost(url: string, body: unknown, user?: { sub: string; email: string; role: string }) {
         try {
             const response = await fetch(url, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...this.buildUserHeaders(user),
+                },
                 body: JSON.stringify(body),
+                signal: AbortSignal.timeout(5000),
+            });
+            const data = await response.json();
+            if (!response.ok) throw new HttpException(data, response.status);
+            return data;
+        } catch (e) {
+            if (e instanceof HttpException) throw e;
+            throw new HttpException(
+                { status: 'error', message: 'Service unreachable' },
+                HttpStatus.SERVICE_UNAVAILABLE,
+            );
+        }
+    }
+
+    private async proxyGet(url: string, user?: { sub: string; email: string; role: string }) {
+        try {
+            const response = await fetch(url, {
+                headers: this.buildUserHeaders(user),
                 signal: AbortSignal.timeout(5000),
             });
             const data = await response.json();

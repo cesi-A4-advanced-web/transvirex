@@ -15,7 +15,14 @@ import { Public } from './decorators/public.decorator';
 const ACCESS_TOKEN_TTL = 15 * 60 * 1000;
 const REFRESH_TOKEN_TTL = 7 * 24 * 60 * 60 * 1000;
 
-const cookieOptions = (maxAge: number) => ({
+const accessTokenCookieOptions = (maxAge: number) => ({
+    httpOnly: false,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'strict' as const,
+    maxAge,
+});
+
+const refreshTokenCookieOptions = (maxAge: number) => ({
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'strict' as const,
@@ -90,8 +97,8 @@ export class GatewayController {
         @Res({ passthrough: true }) res: Response,
     ) {
         const data = await this.gatewayService.login(body);
-        res.cookie('access_token', data.access_token, cookieOptions(ACCESS_TOKEN_TTL));
-        res.cookie('refresh_token', data.refresh_token, cookieOptions(REFRESH_TOKEN_TTL));
+        res.cookie('access_token', data.access_token, accessTokenCookieOptions(ACCESS_TOKEN_TTL));
+        res.cookie('refresh_token', data.refresh_token, refreshTokenCookieOptions(REFRESH_TOKEN_TTL));
         return { success: true };
     }
 
@@ -103,8 +110,8 @@ export class GatewayController {
     ) {
         const refreshToken = req.cookies?.refresh_token;
         const data = await this.gatewayService.refresh({ refresh_token: refreshToken });
-        res.cookie('access_token', data.access_token, cookieOptions(ACCESS_TOKEN_TTL));
-        res.cookie('refresh_token', data.refresh_token, cookieOptions(REFRESH_TOKEN_TTL));
+        res.cookie('access_token', data.access_token, accessTokenCookieOptions(ACCESS_TOKEN_TTL));
+        res.cookie('refresh_token', data.refresh_token, refreshTokenCookieOptions(REFRESH_TOKEN_TTL));
         return { success: true };
     }
 
