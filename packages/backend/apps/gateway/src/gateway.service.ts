@@ -41,7 +41,11 @@ export class GatewayService {
         }
     }
 
-    private buildUserHeaders(user?: { sub: string; email: string; role: string }): Record<string, string> {
+    private buildUserHeaders(user?: {
+        sub: string;
+        email: string;
+        role: string;
+    }): Record<string, string> {
         if (!user) return {};
         return {
             'X-User-Id': user.sub,
@@ -50,7 +54,11 @@ export class GatewayService {
         };
     }
 
-    private async proxyPost(url: string, body: unknown, user?: { sub: string; email: string; role: string }) {
+    private async proxyPost(
+        url: string,
+        body: unknown,
+        user?: { sub: string; email: string; role: string },
+    ) {
         try {
             const response = await fetch(url, {
                 method: 'POST',
@@ -73,7 +81,10 @@ export class GatewayService {
         }
     }
 
-    private async proxyGet(url: string, user?: { sub: string; email: string; role: string }) {
+    private async proxyGet(
+        url: string,
+        user?: { sub: string; email: string; role: string },
+    ) {
         try {
             const response = await fetch(url, {
                 headers: this.buildUserHeaders(user),
@@ -91,16 +102,25 @@ export class GatewayService {
         }
     }
 
-    async login(body: { email: string; password: string }) {
-        return this.proxyPost(`${this.serviceUrls.auth}/auth/login`, body);
+    login(body: { email: string; password: string }) {
+        return this.proxyPost(
+            `${this.serviceUrls.auth}/auth/login`,
+            body,
+        ) as Promise<{ access_token: string; refresh_token: string }>;
     }
 
-    async refresh(body: { refresh_token: string }) {
-        return this.proxyPost(`${this.serviceUrls.auth}/auth/refresh`, body);
+    refresh(body: { refresh_token: string }) {
+        return this.proxyPost(
+            `${this.serviceUrls.auth}/auth/refresh`,
+            body,
+        ) as Promise<{ access_token: string; refresh_token: string }>;
     }
 
-    async logout(body: { refresh_token: string }) {
-        return this.proxyPost(`${this.serviceUrls.auth}/auth/logout`, body);
+    logout(body: { refresh_token: string }) {
+        return this.proxyPost(
+            `${this.serviceUrls.auth}/auth/logout`,
+            body,
+        ) as Promise<{ success: boolean }>;
     }
 
     getHello(): string {
@@ -138,7 +158,7 @@ export class GatewayService {
 
     async executePostgreSQL(query: string) {
         const result = await this.prisma.$queryRawUnsafe(query);
-        const rows = result as any[];
+        const rows = result as Record<string, unknown>[];
         const columns = rows.length > 0 ? Object.keys(rows[0]) : [];
         return { columns, rows, rowCount: rows.length };
     }
@@ -189,7 +209,11 @@ export class GatewayService {
     async listMongoCollections() {
         const db = await this.mongoDBService.getDb();
         const collections = await db.listCollections().toArray();
-        return { collections: collections.map((c: any) => ({ name: c.name })) };
+        return {
+            collections: collections.map((c: { name: string }) => ({
+                name: c.name,
+            })),
+        };
     }
 
     async getMongoCollectionData(
@@ -202,7 +226,7 @@ export class GatewayService {
         const offset = (page - 1) * pageSize;
         const raw = await coll.find({}).skip(offset).limit(pageSize).toArray();
         const totalCount = await coll.countDocuments();
-        const rows = raw.map((r: any) => {
+        const rows = raw.map((r: Record<string, unknown>) => {
             const { _id, ...rest } = r;
             return { _id: String(_id ?? ''), ...rest };
         });
@@ -255,7 +279,7 @@ export class GatewayService {
             .limit(pageSize)
             .toArray();
 
-        const logs = raw.map((r: any) => {
+        const logs = raw.map((r: Record<string, unknown>) => {
             const { _id, ...rest } = r;
             return { _id: String(_id ?? ''), ...rest };
         });

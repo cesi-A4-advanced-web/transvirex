@@ -328,3 +328,5 @@ CLAUDE.md
 .claude/
 
 .pnpm-store/
+# This project uses pnpm !
+package-lock.json 
