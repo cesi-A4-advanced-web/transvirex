@@ -38,7 +38,6 @@ services:
         volumes:
             # - ./:/app/apps/gateway
             - /app/node_modules
-            - /app/dist
         depends_on:
             - postgres
             - rabbitmq
