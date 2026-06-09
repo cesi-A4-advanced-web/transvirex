@@ -2,8 +2,6 @@
     <div class="min-h-screen flex flex-col md:flex-row">
         <!-- Branding panel -->
         <div class="relative flex flex-col justify-between bg-[#1a3f7a] text-white md:w-[42%] md:min-h-screen px-8 py-8 md:px-12 md:py-12">
-        <!-- Branding panel -->
-        <div class="relative flex flex-col justify-between bg-[#1a3f7a] text-white md:w-[42%] md:min-h-screen px-8 py-8 md:px-12 md:py-12">
             <div>
                 <p class="text-xl font-bold leading-none">Transvirex</p>
                 <p class="text-sm text-blue-200 mt-0.5">Moving Intelligence</p>
@@ -125,7 +123,8 @@ async function handleSubmit() {
     error.value = '';
     try {
         await login(email.value, password.value);
-        await navigateTo(redirectByRole(data.access_token));
+        const tokenCookie = useCookie('access_token');
+        await navigateTo(redirectByRole(tokenCookie.value ?? ''));
     } catch (e: unknown) {
         const err = e as { data?: { message?: string } };
         error.value = err?.data?.message || 'Identifiants invalides';
