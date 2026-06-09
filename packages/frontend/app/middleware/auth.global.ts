@@ -1,16 +1,16 @@
 import type { UserRole } from '~/composables/useAuth';
 
 const ROLE_DASHBOARD: Record<UserRole, string> = {
-    admin:            '/admin/dashboard',
-    dispatcher:       '/dispatcher/dashboard',
-    driver:           '/livreur/dashboard',
+    admin: '/admin/dashboard',
+    dispatcher: '/dispatcher/dashboard',
+    driver: '/livreur/dashboard',
     business_manager: '/business/dashboard',
 };
 
 const ROLE_ALLOWED_PREFIX: Record<UserRole, string> = {
-    admin:            '/admin',
-    dispatcher:       '/dispatcher',
-    driver:           '/livreur',
+    admin: '/admin',
+    dispatcher: '/dispatcher',
+    driver: '/livreur',
     business_manager: '/business',
 };
 
@@ -34,7 +34,9 @@ export default defineNuxtRouteMiddleware(async (to) => {
 
     // Vérifier que l'utilisateur accède uniquement aux pages de son rôle
     const allowedPrefix = ROLE_ALLOWED_PREFIX[user.value.role];
-    const isProtectedRoute = Object.values(ROLE_ALLOWED_PREFIX).some(prefix => to.path.startsWith(prefix));
+    const isProtectedRoute = Object.values(ROLE_ALLOWED_PREFIX).some((prefix) =>
+        to.path.startsWith(prefix),
+    );
 
     if (isProtectedRoute && !to.path.startsWith(allowedPrefix)) {
         return navigateTo('/');
