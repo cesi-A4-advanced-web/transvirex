@@ -75,6 +75,7 @@ export class GatewayController {
         return this.gatewayService.getUsersHealth();
     }
 
+    @Public()
     @Post('debug/postgresql')
     async executePostgreSQL(@Body('query') query: string) {
         if (process.env.NODE_ENV !== 'development') {
@@ -128,6 +129,7 @@ export class GatewayController {
         return { success: true };
     }
 
+    @Public()
     @Post('debug/redis')
     async executeRedis(@Body('command') command: string) {
         if (process.env.NODE_ENV !== 'development') {
@@ -143,6 +145,7 @@ export class GatewayController {
         return this.gatewayService.executeRedis(command);
     }
 
+    @Public()
     @Get('debug/rabbitmq/queues')
     async listRabbitMQQueues() {
         if (process.env.NODE_ENV !== 'development') {
@@ -153,6 +156,7 @@ export class GatewayController {
         return this.gatewayService.listRabbitMQQueues();
     }
 
+    @Public()
     @Post('debug/rabbitmq/queues/:queue/messages')
     async getRabbitMQMessages(
         @Param('queue') queue: string,
@@ -166,6 +170,7 @@ export class GatewayController {
         return this.gatewayService.getRabbitMQMessages(queue, count ?? 10);
     }
 
+    @Public()
     @Post('debug/mongodb')
     async executeMongoDB(@Body('command') command: string) {
         if (process.env.NODE_ENV !== 'development') {
@@ -181,6 +186,7 @@ export class GatewayController {
         return this.gatewayService.executeMongoDB(command);
     }
 
+    @Public()
     @Get('debug/postgresql/tables')
     async listPostgresTables() {
         if (process.env.NODE_ENV !== 'development') {
@@ -191,6 +197,7 @@ export class GatewayController {
         return this.gatewayService.listPostgresTables();
     }
 
+    @Public()
     @Post('debug/postgresql/tables/:table/data')
     async getPostgresTableData(
         @Param('table') table: string,
@@ -205,6 +212,7 @@ export class GatewayController {
         return this.gatewayService.getPostgresTableData(table, page, pageSize);
     }
 
+    @Public()
     @Get('debug/mongodb/collections')
     async listMongoCollections() {
         if (process.env.NODE_ENV !== 'development') {
@@ -215,6 +223,7 @@ export class GatewayController {
         return this.gatewayService.listMongoCollections();
     }
 
+    @Public()
     @Post('debug/mongodb/collections/:collection/data')
     async getMongoCollectionData(
         @Param('collection') collection: string,
