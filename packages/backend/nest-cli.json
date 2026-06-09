@@ -61,6 +61,15 @@
             "sourceRoot": "libs/guards/src",
             "type": "library"
         },
+        "logging": {
+            "compilerOptions": {
+                "tsConfigPath": "libs/logging/tsconfig.lib.json"
+            },
+            "entryFile": "index",
+            "root": "libs/logging",
+            "sourceRoot": "libs/logging/src",
+            "type": "library"
+        },
         "mongodb": {
             "compilerOptions": {
                 "tsConfigPath": "libs/mongodb/tsconfig.lib.json"

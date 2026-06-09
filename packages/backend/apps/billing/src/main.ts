@@ -1,10 +1,16 @@
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { Transport } from '@nestjs/microservices';
+import { LoggingService, LoggingInterceptor } from '@app/logging';
 import { BillingModule } from './billing.module';
 
 async function bootstrap() {
-    const app = await NestFactory.create(BillingModule);
+    const app = await NestFactory.create(BillingModule, { bufferLogs: true });
+
+    const logger = app.get(LoggingService);
+    logger.setServiceName('billing');
+    app.useLogger(logger);
+    app.useGlobalInterceptors(app.get(LoggingInterceptor));
 
     app.connectMicroservice({
         transport: Transport.RMQ,
@@ -24,7 +30,7 @@ async function bootstrap() {
 
     const PORT = process.env.PORT || 3000;
     await app.listen(PORT);
-    console.log(`Billing service listening on port ${PORT} (HTTP + RabbitMQ)`);
+    logger.log(`Billing service listening on port ${PORT} (HTTP + RabbitMQ)`, 'Bootstrap');
 }
 bootstrap().catch((error) => {
     console.error('Error starting billing service:', error);

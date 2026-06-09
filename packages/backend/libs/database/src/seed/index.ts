@@ -23,10 +23,24 @@ export interface SeedResult {
     deliveries: number;
 }
 
-export async function seedDatabase(prisma: PrismaClient): Promise<SeedResult> {
+export async function seedDatabase(
+    prisma: PrismaClient,
+    force: boolean = false,
+): Promise<SeedResult> {
     const existing = await prisma.user.findFirst();
     if (existing) {
-        throw new Error('Database already seeded');
+        if (force) {
+            await prisma.deliveryEvent.deleteMany();
+            await prisma.parcel.deleteMany();
+            await prisma.delivery.deleteMany();
+            await prisma.invoice.deleteMany();
+            await prisma.customer.deleteMany();
+            await prisma.driver.deleteMany();
+            await prisma.vehicle.deleteMany();
+            await prisma.user.deleteMany();
+            await prisma.hub.deleteMany();
+            await prisma.address.deleteMany();
+        } else throw new Error('Database already seeded');
     }
 
     faker.seed(42);
