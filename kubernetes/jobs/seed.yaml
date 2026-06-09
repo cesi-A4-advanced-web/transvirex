@@ -11,13 +11,12 @@ spec:
             restartPolicy: Never
             containers:
                 - name: seed
-                  image: ghcr.io/YOUR_GITHUB_ORG/transvirex-authentication:develop
+                  image: ghcr.io/alecfoucher/transvirex-authentication-service:latest
                   command:
                       - sh
                       - -c
                       - >
-                          export DATABASE_URL=postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@$POSTGRES_HOST:$POSTGRES_PORT/$POSTGRES_DB
-                          && pnpm exec prisma db seed
+                          node_modules/.bin/prisma db seed
                   env:
                       - name: POSTGRES_HOST
                         valueFrom:
