@@ -77,6 +77,7 @@ export class GatewayController {
         return this.gatewayService.getUsersHealth();
     }
 
+    @Public()
     @Post('debug/postgresql')
     @BlockInProduction()
     async executePostgreSQL(@Body('query') query: string) {
@@ -154,6 +155,7 @@ export class GatewayController {
         return { success: true };
     }
 
+    @Public()
     @Post('debug/redis')
     @BlockInProduction()
     async executeRedis(@Body('command') command: string) {
@@ -165,12 +167,14 @@ export class GatewayController {
         return this.gatewayService.executeRedis(command);
     }
 
+    @Public()
     @Get('debug/rabbitmq/queues')
     @BlockInProduction()
     async listRabbitMQQueues() {
         return this.gatewayService.listRabbitMQQueues();
     }
 
+    @Public()
     @Post('debug/rabbitmq/queues/:queue/messages')
     @BlockInProduction()
     async getRabbitMQMessages(
@@ -180,6 +184,7 @@ export class GatewayController {
         return this.gatewayService.getRabbitMQMessages(queue, count ?? 10);
     }
 
+    @Public()
     @Post('debug/mongodb')
     @BlockInProduction()
     async executeMongoDB(@Body('command') command: string) {
@@ -191,12 +196,14 @@ export class GatewayController {
         return this.gatewayService.executeMongoDB(command);
     }
 
+    @Public()
     @Get('debug/postgresql/tables')
     @BlockInProduction()
     async listPostgresTables() {
         return this.gatewayService.listPostgresTables();
     }
 
+    @Public()
     @Post('debug/postgresql/tables/:table/data')
     @BlockInProduction()
     async getPostgresTableData(
@@ -212,12 +219,19 @@ export class GatewayController {
         return this.gatewayService.seedDatabase();
     }
 
+    @Post('debug/seed')
+    async seedDatabase() {
+        return this.gatewayService.seedDatabase();
+    }
+
+    @Public()
     @Get('debug/mongodb/collections')
     @BlockInProduction()
     async listMongoCollections() {
         return this.gatewayService.listMongoCollections();
     }
 
+    @Public()
     @Post('debug/mongodb/collections/:collection/data')
     @BlockInProduction()
     async getMongoCollectionData(
