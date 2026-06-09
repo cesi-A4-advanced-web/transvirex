@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { DatabaseModule } from '@app/database';
+import { LoggingModule } from '@app/logging';
 import { AuthenticationController } from './authentication.controller';
 import { AuthenticationService } from './authentication.service';
 import Redis from 'ioredis';
@@ -18,6 +19,7 @@ const RedisProvider = {
 
 @Module({
     imports: [
+        LoggingModule,
         DatabaseModule,
         JwtModule.register({
             secret: process.env.JWT_SECRET || 'dev_secret',

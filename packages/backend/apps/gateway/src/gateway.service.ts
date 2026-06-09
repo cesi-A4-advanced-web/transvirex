@@ -132,7 +132,7 @@ export class GatewayService {
     }
 
     async seedDatabase() {
-        const result = await runSeed(this.prisma);
+        const result = await runSeed(this.prisma, true);
         return { success: true, ...result };
     }
 
@@ -215,5 +215,63 @@ export class GatewayService {
             pageSize,
             totalPages: Math.ceil(totalCount / pageSize),
         };
+    }
+
+    async logFromFrontend(body: {
+        level: string;
+        message: string;
+        metadata?: Record<string, unknown>;
+    }) {
+        const db = await this.mongoDBService.getDb();
+        await db.collection('frontend_logs').insertOne({
+            level: body.level || 'error',
+            message: body.message,
+            timestamp: new Date(),
+            metadata: body.metadata || {},
+        });
+        return { success: true };
+    }
+
+    async getLogs(
+        collectionName: string,
+        level?: string,
+        service?: string,
+        page: number = 1,
+        pageSize: number = 50,
+    ) {
+        const db = await this.mongoDBService.getDb();
+        const coll = db.collection(collectionName);
+
+        const filter: Record<string, unknown> = {};
+        if (level && level !== 'all') filter.level = level;
+        if (service) filter.service = service;
+
+        const offset = (page - 1) * pageSize;
+        const totalCount = await coll.countDocuments(filter);
+        const raw = await coll
+            .find(filter)
+            .sort({ timestamp: -1 })
+            .skip(offset)
+            .limit(pageSize)
+            .toArray();
+
+        const logs = raw.map((r: any) => {
+            const { _id, ...rest } = r;
+            return { _id: String(_id ?? ''), ...rest };
+        });
+
+        return {
+            logs,
+            totalCount,
+            page,
+            pageSize,
+            totalPages: Math.ceil(totalCount / pageSize),
+        };
+    }
+
+    async clearLogs(collectionName: string) {
+        const db = await this.mongoDBService.getDb();
+        const result = await db.collection(collectionName).deleteMany({});
+        return { deletedCount: result.deletedCount };
     }
 }

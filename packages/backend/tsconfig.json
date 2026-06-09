@@ -44,6 +44,12 @@
             "@app/guards/*": [
                 "./libs/guards/src/*"
             ],
+            "@app/logging": [
+                "./libs/logging/src"
+            ],
+            "@app/logging/*": [
+                "./libs/logging/src/*"
+            ],
             "@generated/prisma": [
                 "./prisma/generated/prisma/client"
             ]

@@ -1,12 +1,18 @@
 import { NestFactory } from '@nestjs/core';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { Transport } from '@nestjs/microservices';
+import { LoggingService, LoggingInterceptor } from '@app/logging';
 import { AuthenticationModule } from './authentication.module';
 
 let app: INestApplication;
 
 async function bootstrap() {
-    app = await NestFactory.create(AuthenticationModule);
+    app = await NestFactory.create(AuthenticationModule, { bufferLogs: true });
+
+    const logger = app.get(LoggingService);
+    logger.setServiceName('authentication');
+    app.useLogger(logger);
+    app.useGlobalInterceptors(app.get(LoggingInterceptor));
 
     app.connectMicroservice({
         transport: Transport.RMQ,
@@ -26,8 +32,9 @@ async function bootstrap() {
 
     const PORT = process.env.PORT || 3000;
     await app.listen(PORT);
-    console.log(
+    logger.log(
         `Authentication service listening on port ${PORT} (HTTP + RabbitMQ)`,
+        'Bootstrap',
     );
 }
 
