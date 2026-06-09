@@ -8,6 +8,8 @@ declare -a ENTRIES=(
     "127.0.0.1   transvirex.local"
     "127.0.0.1   www.transvirex.local"
     "127.0.0.1   rabbitmq.transvirex.local"
+    "127.0.0.1   pgadmin.transvirex.local",
+    "127.0.0.1   redis.transvirex.local"
 )
 
 if [ "$EUID" -ne 0 ]; then
