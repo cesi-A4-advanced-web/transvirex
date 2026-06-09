@@ -343,6 +343,10 @@ jobs:
                       kubectl rollout status deployment/transvirex-delivery -n production --timeout=10m --kubeconfig ~/.kube/config
                       kubectl rollout status deployment/transvirex-users -n production --timeout=10m --kubeconfig ~/.kube/config
 
+                      kubectl delete job transvirex-seed -n production --kubeconfig ~/.kube/config --ignore-not-found=true
+                      kubectl apply -f /tmp/k8s-manifests/kubernetes/jobs/seed.yaml --kubeconfig ~/.kube/config
+                      kubectl wait --for=condition=complete job/transvirex-seed -n production --timeout=2m --kubeconfig ~/.kube/config
+
                       rm -rf /tmp/k8s-manifests
 
     notify:
