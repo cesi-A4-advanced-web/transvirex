@@ -1,4 +1,5 @@
 import { PrismaService } from '@app/database';
+import { seedDatabase as runSeed } from '@app/database/seed';
 import { MongoDBService } from '@app/mongodb';
 import { RabbitMQService } from '@app/rabbitmq';
 import { RedisService } from '@app/redis';
@@ -98,6 +99,11 @@ export class GatewayService {
 
     getUsersHealth() {
         return this.fetchHealth('users', this.serviceUrls.users);
+    }
+
+    async seedDatabase() {
+        const result = await runSeed(this.prisma);
+        return { success: true, ...result };
     }
 
     async executePostgreSQL(query: string) {

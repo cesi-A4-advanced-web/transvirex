@@ -1,92 +1,44 @@
-import { PrismaClient } from '@prisma/client';
-import * as bcrypt from 'bcryptjs';
+import { seedDatabase } from '@app/database/seed';
+import { PrismaClient } from '@generated/prisma';
+import { PrismaPg } from '@prisma/adapter-pg';
 
-const prisma = new PrismaClient();
+const POSTGRES_USER = process.env.POSTGRES_USER || 'postgres';
+const POSTGRES_PASSWORD = process.env.POSTGRES_PASSWORD || 'postgres';
+const POSTGRES_HOST = process.env.POSTGRES_HOST || 'postgres';
+const POSTGRES_PORT = process.env.POSTGRES_PORT || '5432';
+const POSTGRES_DB = process.env.POSTGRES_DB || 'transvirex';
+
+const URL = `postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}`;
+const adapter = new PrismaPg(URL);
+const prisma = new PrismaClient({ adapter });
 
 async function main() {
-    const existing = await prisma.user.findFirst();
-    if (existing) {
-        console.log('DB already seeded, skipping.');
-        return;
+    try {
+        const result = await seedDatabase(prisma);
+        console.log('DB seeded successfully.');
+        console.log(`  ${result.addresses} addresses`);
+        console.log(`  ${result.hubs} hubs`);
+        console.log(`  ${result.users} users`);
+        console.log(`  ${result.vehicles} vehicles`);
+        console.log(`  ${result.drivers} drivers`);
+        console.log(`  ${result.customers} customers`);
+        console.log(`  ${result.invoices} invoices`);
+        console.log(`  ${result.deliveries} deliveries`);
+        console.log('');
+        console.log('  admin@transvirex.fr       / Admin123!');
+        console.log('  dispatcher@transvirex.fr  / Dispatcher123!');
+        console.log('  driver@transvirex.fr      / Driver123!');
+    } catch (e: any) {
+        if ((e as Error).message === 'Database already seeded') {
+            console.log('DB already seeded, skipping.');
+        } else {
+            throw e;
+        }
     }
-
-    const address = await prisma.address.create({
-        data: {
-            address: '1 Rue de la Logistique',
-            street: 'Rue de la Logistique',
-            city: 'Paris',
-            postal_code: '75001',
-        },
-    });
-
-    const hub = await prisma.hub.create({
-        data: {
-            reference: 'HUB-001',
-            name: 'Hub Paris Centre',
-            phone_number: '0123456789',
-            capacity_parcels_day: 500,
-            status: 'active',
-            address_id: address.id,
-        },
-    });
-
-    // mdp: Admin123!
-    const adminHash = await bcrypt.hash('Admin123!', 10);
-    await prisma.user.create({
-        data: {
-            reference: 'USR-001',
-            firstname: 'Admin',
-            lastname: 'Transvirex',
-            email: 'admin@transvirex.fr',
-            hash_password: adminHash, // Admin123!
-            role: 'admin',
-            status: 'active',
-            hub_id: hub.id,
-        },
-    });
-
-    // mdp: Dispatcher123!
-    const dispatcherHash = await bcrypt.hash('Dispatcher123!', 10);
-    await prisma.user.create({
-        data: {
-            reference: 'USR-002',
-            firstname: 'Jean',
-            lastname: 'Dupont',
-            email: 'dispatcher@transvirex.fr',
-            hash_password: dispatcherHash, // Dispatcher123!
-            role: 'dispatcher',
-            status: 'active',
-            hub_id: hub.id,
-        },
-    });
-
-    // mdp: Driver123!
-    const driverHash = await bcrypt.hash('Driver123!', 10);
-    const driverUser = await prisma.user.create({
-        data: {
-            reference: 'USR-003',
-            firstname: 'Pierre',
-            lastname: 'Martin',
-            email: 'driver@transvirex.fr',
-            hash_password: driverHash, // Driver123!
-            role: 'driver',
-            status: 'active',
-            hub_id: hub.id,
-        },
-    });
-
-    await prisma.driver.create({
-        data: {
-            reference: 'DRV-001',
-            user_id: driverUser.id,
-            rating: 4.8,
-        },
-    });
-
-    console.log('DB seeded successfully.');
-    console.log('  admin@transvirex.fr       / Admin123!');
-    console.log('  dispatcher@transvirex.fr  / Dispatcher123!');
-    console.log('  driver@transvirex.fr      / Driver123!');
 }
 
-main().finally(() => prisma.$disconnect());
+main()
+    .catch((e) => {
+        console.error(e);
+    })
+    .finally(() => prisma.$disconnect());

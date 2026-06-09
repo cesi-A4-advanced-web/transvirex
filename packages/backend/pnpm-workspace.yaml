@@ -1,8 +1,9 @@
 allowBuilds:
-    '@nestjs/core': true
-    '@prisma/client': false
-    '@prisma/engines': false
-    prisma: false
-    unrs-resolver: true
+  '@nestjs/core': true
+  '@prisma/client': false
+  '@prisma/engines': false
+  esbuild: true
+  prisma: false
+  unrs-resolver: true
 confirmModulesPurge: false
 minimumReleaseAge: 0

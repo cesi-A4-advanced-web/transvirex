@@ -1,8 +1,41 @@
 <script setup lang="ts">
 const health = useHealthStore();
 const route = useRoute();
+const seeding = ref(false);
 
 onMounted(() => health.checkAll());
+
+async function handleSeed() {
+    const confirmed = window.confirm(
+        'This will seed the database with demo data. Continue?',
+    );
+    if (!confirmed) return;
+
+    seeding.value = true;
+    try {
+        const res = await fetch('/api/debug/seed', { method: 'POST' });
+        if (!res.ok) {
+            const body = await res.json().catch(() => null);
+            throw new Error(body?.message ?? `Error ${res.status}`);
+        }
+        const data = await res.json();
+        const counts = [
+            `Addresses: ${data.addresses}`,
+            `Hubs: ${data.hubs}`,
+            `Users: ${data.users}`,
+            `Drivers: ${data.drivers}`,
+            `Customers: ${data.customers}`,
+            `Invoices: ${data.invoices}`,
+            `Deliveries: ${data.deliveries}`,
+        ];
+        alert(`Database seeded successfully!\n\n${counts.join('\n')}`);
+        window.location.reload();
+    } catch (e: any) {
+        alert(`Seed failed: ${e?.message ?? 'Unknown error'}`);
+    } finally {
+        seeding.value = false;
+    }
+}
 </script>
 
 <template>
@@ -144,6 +177,27 @@ onMounted(() => health.checkAll());
                     </svg>
                     MongoDB
                 </NuxtLink>
+
+                <button
+                    class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-300 hover:bg-slate-800 hover:text-white transition w-full text-left"
+                    :disabled="seeding"
+                    @click="handleSeed"
+                >
+                    <svg
+                        class="w-5 h-5 shrink-0"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                        />
+                    </svg>
+                    {{ seeding ? 'Seeding...' : 'Seed DB' }}
+                </button>
             </nav>
 
             <div class="px-6 py-4 border-t border-slate-700">
