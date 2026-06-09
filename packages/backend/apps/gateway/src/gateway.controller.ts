@@ -17,7 +17,14 @@ import { Public } from './decorators/public.decorator';
 const ACCESS_TOKEN_TTL = 15 * 60 * 1000;
 const REFRESH_TOKEN_TTL = 7 * 24 * 60 * 60 * 1000;
 
-const cookieOptions = (maxAge: number) => ({
+const accessTokenCookieOptions = (maxAge: number) => ({
+    httpOnly: false,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'strict' as const,
+    maxAge,
+});
+
+const refreshTokenCookieOptions = (maxAge: number) => ({
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'strict' as const,
@@ -97,6 +104,16 @@ export class GatewayController {
             'refresh_token',
             data.refresh_token,
             cookieOptions(REFRESH_TOKEN_TTL),
+        );
+        res.cookie(
+            'access_token',
+            data.access_token,
+            accessTokenCookieOptions(ACCESS_TOKEN_TTL),
+        );
+        res.cookie(
+            'refresh_token',
+            data.refresh_token,
+            refreshTokenCookieOptions(REFRESH_TOKEN_TTL),
         );
         return { success: true };
     }
