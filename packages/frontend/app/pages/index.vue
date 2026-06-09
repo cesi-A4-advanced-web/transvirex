@@ -2,6 +2,8 @@
     <div class="min-h-screen flex flex-col md:flex-row">
         <!-- Branding panel -->
         <div class="relative flex flex-col justify-between bg-[#1a3f7a] text-white md:w-[42%] md:min-h-screen px-8 py-8 md:px-12 md:py-12">
+        <!-- Branding panel -->
+        <div class="relative flex flex-col justify-between bg-[#1a3f7a] text-white md:w-[42%] md:min-h-screen px-8 py-8 md:px-12 md:py-12">
             <div>
                 <p class="text-xl font-bold leading-none">Transvirex</p>
                 <p class="text-sm text-blue-200 mt-0.5">Moving Intelligence</p>
@@ -78,6 +80,7 @@
 </template>
 
 <script setup lang="ts">
+
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -88,15 +91,18 @@ import { $fetch } from 'ofetch';
 
 definePageMeta({ layout: false });
 
-const roles = [{ label: 'Dispatcher', value: 'dispatcher' }, { label: 'Chauffeur', value: 'driver' }, { label: 'Admin', value: 'admin' }];
+const { login } = useAuth();
+
+const roles = [
+    { label: 'Dispatcher', value: 'dispatcher' },
+    { label: 'Chauffeur', value: 'driver' },
+    { label: 'Admin', value: 'admin' },
+];
 const selectedRole = ref('dispatcher');
 const email = ref('');
 const password = ref('');
 const error = ref('');
 const loading = ref(false);
-
-const accessToken = useCookie('access_token', { maxAge: 60 * 15, sameSite: 'strict' });
-const refreshToken = useCookie('refresh_token', { maxAge: 60 * 60 * 24 * 7, sameSite: 'strict' });
 
 function parseJwt(token: string): Record<string, unknown> | null {
     try {
@@ -118,12 +124,7 @@ async function handleSubmit() {
     loading.value = true;
     error.value = '';
     try {
-        const data = await $fetch<{ access_token: string; refresh_token: string }>('/api/auth/login', {
-            method: 'POST',
-            body: { email: email.value, password: password.value },
-        });
-        accessToken.value = data.access_token;
-        refreshToken.value = data.refresh_token;
+        await login(email.value, password.value);
         await navigateTo(redirectByRole(data.access_token));
     } catch (e: unknown) {
         const err = e as { data?: { message?: string } };

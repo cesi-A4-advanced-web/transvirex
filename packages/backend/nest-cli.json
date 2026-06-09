@@ -52,13 +52,22 @@
             "sourceRoot": "apps/gateway/src",
             "type": "application"
         },
-        "redis": {
+        "guards": {
             "compilerOptions": {
-                "tsConfigPath": "libs/redis/tsconfig.lib.json"
+                "tsConfigPath": "libs/guards/tsconfig.lib.json"
             },
             "entryFile": "index",
-            "root": "libs/redis",
-            "sourceRoot": "libs/redis/src",
+            "root": "libs/guards",
+            "sourceRoot": "libs/guards/src",
+            "type": "library"
+        },
+        "mongodb": {
+            "compilerOptions": {
+                "tsConfigPath": "libs/mongodb/tsconfig.lib.json"
+            },
+            "entryFile": "index",
+            "root": "libs/mongodb",
+            "sourceRoot": "libs/mongodb/src",
             "type": "library"
         },
         "rabbitmq": {
@@ -70,13 +79,13 @@
             "sourceRoot": "libs/rabbitmq/src",
             "type": "library"
         },
-        "mongodb": {
+        "redis": {
             "compilerOptions": {
-                "tsConfigPath": "libs/mongodb/tsconfig.lib.json"
+                "tsConfigPath": "libs/redis/tsconfig.lib.json"
             },
             "entryFile": "index",
-            "root": "libs/mongodb",
-            "sourceRoot": "libs/mongodb/src",
+            "root": "libs/redis",
+            "sourceRoot": "libs/redis/src",
             "type": "library"
         },
         "stock": {

@@ -82,17 +82,6 @@ services:
         networks:
             - transvirex-network
 
-    pgadmin:
-        image: dpage/pgadmin4:latest
-        container_name: transvirex-pgadmin
-        environment:
-            PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@transvirex.com}
-            PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-admin}
-        volumes:
-            - pgadmin_data:/var/lib/pgadmin
-        restart: unless-stopped
-        networks:
-            - transvirex-network
 
     # ===================================
     # 💾 Databases & Message Brokers
@@ -150,7 +139,14 @@ services:
         restart: unless-stopped
         command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:-redis_password}
         healthcheck:
-            test: ['CMD', 'redis-cli', '-a', '${REDIS_PASSWORD:-redis_password}', 'ping']
+            test:
+                [
+                    'CMD',
+                    'redis-cli',
+                    '-a',
+                    '${REDIS_PASSWORD:-redis_password}',
+                    'ping',
+                ]
             interval: 10s
             timeout: 5s
             retries: 5
@@ -203,9 +199,6 @@ services:
                   target: /etc/nginx/nginx.conf
 
 volumes:
-    pgadmin_data:
-        name: transvirex_pgadmin_data
-        driver: local
     postgres_data:
         name: transvirex_postgres_data
         driver: local

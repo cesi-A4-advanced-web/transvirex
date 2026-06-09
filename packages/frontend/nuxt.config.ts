@@ -40,8 +40,14 @@ export default defineNuxtConfig({
                 'pgadmin.transvirex.local',
             ],
         },
-    },
-    dir: {
-        public: 'app/public',
+        optimizeDeps: {
+            include: [
+                '@vueuse/core',
+                'class-variance-authority',
+                'clsx',
+                'reka-ui',
+                'tailwind-merge',
+            ],
+        },
     },
 });

@@ -1,6 +1,8 @@
 import { Controller, Get, Post, Body } from '@nestjs/common';
 import { MessagePattern } from '@nestjs/microservices';
 import { AuthenticationService } from './authentication.service';
+import { LoginDto } from './dto/login.dto';
+import { RefreshDto } from './dto/refresh.dto';
 
 @Controller()
 export class AuthenticationController {
@@ -19,17 +21,17 @@ export class AuthenticationController {
     }
 
     @Post('auth/login')
-    login(@Body() body: { email: string; password: string }) {
+    login(@Body() body: LoginDto) {
         return this.authenticationService.login(body.email, body.password);
     }
 
     @Post('auth/refresh')
-    refresh(@Body() body: { refresh_token: string }) {
+    refresh(@Body() body: RefreshDto) {
         return this.authenticationService.refresh(body.refresh_token);
     }
 
     @Post('auth/logout')
-    logout(@Body() body: { refresh_token: string }) {
+    logout(@Body() body: RefreshDto) {
         return this.authenticationService.logout(body.refresh_token);
     }
 }

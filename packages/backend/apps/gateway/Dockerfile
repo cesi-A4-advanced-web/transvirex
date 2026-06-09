@@ -10,7 +10,7 @@ RUN pnpm install --no-frozen-lockfile --node-linker=hoisted
 # Copy source code, generate Prisma client and build
 COPY . .
 RUN pnpm exec prisma generate
-RUN node_modules/.bin/tsc -p tsconfig.build.json 2>&1 && mkdir -p dist/prisma
+RUN pnpm run build:gateway
 
 # +--------------------------------------------------------+
 # |                         RUNTIME                        |
@@ -18,12 +18,12 @@ RUN node_modules/.bin/tsc -p tsconfig.build.json 2>&1 && mkdir -p dist/prisma
 FROM node:26-slim AS runtime
 WORKDIR /app
 COPY --from=build /app/node_modules ./node_modules
-COPY --from=build /app/dist/apps/gateway/ ./dist/apps/gateway/
+COPY --from=build /app/dist/apps/gateway/ ./apps/gateway/
 COPY --from=build /app/dist/libs/ ./libs/
 COPY --from=build /app/prisma ./prisma
 COPY --from=build /app/dist/prisma/ ./prisma/
 COPY --from=build /app/tsconfig.json ./tsconfig.json
-CMD ["node", "-r", "tsconfig-paths/register", "dist/apps/gateway/src/main.js"]
+CMD ["node", "-r", "tsconfig-paths/register", "apps/gateway/src/main.js"]
 
 # +--------------------------------------------------------+
 # |                      DEVELOPMENT                       |
