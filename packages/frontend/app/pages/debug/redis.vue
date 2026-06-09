@@ -1,20 +1,7 @@
 <script setup lang="ts">
 import { Button } from '@/components/ui/button';
-import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle,
-} from '@/components/ui/card';
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from '@/components/ui/table';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Textarea } from '@/components/ui/textarea';
 import { useRedisStore } from '@/stores/redis';
 
@@ -44,9 +31,7 @@ function insertCommand(cmd: string) {
     <div class="max-w-6xl mx-auto space-y-8">
         <div class="space-y-1">
             <h1 class="text-3xl font-bold text-slate-900">Console Redis</h1>
-            <p class="text-gray-500">
-                Exécuter des commandes Redis sur le serveur de cache
-            </p>
+            <p class="text-gray-500">Exécuter des commandes Redis sur le serveur de cache</p>
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -54,22 +39,12 @@ function insertCommand(cmd: string) {
                 <Card>
                     <CardHeader>
                         <CardTitle>Commande</CardTitle>
-                        <CardDescription
-                            >Saisissez votre commande Redis
-                            ci-dessous</CardDescription
-                        >
+                        <CardDescription>Saisissez votre commande Redis ci-dessous</CardDescription>
                     </CardHeader>
                     <CardContent>
-                        <Textarea
-                            v-model="redis.command"
-                            placeholder="KEYS *"
-                            :rows="4"
-                        />
+                        <Textarea v-model="redis.command" placeholder="KEYS *" :rows="4" />
                         <div class="flex gap-2 mt-4">
-                            <Button
-                                @click="redis.execute()"
-                                :disabled="redis.loading"
-                            >
+                            <Button @click="redis.execute()" :disabled="redis.loading">
                                 <svg
                                     class="w-4 h-4"
                                     v-if="!redis.loading"
@@ -104,9 +79,7 @@ function insertCommand(cmd: string) {
                                         d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
                                     />
                                 </svg>
-                                {{
-                                    redis.loading ? 'Exécution...' : 'Exécuter'
-                                }}
+                                {{ redis.loading ? 'Exécution...' : 'Exécuter' }}
                             </Button>
                         </div>
                     </CardContent>
@@ -116,9 +89,7 @@ function insertCommand(cmd: string) {
                     <CardHeader>
                         <CardTitle>Résultat</CardTitle>
                         <CardDescription v-if="redis.results">
-                            {{ redis.results.rowCount }} résultat{{
-                                redis.results.rowCount > 1 ? 's' : ''
-                            }}
+                            {{ redis.results.rowCount }} résultat{{ redis.results.rowCount > 1 ? 's' : '' }}
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
@@ -132,28 +103,15 @@ function insertCommand(cmd: string) {
                             <Table>
                                 <TableHeader>
                                     <TableRow>
-                                        <TableHead
-                                            v-for="col in redis.results.columns"
-                                            :key="col"
-                                        >
+                                        <TableHead v-for="col in redis.results.columns" :key="col">
                                             {{ col }}
                                         </TableHead>
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
-                                    <TableRow
-                                        v-for="(row, i) in redis.results.rows"
-                                        :key="i"
-                                    >
-                                        <TableCell
-                                            v-for="col in redis.results.columns"
-                                            :key="col"
-                                        >
-                                            {{
-                                                row[col] != null
-                                                    ? String(row[col])
-                                                    : 'nil'
-                                            }}
+                                    <TableRow v-for="(row, i) in redis.results.rows" :key="i">
+                                        <TableCell v-for="col in redis.results.columns" :key="col">
+                                            {{ row[col] != null ? String(row[col]) : 'nil' }}
                                         </TableCell>
                                     </TableRow>
                                 </TableBody>
@@ -178,10 +136,7 @@ function insertCommand(cmd: string) {
                                     d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
                                 />
                             </svg>
-                            <p class="text-gray-500">
-                                Exécutez une commande Redis pour voir le
-                                résultat
-                            </p>
+                            <p class="text-gray-500">Exécutez une commande Redis pour voir le résultat</p>
                         </div>
                     </CardContent>
                 </Card>
@@ -191,9 +146,7 @@ function insertCommand(cmd: string) {
                 <Card>
                     <CardHeader>
                         <CardTitle>Commandes rapides</CardTitle>
-                        <CardDescription
-                            >Cliquez pour insérer une commande</CardDescription
-                        >
+                        <CardDescription>Cliquez pour insérer une commande</CardDescription>
                     </CardHeader>
                     <CardContent>
                         <div class="space-y-2">
@@ -203,9 +156,7 @@ function insertCommand(cmd: string) {
                                 @click="insertCommand(item.cmd)"
                                 class="w-full text-left p-3 rounded-lg border border-gray-200 hover:border-blue-400 hover:bg-blue-50 transition text-sm"
                             >
-                                <code class="text-blue-600 font-mono text-xs"
-                                    >{{ item.cmd }}
-                                </code>
+                                <code class="text-blue-600 font-mono text-xs">{{ item.cmd }} </code>
                                 <p class="text-gray-500 text-xs mt-0.5">
                                     {{ item.desc }}
                                 </p>

@@ -49,11 +49,7 @@ function header(doc: any, title: string, subtitle: string) {
 
     // Contact line
     doc.setFontSize(6.5);
-    doc.text(
-        '12 Rue de la Logistique — 75001 Paris  ·  contact@transvirex.fr  ·  +33 1 23 45 67 89',
-        14,
-        28,
-    );
+    doc.text('12 Rue de la Logistique — 75001 Paris  ·  contact@transvirex.fr  ·  +33 1 23 45 67 89', 14, 28);
 
     // Right: document type
     doc.setFont('helvetica', 'bold');
@@ -98,16 +94,8 @@ function footer(doc: any) {
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(6.5);
     doc.setTextColor(...Mt);
-    doc.text(
-        'Transvirex SAS — SIRET 123 456 789 00001 — RCS Paris B 123 456 789 — Capital 50 000 €',
-        14,
-        PH - 11,
-    );
-    doc.text(
-        'TVA intracommunautaire : FR12 123456789 — Code APE 4941A — Licences transport T1/T2',
-        14,
-        PH - 6.5,
-    );
+    doc.text('Transvirex SAS — SIRET 123 456 789 00001 — RCS Paris B 123 456 789 — Capital 50 000 €', 14, PH - 11);
+    doc.text('TVA intracommunautaire : FR12 123456789 — Code APE 4941A — Licences transport T1/T2', 14, PH - 6.5);
     doc.text(`Page ${pg} / ${total}`, PW - 14, PH - 9, { align: 'right' });
 
     // Accent dot bottom-right
@@ -119,16 +107,7 @@ function footer(doc: any) {
  * Draw a rounded info block with title and content lines.
  * Supports light and dark variants.
  */
-function infoBlock(
-    doc: any,
-    x: number,
-    y: number,
-    w: number,
-    h: number,
-    title: string,
-    lines: string[],
-    dark = false,
-) {
+function infoBlock(doc: any, x: number, y: number, w: number, h: number, title: string, lines: string[], dark = false) {
     if (dark) {
         doc.setFillColor(...P);
     } else {
@@ -157,15 +136,7 @@ function infoBlock(
 /**
  * Draw a small KPI metric box with value and label.
  */
-function kpiBox(
-    doc: any,
-    x: number,
-    y: number,
-    w: number,
-    value: string,
-    label: string,
-    accent = false,
-) {
+function kpiBox(doc: any, x: number, y: number, w: number, value: string, label: string, accent = false) {
     doc.setFillColor(...(accent ? A : P));
     doc.roundedRect(x, y, w, 18, 2.5, 2.5, 'F');
     doc.setFont('helvetica', 'bold');
@@ -174,9 +145,7 @@ function kpiBox(
     doc.text(value, x + w / 2, y + 11, { align: 'center' });
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(6.5);
-    doc.setTextColor(
-        ...(accent ? ([255, 230, 160] as [number, number, number]) : Bl),
-    );
+    doc.setTextColor(...(accent ? ([255, 230, 160] as [number, number, number]) : Bl));
     doc.text(label, x + w / 2, y + 16, { align: 'center' });
 }
 
@@ -340,18 +309,10 @@ export async function exportFacturePdf(f: FactureData) {
 
     header(doc, 'FACTURE', f.ref);
 
-    const amountClean =
-        parseFloat(f.amount.replace(/[€\s]/g, '').replace(',', '.')) || 0;
-    const ht =
-        amountClean > 0
-            ? (amountClean / 1.2).toFixed(2).replace('.', ',')
-            : '0,00';
-    const tva =
-        amountClean > 0
-            ? (amountClean - amountClean / 1.2).toFixed(2).replace('.', ',')
-            : '0,00';
-    const ttc =
-        amountClean > 0 ? amountClean.toFixed(2).replace('.', ',') : '0,00';
+    const amountClean = parseFloat(f.amount.replace(/[€\s]/g, '').replace(',', '.')) || 0;
+    const ht = amountClean > 0 ? (amountClean / 1.2).toFixed(2).replace('.', ',') : '0,00';
+    const tva = amountClean > 0 ? (amountClean - amountClean / 1.2).toFixed(2).replace('.', ',') : '0,00';
+    const ttc = amountClean > 0 ? amountClean.toFixed(2).replace('.', ',') : '0,00';
 
     const y = 47;
 
@@ -371,13 +332,7 @@ export async function exportFacturePdf(f: FactureData) {
         88,
         44,
         'Détails du document',
-        [
-            f.ref,
-            `Statut : ${f.status}`,
-            `Priorité : ${f.priority}`,
-            `Échéance : ${f.due}`,
-            `Service : ${f.service}`,
-        ],
+        [f.ref, `Statut : ${f.status}`, `Priorité : ${f.priority}`, `Échéance : ${f.due}`, `Service : ${f.service}`],
         true,
     );
 
@@ -387,13 +342,7 @@ export async function exportFacturePdf(f: FactureData) {
         startY: y + 51,
         head: [['Description', 'Qté', 'Prix unitaire HT', 'TVA', 'Total TTC']],
         body: [
-            [
-                `${f.service}\nPrestation Transvirex — réf. ${f.ref}`,
-                '1',
-                `€ ${ht}`,
-                '20 %',
-                f.amount,
-            ],
+            [`${f.service}\nPrestation Transvirex — réf. ${f.ref}`, '1', `€ ${ht}`, '20 %', f.amount],
             ['Frais de traitement & manutention', '1', '€ 0,00', '—', '€ 0,00'],
         ],
         columnStyles: {
@@ -450,11 +399,7 @@ export async function exportFacturePdf(f: FactureData) {
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(7);
     doc.setTextColor(...Mt);
-    doc.text(
-        'Règlement litige : Tribunal de Commerce de Paris — www.transvirex.fr/cgu',
-        19,
-        noteY + 11,
-    );
+    doc.text('Règlement litige : Tribunal de Commerce de Paris — www.transvirex.fr/cgu', 19, noteY + 11);
 
     footer(doc);
     doc.save(`${f.ref}.pdf`);
@@ -509,44 +454,16 @@ export async function exportBonCommandePdf(b: BonCommandeData) {
     const kW = (PW - 28 - 8) / 3;
     kpiBox(doc, 14, y + 50, kW, '1', 'Prestation', false);
     kpiBox(doc, 14 + kW + 4, y + 50, kW, b.amount, 'Montant total', true);
-    kpiBox(
-        doc,
-        14 + (kW + 4) * 2,
-        y + 50,
-        kW,
-        b.due,
-        'Livraison prévue',
-        false,
-    );
+    kpiBox(doc, 14 + (kW + 4) * 2, y + 50, kW, b.due, 'Livraison prévue', false);
 
     // Items table
     autoTable(doc, {
         ...baseTable,
         startY: y + 76,
-        head: [
-            [
-                'Désignation',
-                'Prestation / Description',
-                'Qté',
-                'Prix unitaire',
-                'Montant',
-            ],
-        ],
+        head: [['Désignation', 'Prestation / Description', 'Qté', 'Prix unitaire', 'Montant']],
         body: [
-            [
-                b.service,
-                `Transport — ${b.ref}\nTransvirex SAS`,
-                '1',
-                b.amount,
-                b.amount,
-            ],
-            [
-                'Frais administratifs',
-                'Gestion de dossier transport',
-                '1',
-                '€ 0,00',
-                '€ 0,00',
-            ],
+            [b.service, `Transport — ${b.ref}\nTransvirex SAS`, '1', b.amount, b.amount],
+            ['Frais administratifs', 'Gestion de dossier transport', '1', '€ 0,00', '€ 0,00'],
         ],
         columnStyles: {
             0: { cellWidth: 38 },
@@ -685,50 +602,15 @@ export async function exportOrdreMissionPdf(m: MissionData) {
 
     // KPIs
     const kW = (PW - 28 - 8) / 3;
-    kpiBox(
-        doc,
-        14,
-        y + 52,
-        kW,
-        String(m.deliveries.length),
-        'Livraisons assignées',
-        false,
-    );
-    kpiBox(
-        doc,
-        14 + kW + 4,
-        y + 52,
-        kW,
-        m.deliveries[0]?.time ?? '—',
-        'Heure de départ',
-        true,
-    );
-    kpiBox(
-        doc,
-        14 + (kW + 4) * 2,
-        y + 52,
-        kW,
-        m.deliveries.at(-1)?.time ?? '—',
-        'Heure fin prévue',
-        false,
-    );
+    kpiBox(doc, 14, y + 52, kW, String(m.deliveries.length), 'Livraisons assignées', false);
+    kpiBox(doc, 14 + kW + 4, y + 52, kW, m.deliveries[0]?.time ?? '—', 'Heure de départ', true);
+    kpiBox(doc, 14 + (kW + 4) * 2, y + 52, kW, m.deliveries.at(-1)?.time ?? '—', 'Heure fin prévue', false);
 
     // Deliveries table
     autoTable(doc, {
         ...baseTable,
         startY: y + 78,
-        head: [
-            [
-                '#',
-                'Référence',
-                'Adresse & Ville',
-                'Destinataire',
-                'Heure',
-                'Colis',
-                'Observations',
-                'Signature',
-            ],
-        ],
+        head: [['#', 'Référence', 'Adresse & Ville', 'Destinataire', 'Heure', 'Colis', 'Observations', 'Signature']],
         body: m.deliveries.map((d) => [
             String(d.stop),
             d.ref,
@@ -803,11 +685,7 @@ export async function exportOrdreMissionPdf(m: MissionData) {
     doc.setFontSize(7.5);
     doc.setTextColor(...Mt);
     doc.text(`Nom : ${m.driverName}`, 19, sigY + 14);
-    doc.text(
-        'Prise en charge le :  ____/____/______  à  ____h____',
-        19,
-        sigY + 20,
-    );
+    doc.text('Prise en charge le :  ____/____/______  à  ____h____', 19, sigY + 20);
     doc.setDrawColor(...Bx);
     doc.setLineWidth(0.4);
     doc.line(19, sigY + 28, 14 + sW - 5, sigY + 28);

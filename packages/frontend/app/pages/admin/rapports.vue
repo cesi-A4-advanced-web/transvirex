@@ -4,13 +4,9 @@
             <div class="flex items-center justify-between">
                 <div>
                     <h1 class="text-2xl font-bold tracking-tight">Rapports</h1>
-                    <p class="text-muted-foreground text-sm mt-1">
-                        Indicateurs de performance
-                    </p>
+                    <p class="text-muted-foreground text-sm mt-1">Indicateurs de performance</p>
                 </div>
-                <Button variant="outline"
-                    ><Download class="w-4 h-4 mr-2" />Exporter</Button
-                >
+                <Button variant="outline"><Download class="w-4 h-4 mr-2" />Exporter</Button>
             </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
@@ -20,14 +16,7 @@
                         <CardTitle class="text-2xl">{{ kpi.value }}</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <p
-                            class="text-xs"
-                            :class="
-                                kpi.trend >= 0
-                                    ? 'text-green-600'
-                                    : 'text-red-500'
-                            "
-                        >
+                        <p class="text-xs" :class="kpi.trend >= 0 ? 'text-green-600' : 'text-red-500'">
                             {{ kpi.trend >= 0 ? '▲' : '▼' }}
                             {{ Math.abs(kpi.trend) }}% ce mois
                         </p>
@@ -37,22 +26,11 @@
 
             <div class="grid grid-cols-1 xl:grid-cols-2 gap-4">
                 <Card>
-                    <CardHeader
-                        ><CardTitle class="text-base"
-                            >Livraisons par statut</CardTitle
-                        ></CardHeader
-                    >
+                    <CardHeader><CardTitle class="text-base">Livraisons par statut</CardTitle></CardHeader>
                     <CardContent>
                         <div class="space-y-3">
-                            <div
-                                v-for="stat in deliveryStats"
-                                :key="stat.label"
-                                class="flex items-center gap-3"
-                            >
-                                <span
-                                    class="text-sm text-muted-foreground w-24 flex-shrink-0"
-                                    >{{ stat.label }}</span
-                                >
+                            <div v-for="stat in deliveryStats" :key="stat.label" class="flex items-center gap-3">
+                                <span class="text-sm text-muted-foreground w-24 flex-shrink-0">{{ stat.label }}</span>
                                 <div class="flex-1 bg-muted rounded-full h-2">
                                     <div
                                         class="h-2 rounded-full transition-all"
@@ -60,41 +38,27 @@
                                         :style="{ width: stat.pct + '%' }"
                                     />
                                 </div>
-                                <span
-                                    class="text-sm font-semibold w-10 text-right"
-                                    >{{ stat.count }}</span
-                                >
+                                <span class="text-sm font-semibold w-10 text-right">{{ stat.count }}</span>
                             </div>
                         </div>
                     </CardContent>
                 </Card>
 
                 <Card>
-                    <CardHeader
-                        ><CardTitle class="text-base"
-                            >Performance par hub</CardTitle
-                        ></CardHeader
-                    >
+                    <CardHeader><CardTitle class="text-base">Performance par hub</CardTitle></CardHeader>
                     <CardContent class="p-0">
                         <Table>
                             <TableHeader>
                                 <TableRow>
                                     <TableHead>Hub</TableHead>
-                                    <TableHead class="text-right"
-                                        >Livraisons</TableHead
-                                    >
-                                    <TableHead class="text-right"
-                                        >Taux succès</TableHead
-                                    >
+                                    <TableHead class="text-right">Livraisons</TableHead>
+                                    <TableHead class="text-right">Taux succès</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
                                 <TableRow v-for="h in hubPerf" :key="h.name">
                                     <TableCell>{{ h.name }}</TableCell>
-                                    <TableCell
-                                        class="text-right text-muted-foreground"
-                                        >{{ h.deliveries }}</TableCell
-                                    >
+                                    <TableCell class="text-right text-muted-foreground">{{ h.deliveries }}</TableCell>
                                     <TableCell
                                         class="text-right font-semibold"
                                         :class="
@@ -118,21 +82,8 @@
 
 <script setup lang="ts">
 import { Button } from '@/components/ui/button';
-import {
-    Card,
-    CardHeader,
-    CardTitle,
-    CardDescription,
-    CardContent,
-} from '@/components/ui/card';
-import {
-    Table,
-    TableHeader,
-    TableRow,
-    TableHead,
-    TableBody,
-    TableCell,
-} from '@/components/ui/table';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
+import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/table';
 import { Download } from 'lucide-vue-next';
 
 definePageMeta({ layout: false });

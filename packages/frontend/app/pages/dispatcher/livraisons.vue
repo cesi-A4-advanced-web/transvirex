@@ -3,12 +3,8 @@
         <div class="space-y-4">
             <div class="flex items-center justify-between">
                 <div>
-                    <h1 class="text-2xl font-bold tracking-tight">
-                        Livraisons
-                    </h1>
-                    <p class="text-muted-foreground text-sm mt-1">
-                        Suivi et assignation
-                    </p>
+                    <h1 class="text-2xl font-bold tracking-tight">Livraisons</h1>
+                    <p class="text-muted-foreground text-sm mt-1">Suivi et assignation</p>
                 </div>
                 <Button><Plus class="w-4 h-4 mr-2" />Planifier</Button>
             </div>
@@ -38,14 +34,8 @@
             <Card>
                 <CardContent class="p-4">
                     <div class="relative max-w-sm">
-                        <Search
-                            class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground"
-                        />
-                        <Input
-                            v-model="search"
-                            placeholder="Référence, client..."
-                            class="pl-9"
-                        />
+                        <Search class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                        <Input v-model="search" placeholder="Référence, client..." class="pl-9" />
                     </div>
                 </CardContent>
             </Card>
@@ -66,27 +56,15 @@
                         </TableHeader>
                         <TableBody>
                             <TableRow v-for="d in filtered" :key="d.ref">
-                                <TableCell
-                                    class="font-mono text-xs text-muted-foreground"
-                                    >{{ d.ref }}</TableCell
-                                >
-                                <TableCell class="font-medium">{{
-                                    d.client
-                                }}</TableCell>
+                                <TableCell class="font-mono text-xs text-muted-foreground">{{ d.ref }}</TableCell>
+                                <TableCell class="font-medium">{{ d.client }}</TableCell>
                                 <TableCell>{{ d.destination }}</TableCell>
                                 <TableCell
-                                    ><Badge
-                                        :class="priorityClass(d.priority)"
-                                        >{{ d.priority }}</Badge
-                                    ></TableCell
+                                    ><Badge :class="priorityClass(d.priority)">{{ d.priority }}</Badge></TableCell
                                 >
-                                <TableCell class="text-muted-foreground">{{
-                                    d.driver || '—'
-                                }}</TableCell>
+                                <TableCell class="text-muted-foreground">{{ d.driver || '—' }}</TableCell>
                                 <TableCell
-                                    ><Badge :class="statusClass(d.status)">{{
-                                        d.status
-                                    }}</Badge></TableCell
+                                    ><Badge :class="statusClass(d.status)">{{ d.status }}</Badge></TableCell
                                 >
                                 <TableCell>
                                     <Button
@@ -96,20 +74,14 @@
                                         class="p-0 h-auto font-semibold text-primary"
                                         >Assigner</Button
                                     >
-                                    <Button
-                                        v-else
-                                        variant="ghost"
-                                        size="sm"
-                                        class="p-0 h-auto text-muted-foreground"
+                                    <Button v-else variant="ghost" size="sm" class="p-0 h-auto text-muted-foreground"
                                         >Détails</Button
                                     >
                                 </TableCell>
                             </TableRow>
                         </TableBody>
                     </Table>
-                    <div
-                        class="px-4 py-3 border-t text-xs text-muted-foreground"
-                    >
+                    <div class="px-4 py-3 border-t text-xs text-muted-foreground">
                         {{ filtered.length }} livraison(s)
                     </div>
                 </CardContent>
@@ -123,14 +95,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import {
-    Table,
-    TableHeader,
-    TableRow,
-    TableHead,
-    TableBody,
-    TableCell,
-} from '@/components/ui/table';
+import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/table';
 import { Plus, Search } from 'lucide-vue-next';
 
 definePageMeta({ layout: false });
@@ -230,12 +195,9 @@ function statusClass(s: string) {
         (
             {
                 Livré: 'bg-green-100 text-green-700 border-green-200 hover:bg-green-100',
-                'En cours':
-                    'bg-blue-100 text-blue-700 border-blue-200 hover:bg-blue-100',
-                'En attente':
-                    'bg-yellow-100 text-yellow-700 border-yellow-200 hover:bg-yellow-100',
-                Retardé:
-                    'bg-red-100 text-red-700 border-red-200 hover:bg-red-100',
+                'En cours': 'bg-blue-100 text-blue-700 border-blue-200 hover:bg-blue-100',
+                'En attente': 'bg-yellow-100 text-yellow-700 border-yellow-200 hover:bg-yellow-100',
+                Retardé: 'bg-red-100 text-red-700 border-red-200 hover:bg-red-100',
             } as Record<string, string>
         )[s] ?? ''
     );
@@ -247,8 +209,7 @@ function priorityClass(p: string) {
             {
                 Urgent: 'bg-red-100 text-red-700 border-red-200 hover:bg-red-100',
                 High: 'bg-orange-100 text-orange-700 border-orange-200 hover:bg-orange-100',
-                Standard:
-                    'bg-blue-100 text-blue-700 border-blue-200 hover:bg-blue-100',
+                Standard: 'bg-blue-100 text-blue-700 border-blue-200 hover:bg-blue-100',
                 Low: 'bg-gray-100 text-gray-500 border-gray-200 hover:bg-gray-100',
             } as Record<string, string>
         )[p] ?? ''

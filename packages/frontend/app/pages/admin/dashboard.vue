@@ -3,9 +3,7 @@
         <div class="space-y-6">
             <div>
                 <h1 class="text-2xl font-bold tracking-tight">Dashboard</h1>
-                <p class="text-muted-foreground text-sm mt-1">
-                    Vue d'ensemble des opérations
-                </p>
+                <p class="text-muted-foreground text-sm mt-1">Vue d'ensemble des opérations</p>
             </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
@@ -17,16 +15,9 @@
                     <CardContent>
                         <div
                             class="flex items-center gap-1 text-xs"
-                            :class="
-                                kpi.trend >= 0
-                                    ? 'text-green-600'
-                                    : 'text-red-500'
-                            "
+                            :class="kpi.trend >= 0 ? 'text-green-600' : 'text-red-500'"
                         >
-                            <TrendingUp
-                                v-if="kpi.trend >= 0"
-                                class="w-3.5 h-3.5"
-                            />
+                            <TrendingUp v-if="kpi.trend >= 0" class="w-3.5 h-3.5" />
                             <TrendingDown v-else class="w-3.5 h-3.5" />
                             {{ Math.abs(kpi.trend) }}% vs hier
                         </div>
@@ -37,13 +28,8 @@
             <div class="grid grid-cols-1 xl:grid-cols-3 gap-4">
                 <Card class="xl:col-span-2">
                     <CardHeader>
-                        <CardTitle class="text-base"
-                            >Devis / Bons de commande / Factures</CardTitle
-                        >
-                        <CardDescription
-                            >Comparaison mensuelle — 6 derniers
-                            mois</CardDescription
-                        >
+                        <CardTitle class="text-base">Devis / Bons de commande / Factures</CardTitle>
+                        <CardDescription>Comparaison mensuelle — 6 derniers mois</CardDescription>
                     </CardHeader>
                     <CardContent>
                         <ClientOnly>
@@ -51,9 +37,7 @@
                                 <Bar :data="barData" :options="barOptions" />
                             </div>
                             <template #fallback>
-                                <div
-                                    class="h-64 bg-muted/30 rounded-lg animate-pulse"
-                                />
+                                <div class="h-64 bg-muted/30 rounded-lg animate-pulse" />
                             </template>
                         </ClientOnly>
                     </CardContent>
@@ -61,30 +45,19 @@
 
                 <Card>
                     <CardHeader>
-                        <CardTitle class="text-base"
-                            >Statuts de livraisons</CardTitle
-                        >
-                        <CardDescription
-                            >Répartition du mois en cours</CardDescription
-                        >
+                        <CardTitle class="text-base">Statuts de livraisons</CardTitle>
+                        <CardDescription>Répartition du mois en cours</CardDescription>
                     </CardHeader>
                     <CardContent class="flex flex-col items-center">
                         <ClientOnly>
                             <div class="h-52 w-52">
-                                <Doughnut
-                                    :data="doughnutData"
-                                    :options="doughnutOptions"
-                                />
+                                <Doughnut :data="doughnutData" :options="doughnutOptions" />
                             </div>
                             <template #fallback>
-                                <div
-                                    class="h-52 w-52 rounded-full bg-muted/30 animate-pulse"
-                                />
+                                <div class="h-52 w-52 rounded-full bg-muted/30 animate-pulse" />
                             </template>
                         </ClientOnly>
-                        <div
-                            class="mt-4 grid grid-cols-2 gap-x-6 gap-y-1.5 text-xs w-full"
-                        >
+                        <div class="mt-4 grid grid-cols-2 gap-x-6 gap-y-1.5 text-xs w-full">
                             <div
                                 v-for="(label, i) in doughnutData.labels"
                                 :key="String(label)"
@@ -93,19 +66,12 @@
                                 <span
                                     class="w-2.5 h-2.5 rounded-full flex-shrink-0"
                                     :style="{
-                                        background: String(
-                                            (
-                                                doughnutData.datasets[0]
-                                                    .backgroundColor as string[]
-                                            )[i],
-                                        ),
+                                        background: String((doughnutData.datasets[0].backgroundColor as string[])[i]),
                                     }"
                                 />
                                 <span>{{ label }}</span>
                                 <span class="text-muted-foreground ml-auto"
-                                    >{{
-                                        doughnutData.datasets[0].data[i]
-                                    }}%</span
+                                    >{{ doughnutData.datasets[0].data[i] }}%</span
                                 >
                             </div>
                         </div>
@@ -116,9 +82,7 @@
             <div class="grid grid-cols-1 xl:grid-cols-2 gap-4">
                 <Card>
                     <CardHeader>
-                        <CardTitle class="text-base"
-                            >Livraisons — 30 derniers jours</CardTitle
-                        >
+                        <CardTitle class="text-base">Livraisons — 30 derniers jours</CardTitle>
                         <CardDescription>Évolution quotidienne</CardDescription>
                     </CardHeader>
                     <CardContent>
@@ -127,9 +91,7 @@
                                 <Line :data="lineData" :options="lineOptions" />
                             </div>
                             <template #fallback>
-                                <div
-                                    class="h-56 bg-muted/30 rounded-lg animate-pulse"
-                                />
+                                <div class="h-56 bg-muted/30 rounded-lg animate-pulse" />
                             </template>
                         </ClientOnly>
                     </CardContent>
@@ -137,25 +99,16 @@
 
                 <Card>
                     <CardHeader>
-                        <CardTitle class="text-base"
-                            >Projection CA mensuel</CardTitle
-                        >
-                        <CardDescription
-                            >Réalisé vs prévisionnel (€)</CardDescription
-                        >
+                        <CardTitle class="text-base">Projection CA mensuel</CardTitle>
+                        <CardDescription>Réalisé vs prévisionnel (€)</CardDescription>
                     </CardHeader>
                     <CardContent>
                         <ClientOnly>
                             <div class="h-56">
-                                <Line
-                                    :data="projectionData"
-                                    :options="projectionOptions"
-                                />
+                                <Line :data="projectionData" :options="projectionOptions" />
                             </div>
                             <template #fallback>
-                                <div
-                                    class="h-56 bg-muted/30 rounded-lg animate-pulse"
-                                />
+                                <div class="h-56 bg-muted/30 rounded-lg animate-pulse" />
                             </template>
                         </ClientOnly>
                     </CardContent>
@@ -163,15 +116,9 @@
             </div>
 
             <Card>
-                <CardHeader
-                    class="flex-row items-center justify-between space-y-0 pb-3"
-                >
+                <CardHeader class="flex-row items-center justify-between space-y-0 pb-3">
                     <CardTitle class="text-base">Livraisons récentes</CardTitle>
-                    <NuxtLink
-                        to="/admin/livraisons"
-                        class="text-xs text-primary hover:underline"
-                        >Voir tout →</NuxtLink
-                    >
+                    <NuxtLink to="/admin/livraisons" class="text-xs text-primary hover:underline">Voir tout →</NuxtLink>
                 </CardHeader>
                 <CardContent class="p-0">
                     <Table>
@@ -187,26 +134,14 @@
                         </TableHeader>
                         <TableBody>
                             <TableRow v-for="d in recentDeliveries" :key="d.id">
-                                <TableCell
-                                    class="font-mono text-xs text-muted-foreground"
-                                    >{{ d.id }}</TableCell
-                                >
+                                <TableCell class="font-mono text-xs text-muted-foreground">{{ d.id }}</TableCell>
                                 <TableCell>{{ d.destination }}</TableCell>
-                                <TableCell class="text-muted-foreground">{{
-                                    d.driver
-                                }}</TableCell>
-                                <TableCell class="text-muted-foreground">{{
-                                    d.client
-                                }}</TableCell>
+                                <TableCell class="text-muted-foreground">{{ d.driver }}</TableCell>
+                                <TableCell class="text-muted-foreground">{{ d.client }}</TableCell>
                                 <TableCell
-                                    ><Badge :class="statusClass(d.status)">{{
-                                        d.status
-                                    }}</Badge></TableCell
+                                    ><Badge :class="statusClass(d.status)">{{ d.status }}</Badge></TableCell
                                 >
-                                <TableCell
-                                    class="font-mono text-xs text-muted-foreground"
-                                    >{{ d.time }}</TableCell
-                                >
+                                <TableCell class="font-mono text-xs text-muted-foreground">{{ d.time }}</TableCell>
                             </TableRow>
                         </TableBody>
                     </Table>
@@ -231,22 +166,9 @@ import {
     ArcElement,
     Filler,
 } from 'chart.js';
-import {
-    Card,
-    CardHeader,
-    CardTitle,
-    CardDescription,
-    CardContent,
-} from '@/components/ui/card';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import {
-    Table,
-    TableHeader,
-    TableRow,
-    TableHead,
-    TableBody,
-    TableCell,
-} from '@/components/ui/table';
+import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/table';
 import { TrendingUp, TrendingDown } from 'lucide-vue-next';
 
 /** Register Chart.js components used across dashboard charts. */
@@ -334,12 +256,9 @@ function statusClass(s: string) {
         (
             {
                 Livré: 'bg-green-100 text-green-700 border-green-200 hover:bg-green-100',
-                'En cours':
-                    'bg-blue-100 text-blue-700 border-blue-200 hover:bg-blue-100',
-                'En attente':
-                    'bg-yellow-100 text-yellow-700 border-yellow-200 hover:bg-yellow-100',
-                Retardé:
-                    'bg-red-100 text-red-700 border-red-200 hover:bg-red-100',
+                'En cours': 'bg-blue-100 text-blue-700 border-blue-200 hover:bg-blue-100',
+                'En attente': 'bg-yellow-100 text-yellow-700 border-yellow-200 hover:bg-yellow-100',
+                Retardé: 'bg-red-100 text-red-700 border-red-200 hover:bg-red-100',
             } as Record<string, string>
         )[s] ?? ''
     );
@@ -401,13 +320,7 @@ const doughnutData = {
     datasets: [
         {
             data: [58, 18, 12, 7, 5],
-            backgroundColor: [
-                '#22c55e',
-                '#3b82f6',
-                '#f59e0b',
-                '#ef4444',
-                '#6b7280',
-            ],
+            backgroundColor: ['#22c55e', '#3b82f6', '#f59e0b', '#ef4444', '#6b7280'],
             borderWidth: 0,
             hoverOffset: 6,
         },
@@ -422,8 +335,7 @@ const doughnutOptions = {
         legend: { display: false },
         tooltip: {
             callbacks: {
-                label: (ctx: { label: string; parsed: number }) =>
-                    ` ${ctx.label}: ${ctx.parsed}%`,
+                label: (ctx: { label: string; parsed: number }) => ` ${ctx.label}: ${ctx.parsed}%`,
             },
         },
     },
@@ -432,16 +344,13 @@ const doughnutOptions = {
 
 /** Line chart data: daily delivery volume over 30 days. */
 const lineData = {
-    labels: Array.from({ length: 30 }, (_, i) =>
-        i % 5 === 0 ? `J-${29 - i}` : '',
-    ),
+    labels: Array.from({ length: 30 }, (_, i) => (i % 5 === 0 ? `J-${29 - i}` : '')),
     datasets: [
         {
             label: 'Livraisons',
             data: [
-                210, 225, 198, 240, 255, 230, 218, 262, 244, 258, 235, 270, 248,
-                232, 265, 278, 255, 242, 268, 283, 260, 247, 271, 289, 265, 253,
-                278, 294, 272, 247,
+                210, 225, 198, 240, 255, 230, 218, 262, 244, 258, 235, 270, 248, 232, 265, 278, 255, 242, 268, 283, 260,
+                247, 271, 289, 265, 253, 278, 294, 272, 247,
             ],
             borderColor: '#3b82f6',
             backgroundColor: 'rgba(59,130,246,0.08)',
@@ -469,37 +378,11 @@ const lineOptions = {
 
 /** Projection chart data: actual vs forecasted monthly revenue. */
 const projectionData = {
-    labels: [
-        'Jan',
-        'Fév',
-        'Mar',
-        'Avr',
-        'Mai',
-        'Jun',
-        'Jul',
-        'Aoû',
-        'Sep',
-        'Oct',
-        'Nov',
-        'Déc',
-    ],
+    labels: ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Jun', 'Jul', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc'],
     datasets: [
         {
             label: 'Réalisé',
-            data: [
-                98000,
-                105000,
-                112000,
-                108000,
-                124500,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-            ],
+            data: [98000, 105000, 112000, 108000, 124500, null, null, null, null, null, null, null],
             borderColor: '#3b82f6',
             backgroundColor: 'rgba(59,130,246,0.08)',
             fill: true,
@@ -509,20 +392,7 @@ const projectionData = {
         },
         {
             label: 'Prévisionnel',
-            data: [
-                null,
-                null,
-                null,
-                null,
-                124500,
-                131000,
-                138000,
-                142000,
-                135000,
-                148000,
-                155000,
-                162000,
-            ],
+            data: [null, null, null, null, 124500, 131000, 138000, 142000, 135000, 148000, 155000, 162000],
             borderColor: '#94a3b8',
             borderDash: [6, 3],
             backgroundColor: 'transparent',
@@ -546,13 +416,8 @@ const projectionOptions = {
             mode: 'index' as const,
             intersect: false,
             callbacks: {
-                label: (ctx: {
-                    dataset: { label?: string };
-                    parsed: { y: number | null };
-                }) =>
-                    ctx.parsed.y != null
-                        ? ` ${ctx.dataset.label}: € ${ctx.parsed.y.toLocaleString('fr-FR')}`
-                        : '',
+                label: (ctx: { dataset: { label?: string }; parsed: { y: number | null } }) =>
+                    ctx.parsed.y != null ? ` ${ctx.dataset.label}: € ${ctx.parsed.y.toLocaleString('fr-FR')}` : '',
             },
         },
     },

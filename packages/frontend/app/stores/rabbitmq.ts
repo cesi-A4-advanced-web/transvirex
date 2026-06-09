@@ -71,14 +71,11 @@ export const useRabbitMQStore = defineStore('rabbitmq', () => {
         selectedQueue.value = queue;
 
         try {
-            const res = await fetch(
-                `/api/debug/rabbitmq/queues/${encodeURIComponent(queue)}/messages`,
-                {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ count: 20 }),
-                },
-            );
+            const res = await fetch(`/api/debug/rabbitmq/queues/${encodeURIComponent(queue)}/messages`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ count: 20 }),
+            });
 
             if (!res.ok) {
                 const body = await res.json().catch(() => null);

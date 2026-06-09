@@ -3,23 +3,14 @@
         <div class="space-y-4">
             <div>
                 <h1 class="text-2xl font-bold tracking-tight">Chauffeurs</h1>
-                <p class="text-muted-foreground text-sm mt-1">
-                    Disponibilité et assignation
-                </p>
+                <p class="text-muted-foreground text-sm mt-1">Disponibilité et assignation</p>
             </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <Card v-for="stat in stats" :key="stat.label">
                     <CardContent class="p-4 flex items-center gap-4">
-                        <div
-                            class="w-10 h-10 rounded-full flex items-center justify-center"
-                            :class="stat.bg"
-                        >
-                            <component
-                                :is="stat.icon"
-                                class="w-5 h-5"
-                                :class="stat.color"
-                            />
+                        <div class="w-10 h-10 rounded-full flex items-center justify-center" :class="stat.bg">
+                            <component :is="stat.icon" class="w-5 h-5" :class="stat.color" />
                         </div>
                         <div>
                             <p class="text-2xl font-bold">{{ stat.value }}</p>
@@ -34,14 +25,8 @@
             <Card>
                 <CardContent class="p-4">
                     <div class="relative max-w-sm">
-                        <Search
-                            class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground"
-                        />
-                        <Input
-                            v-model="search"
-                            placeholder="Nom, hub..."
-                            class="pl-9"
-                        />
+                        <Search class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                        <Input v-model="search" placeholder="Nom, hub..." class="pl-9" />
                     </div>
                 </CardContent>
             </Card>
@@ -69,31 +54,16 @@
                                         >
                                             {{ initials(d.name) }}
                                         </div>
-                                        <span class="font-medium">{{
-                                            d.name
-                                        }}</span>
+                                        <span class="font-medium">{{ d.name }}</span>
                                     </div>
                                 </TableCell>
-                                <TableCell class="text-muted-foreground">{{
-                                    d.hub
-                                }}</TableCell>
+                                <TableCell class="text-muted-foreground">{{ d.hub }}</TableCell>
+                                <TableCell class="font-mono text-xs text-muted-foreground">{{ d.vehicle }}</TableCell>
+                                <TableCell class="text-yellow-500 font-semibold text-xs">★ {{ d.rating }}</TableCell>
                                 <TableCell
-                                    class="font-mono text-xs text-muted-foreground"
-                                    >{{ d.vehicle }}</TableCell
+                                    ><Badge :class="statusClass(d.status)">{{ d.status }}</Badge></TableCell
                                 >
-                                <TableCell
-                                    class="text-yellow-500 font-semibold text-xs"
-                                    >★ {{ d.rating }}</TableCell
-                                >
-                                <TableCell
-                                    ><Badge :class="statusClass(d.status)">{{
-                                        d.status
-                                    }}</Badge></TableCell
-                                >
-                                <TableCell
-                                    class="font-mono text-xs text-primary"
-                                    >{{ d.current || '—' }}</TableCell
-                                >
+                                <TableCell class="font-mono text-xs text-primary">{{ d.current || '—' }}</TableCell>
                             </TableRow>
                         </TableBody>
                     </Table>
@@ -106,14 +76,7 @@
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import {
-    Table,
-    TableHeader,
-    TableRow,
-    TableHead,
-    TableBody,
-    TableCell,
-} from '@/components/ui/table';
+import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/table';
 import { Search, Truck, UserCheck, UserX } from 'lucide-vue-next';
 definePageMeta({ layout: false });
 useHead({ title: 'Chauffeurs — Dispatcher' });
@@ -224,12 +187,9 @@ function statusClass(s: string) {
     return (
         (
             {
-                Disponible:
-                    'bg-green-100 text-green-700 border-green-200 hover:bg-green-100',
-                'En livraison':
-                    'bg-blue-100 text-blue-700 border-blue-200 hover:bg-blue-100',
-                Indisponible:
-                    'bg-gray-100 text-gray-500 border-gray-200 hover:bg-gray-100',
+                Disponible: 'bg-green-100 text-green-700 border-green-200 hover:bg-green-100',
+                'En livraison': 'bg-blue-100 text-blue-700 border-blue-200 hover:bg-blue-100',
+                Indisponible: 'bg-gray-100 text-gray-500 border-gray-200 hover:bg-gray-100',
             } as Record<string, string>
         )[s] ?? ''
     );

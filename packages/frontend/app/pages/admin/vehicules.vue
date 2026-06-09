@@ -4,9 +4,7 @@
             <div class="flex items-center justify-between">
                 <div>
                     <h1 class="text-2xl font-bold tracking-tight">Véhicules</h1>
-                    <p class="text-muted-foreground text-sm mt-1">
-                        Gestion de la flotte de véhicules
-                    </p>
+                    <p class="text-muted-foreground text-sm mt-1">Gestion de la flotte de véhicules</p>
                 </div>
                 <Button><Plus class="w-4 h-4 mr-2" />Nouveau véhicule</Button>
             </div>
@@ -26,20 +24,11 @@
                         </TableHeader>
                         <TableBody>
                             <TableRow v-for="v in vehicles" :key="v.ref">
-                                <TableCell
-                                    class="font-mono text-xs text-muted-foreground"
-                                    >{{ v.ref }}</TableCell
-                                >
-                                <TableCell class="font-medium">{{
-                                    v.type
-                                }}</TableCell>
-                                <TableCell class="font-mono text-sm">{{
-                                    v.plate
-                                }}</TableCell>
+                                <TableCell class="font-mono text-xs text-muted-foreground">{{ v.ref }}</TableCell>
+                                <TableCell class="font-medium">{{ v.type }}</TableCell>
+                                <TableCell class="font-mono text-sm">{{ v.plate }}</TableCell>
                                 <TableCell>{{ v.hub }}</TableCell>
-                                <TableCell class="text-muted-foreground">{{
-                                    v.driver || '—'
-                                }}</TableCell>
+                                <TableCell class="text-muted-foreground">{{ v.driver || '—' }}</TableCell>
                                 <TableCell>
                                     <Badge
                                         :class="
@@ -55,9 +44,7 @@
                             </TableRow>
                         </TableBody>
                     </Table>
-                    <div
-                        class="px-4 py-3 border-t text-xs text-muted-foreground"
-                    >
+                    <div class="px-4 py-3 border-t text-xs text-muted-foreground">
                         {{ vehicles.length }} véhicule(s)
                     </div>
                 </CardContent>
@@ -70,14 +57,7 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import {
-    Table,
-    TableHeader,
-    TableRow,
-    TableHead,
-    TableBody,
-    TableCell,
-} from '@/components/ui/table';
+import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/table';
 import { Plus } from 'lucide-vue-next';
 
 definePageMeta({ layout: false });

@@ -3,12 +3,8 @@
         <div class="space-y-4">
             <div class="flex items-center justify-between">
                 <div>
-                    <h1 class="text-2xl font-bold tracking-tight">
-                        Chauffeurs
-                    </h1>
-                    <p class="text-muted-foreground text-sm mt-1">
-                        Gestion de la flotte de chauffeurs
-                    </p>
+                    <h1 class="text-2xl font-bold tracking-tight">Chauffeurs</h1>
+                    <p class="text-muted-foreground text-sm mt-1">Gestion de la flotte de chauffeurs</p>
                 </div>
                 <Button><Plus class="w-4 h-4 mr-2" />Nouveau chauffeur</Button>
             </div>
@@ -16,14 +12,8 @@
             <Card>
                 <CardContent class="p-4">
                     <div class="relative max-w-sm">
-                        <Search
-                            class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground"
-                        />
-                        <Input
-                            v-model="search"
-                            placeholder="Nom, référence..."
-                            class="pl-9"
-                        />
+                        <Search class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                        <Input v-model="search" placeholder="Nom, référence..." class="pl-9" />
                     </div>
                 </CardContent>
             </Card>
@@ -44,10 +34,7 @@
                         </TableHeader>
                         <TableBody>
                             <TableRow v-for="d in filtered" :key="d.ref">
-                                <TableCell
-                                    class="font-mono text-xs text-muted-foreground"
-                                    >{{ d.ref }}</TableCell
-                                >
+                                <TableCell class="font-mono text-xs text-muted-foreground">{{ d.ref }}</TableCell>
                                 <TableCell>
                                     <div class="flex items-center gap-2.5">
                                         <div
@@ -55,23 +42,13 @@
                                         >
                                             {{ d.name.charAt(0) }}
                                         </div>
-                                        <span class="font-medium">{{
-                                            d.name
-                                        }}</span>
+                                        <span class="font-medium">{{ d.name }}</span>
                                     </div>
                                 </TableCell>
-                                <TableCell
-                                    class="text-xs text-muted-foreground"
-                                    >{{ d.email }}</TableCell
-                                >
-                                <TableCell class="text-muted-foreground">{{
-                                    d.vehicle
-                                }}</TableCell>
+                                <TableCell class="text-xs text-muted-foreground">{{ d.email }}</TableCell>
+                                <TableCell class="text-muted-foreground">{{ d.vehicle }}</TableCell>
                                 <TableCell>{{ d.hub }}</TableCell>
-                                <TableCell
-                                    class="text-yellow-500 font-semibold text-xs"
-                                    >★ {{ d.rating }}</TableCell
-                                >
+                                <TableCell class="text-yellow-500 font-semibold text-xs">★ {{ d.rating }}</TableCell>
                                 <TableCell>
                                     <Badge
                                         :class="
@@ -87,9 +64,7 @@
                             </TableRow>
                         </TableBody>
                     </Table>
-                    <div
-                        class="px-4 py-3 border-t text-xs text-muted-foreground"
-                    >
+                    <div class="px-4 py-3 border-t text-xs text-muted-foreground">
                         {{ filtered.length }} chauffeur(s)
                     </div>
                 </CardContent>
@@ -103,14 +78,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import {
-    Table,
-    TableHeader,
-    TableRow,
-    TableHead,
-    TableBody,
-    TableCell,
-} from '@/components/ui/table';
+import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/table';
 import { Plus, Search } from 'lucide-vue-next';
 
 definePageMeta({ layout: false });
@@ -188,10 +156,7 @@ const drivers = [
 const filtered = computed(() =>
     drivers.filter(
         (d) =>
-            !search.value ||
-            Object.values(d).some((v) =>
-                String(v).toLowerCase().includes(search.value.toLowerCase()),
-            ),
+            !search.value || Object.values(d).some((v) => String(v).toLowerCase().includes(search.value.toLowerCase())),
     ),
 );
 </script>

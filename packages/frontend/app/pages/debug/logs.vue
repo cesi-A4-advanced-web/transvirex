@@ -1,12 +1,6 @@
 <script setup lang="ts">
 import { Button } from '@/components/ui/button';
-import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle,
-} from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import {
     Dialog,
     DialogContent,
@@ -16,14 +10,7 @@ import {
     DialogTitle,
 } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from '@/components/ui/table';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useErrorLogger } from '@/composables/useErrorLogger';
 import type { LogEntry } from '@/stores/logs';
@@ -139,11 +126,7 @@ function testError() {
             <p class="text-gray-500">Consultation des logs applicatifs</p>
         </div>
 
-        <Tabs
-            default-value="backend"
-            class="w-full"
-            @update:model-value="onTabChange"
-        >
+        <Tabs default-value="backend" class="w-full" @update:model-value="onTabChange">
             <div class="flex items-center justify-between">
                 <TabsList>
                     <TabsTrigger value="backend">Backend</TabsTrigger>
@@ -157,40 +140,26 @@ function testError() {
                         <CardContent class="pt-6">
                             <div class="flex flex-wrap items-center gap-3">
                                 <div class="flex items-center gap-2">
-                                    <label
-                                        class="text-sm text-gray-500 whitespace-nowrap"
-                                        >Niveau</label
-                                    >
+                                    <label class="text-sm text-gray-500 whitespace-nowrap">Niveau</label>
                                     <select
                                         v-model="logs.backendFilters.level"
                                         @change="logs.fetchBackendLogs()"
                                         class="text-sm border border-gray-300 rounded-md px-2 py-1.5"
                                     >
-                                        <option
-                                            v-for="l in levels"
-                                            :key="l"
-                                            :value="l"
-                                        >
+                                        <option v-for="l in levels" :key="l" :value="l">
                                             {{ l }}
                                         </option>
                                     </select>
                                 </div>
                                 <div class="flex items-center gap-2">
-                                    <label
-                                        class="text-sm text-gray-500 whitespace-nowrap"
-                                        >Service</label
-                                    >
+                                    <label class="text-sm text-gray-500 whitespace-nowrap">Service</label>
                                     <select
                                         v-model="logs.backendFilters.service"
                                         @change="logs.fetchBackendLogs()"
                                         class="text-sm border border-gray-300 rounded-md px-2 py-1.5"
                                     >
                                         <option value="">Tous</option>
-                                        <option
-                                            v-for="s in logs.backendServices"
-                                            :key="s"
-                                            :value="s"
-                                        >
+                                        <option v-for="s in logs.backendServices" :key="s" :value="s">
                                             {{ s }}
                                         </option>
                                     </select>
@@ -226,12 +195,7 @@ function testError() {
                                         class="text-red-600 border-red-200 hover:bg-red-50"
                                         @click="confirmClear('backend')"
                                     >
-                                        <svg
-                                            class="w-4 h-4"
-                                            fill="none"
-                                            stroke="currentColor"
-                                            viewBox="0 0 24 24"
-                                        >
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path
                                                 stroke-linecap="round"
                                                 stroke-linejoin="round"
@@ -250,17 +214,12 @@ function testError() {
                         <CardHeader>
                             <CardTitle>Logs Backend</CardTitle>
                             <CardDescription v-if="logs.backendTotalCount > 0">
-                                {{ logs.backendTotalCount }} entrée{{
-                                    logs.backendTotalCount > 1 ? 's' : ''
-                                }}
+                                {{ logs.backendTotalCount }} entrée{{ logs.backendTotalCount > 1 ? 's' : '' }}
                             </CardDescription>
                         </CardHeader>
                         <CardContent>
                             <div
-                                v-if="
-                                    logs.loading &&
-                                    logs.backendLogs.length === 0
-                                "
+                                v-if="logs.loading && logs.backendLogs.length === 0"
                                 class="text-center py-12 text-gray-400"
                             >
                                 Chargement...
@@ -271,10 +230,7 @@ function testError() {
                             >
                                 {{ logs.error }}
                             </div>
-                            <div
-                                v-else-if="logs.backendLogs.length === 0"
-                                class="text-center py-12 text-gray-400"
-                            >
+                            <div v-else-if="logs.backendLogs.length === 0" class="text-center py-12 text-gray-400">
                                 <svg
                                     class="w-16 h-16 mx-auto text-gray-300 mb-4"
                                     fill="none"
@@ -295,50 +251,28 @@ function testError() {
                                     <Table>
                                         <TableHeader>
                                             <TableRow>
-                                                <TableHead
-                                                    class="w-8"
-                                                ></TableHead>
-                                                <TableHead
-                                                    class="w-40 whitespace-nowrap"
-                                                    >Date</TableHead
-                                                >
-                                                <TableHead class="w-20"
-                                                    >Niveau</TableHead
-                                                >
-                                                <TableHead class="w-28"
-                                                    >Service</TableHead
-                                                >
-                                                <TableHead class="w-28"
-                                                    >Contexte</TableHead
-                                                >
+                                                <TableHead class="w-8"></TableHead>
+                                                <TableHead class="w-40 whitespace-nowrap">Date</TableHead>
+                                                <TableHead class="w-20">Niveau</TableHead>
+                                                <TableHead class="w-28">Service</TableHead>
+                                                <TableHead class="w-28">Contexte</TableHead>
                                                 <TableHead>Message</TableHead>
                                             </TableRow>
                                         </TableHeader>
                                         <TableBody>
-                                            <template
-                                                v-for="log in logs.backendLogs"
-                                                :key="log._id"
-                                            >
+                                            <template v-for="log in logs.backendLogs" :key="log._id">
                                                 <TableRow
                                                     class="cursor-pointer"
                                                     :class="{
-                                                        'bg-gray-50':
-                                                            expandedRows.has(
-                                                                log._id,
-                                                            ),
+                                                        'bg-gray-50': expandedRows.has(log._id),
                                                     }"
                                                     @click="toggleRow(log._id)"
                                                 >
-                                                    <TableCell
-                                                        class="text-gray-400"
-                                                    >
+                                                    <TableCell class="text-gray-400">
                                                         <svg
                                                             class="w-4 h-4 transition-transform"
                                                             :class="{
-                                                                'rotate-90':
-                                                                    expandedRows.has(
-                                                                        log._id,
-                                                                    ),
+                                                                'rotate-90': expandedRows.has(log._id),
                                                             }"
                                                             fill="none"
                                                             stroke="currentColor"
@@ -352,35 +286,21 @@ function testError() {
                                                             />
                                                         </svg>
                                                     </TableCell>
-                                                    <TableCell
-                                                        class="text-xs text-gray-500 whitespace-nowrap"
-                                                    >
-                                                        {{
-                                                            formatTimestamp(
-                                                                log.timestamp,
-                                                            )
-                                                        }}
+                                                    <TableCell class="text-xs text-gray-500 whitespace-nowrap">
+                                                        {{ formatTimestamp(log.timestamp) }}
                                                     </TableCell>
                                                     <TableCell>
                                                         <span
                                                             class="inline-flex items-center rounded-md border px-2 py-0.5 text-xs font-semibold"
-                                                            :class="
-                                                                levelColor(
-                                                                    log.level,
-                                                                )
-                                                            "
+                                                            :class="levelColor(log.level)"
                                                         >
                                                             {{ log.level }}
                                                         </span>
                                                     </TableCell>
-                                                    <TableCell
-                                                        class="text-sm text-gray-700"
-                                                    >
+                                                    <TableCell class="text-sm text-gray-700">
                                                         {{ log.service || '-' }}
                                                     </TableCell>
-                                                    <TableCell
-                                                        class="text-sm text-gray-700 max-w-32 truncate"
-                                                    >
+                                                    <TableCell class="text-sm text-gray-700 max-w-32 truncate">
                                                         {{ log.context || '-' }}
                                                     </TableCell>
                                                     <TableCell
@@ -390,27 +310,11 @@ function testError() {
                                                         {{ log.message }}
                                                     </TableCell>
                                                 </TableRow>
-                                                <TableRow
-                                                    v-if="
-                                                        expandedRows.has(
-                                                            log._id,
-                                                        )
-                                                    "
-                                                    class="bg-gray-50"
-                                                >
+                                                <TableRow v-if="expandedRows.has(log._id)" class="bg-gray-50">
                                                     <TableCell></TableCell>
-                                                    <TableCell
-                                                        colspan="5"
-                                                        class="p-4"
-                                                    >
+                                                    <TableCell colspan="5" class="p-4">
                                                         <div class="space-y-2">
-                                                            <div
-                                                                v-if="
-                                                                    log.metadata
-                                                                        ?.trace
-                                                                "
-                                                                class="space-y-1"
-                                                            >
+                                                            <div v-if="log.metadata?.trace" class="space-y-1">
                                                                 <p
                                                                     class="text-xs font-semibold text-gray-500 uppercase"
                                                                 >
@@ -418,21 +322,10 @@ function testError() {
                                                                 </p>
                                                                 <pre
                                                                     class="text-xs text-red-600 bg-red-50 border border-red-200 rounded p-3 overflow-auto max-h-40"
-                                                                    >{{
-                                                                        log
-                                                                            .metadata
-                                                                            .trace
-                                                                    }}</pre
+                                                                    >{{ log.metadata.trace }}</pre
                                                                 >
                                                             </div>
-                                                            <div
-                                                                v-if="
-                                                                    hasMetadata(
-                                                                        log,
-                                                                    )
-                                                                "
-                                                                class="space-y-1"
-                                                            >
+                                                            <div v-if="hasMetadata(log)" class="space-y-1">
                                                                 <p
                                                                     class="text-xs font-semibold text-gray-500 uppercase"
                                                                 >
@@ -440,13 +333,7 @@ function testError() {
                                                                 </p>
                                                                 <pre
                                                                     class="text-xs text-gray-600 bg-white border border-gray-200 rounded p-3 overflow-auto max-h-60"
-                                                                    >{{
-                                                                        JSON.stringify(
-                                                                            log.metadata,
-                                                                            null,
-                                                                            2,
-                                                                        )
-                                                                    }}</pre
+                                                                    >{{ JSON.stringify(log.metadata, null, 2) }}</pre
                                                                 >
                                                             </div>
                                                         </div>
@@ -461,33 +348,20 @@ function testError() {
                                     v-if="logs.backendTotalPages > 1"
                                     class="flex items-center justify-between mt-4 pt-4 border-t border-gray-200"
                                 >
-                                    <div
-                                        class="flex items-center gap-2 text-sm text-gray-500"
-                                    >
-                                        <span
-                                            >Page
-                                            {{ logs.backendFilters.page }} /
-                                            {{ logs.backendTotalPages }}</span
-                                        >
+                                    <div class="flex items-center gap-2 text-sm text-gray-500">
+                                        <span>Page {{ logs.backendFilters.page }} / {{ logs.backendTotalPages }}</span>
                                     </div>
                                     <div class="flex items-center gap-2">
                                         <Button
                                             variant="outline"
                                             size="sm"
-                                            :disabled="
-                                                logs.backendFilters.page <= 1
-                                            "
+                                            :disabled="logs.backendFilters.page <= 1"
                                             @click="
                                                 logs.backendFilters.page--;
                                                 logs.fetchBackendLogs();
                                             "
                                         >
-                                            <svg
-                                                class="w-4 h-4"
-                                                fill="none"
-                                                stroke="currentColor"
-                                                viewBox="0 0 24 24"
-                                            >
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path
                                                     stroke-linecap="round"
                                                     stroke-linejoin="round"
@@ -496,9 +370,7 @@ function testError() {
                                                 />
                                             </svg>
                                         </Button>
-                                        <span
-                                            class="text-sm text-gray-600 min-w-16 text-center"
-                                        >
+                                        <span class="text-sm text-gray-600 min-w-16 text-center">
                                             Page
                                             {{ logs.backendFilters.page }} /
                                             {{ logs.backendTotalPages }}
@@ -506,21 +378,13 @@ function testError() {
                                         <Button
                                             variant="outline"
                                             size="sm"
-                                            :disabled="
-                                                logs.backendFilters.page >=
-                                                logs.backendTotalPages
-                                            "
+                                            :disabled="logs.backendFilters.page >= logs.backendTotalPages"
                                             @click="
                                                 logs.backendFilters.page++;
                                                 logs.fetchBackendLogs();
                                             "
                                         >
-                                            <svg
-                                                class="w-4 h-4"
-                                                fill="none"
-                                                stroke="currentColor"
-                                                viewBox="0 0 24 24"
-                                            >
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path
                                                     stroke-linecap="round"
                                                     stroke-linejoin="round"
@@ -531,16 +395,10 @@ function testError() {
                                         </Button>
                                     </div>
                                     <div class="flex items-center gap-2">
-                                        <label
-                                            class="text-sm text-gray-500"
-                                            for="backend-page-size"
-                                            >Par page</label
-                                        >
+                                        <label class="text-sm text-gray-500" for="backend-page-size">Par page</label>
                                         <select
                                             id="backend-page-size"
-                                            v-model="
-                                                logs.backendFilters.pageSize
-                                            "
+                                            v-model="logs.backendFilters.pageSize"
                                             @change="
                                                 logs.backendFilters.page = 1;
                                                 logs.fetchBackendLogs();
@@ -565,20 +423,13 @@ function testError() {
                         <CardContent class="pt-6">
                             <div class="flex flex-wrap items-center gap-3">
                                 <div class="flex items-center gap-2">
-                                    <label
-                                        class="text-sm text-gray-500 whitespace-nowrap"
-                                        >Niveau</label
-                                    >
+                                    <label class="text-sm text-gray-500 whitespace-nowrap">Niveau</label>
                                     <select
                                         v-model="logs.frontendFilters.level"
                                         @change="logs.fetchFrontendLogs()"
                                         class="text-sm border border-gray-300 rounded-md px-2 py-1.5"
                                     >
-                                        <option
-                                            v-for="l in levels"
-                                            :key="l"
-                                            :value="l"
-                                        >
+                                        <option v-for="l in levels" :key="l" :value="l">
                                             {{ l }}
                                         </option>
                                     </select>
@@ -609,11 +460,7 @@ function testError() {
                                         Actualiser
                                     </Button>
 
-                                    <Button
-                                        variant="outline"
-                                        size="sm"
-                                        @click="testError()"
-                                    >
+                                    <Button variant="outline" size="sm" @click="testError()">
                                         <TestTube2Icon class="w-4 h-4" />
                                         Tester
                                     </Button>
@@ -623,12 +470,7 @@ function testError() {
                                         class="text-red-600 border-red-200 hover:bg-red-50"
                                         @click="confirmClear('frontend')"
                                     >
-                                        <svg
-                                            class="w-4 h-4"
-                                            fill="none"
-                                            stroke="currentColor"
-                                            viewBox="0 0 24 24"
-                                        >
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path
                                                 stroke-linecap="round"
                                                 stroke-linejoin="round"
@@ -647,17 +489,12 @@ function testError() {
                         <CardHeader>
                             <CardTitle>Logs Frontend</CardTitle>
                             <CardDescription v-if="logs.frontendTotalCount > 0">
-                                {{ logs.frontendTotalCount }} entrée{{
-                                    logs.frontendTotalCount > 1 ? 's' : ''
-                                }}
+                                {{ logs.frontendTotalCount }} entrée{{ logs.frontendTotalCount > 1 ? 's' : '' }}
                             </CardDescription>
                         </CardHeader>
                         <CardContent>
                             <div
-                                v-if="
-                                    logs.loading &&
-                                    logs.frontendLogs.length === 0
-                                "
+                                v-if="logs.loading && logs.frontendLogs.length === 0"
                                 class="text-center py-12 text-gray-400"
                             >
                                 Chargement...
@@ -668,10 +505,7 @@ function testError() {
                             >
                                 {{ logs.error }}
                             </div>
-                            <div
-                                v-else-if="logs.frontendLogs.length === 0"
-                                class="text-center py-12 text-gray-400"
-                            >
+                            <div v-else-if="logs.frontendLogs.length === 0" class="text-center py-12 text-gray-400">
                                 <svg
                                     class="w-16 h-16 mx-auto text-gray-300 mb-4"
                                     fill="none"
@@ -692,44 +526,26 @@ function testError() {
                                     <Table>
                                         <TableHeader>
                                             <TableRow>
-                                                <TableHead
-                                                    class="w-8"
-                                                ></TableHead>
-                                                <TableHead
-                                                    class="w-40 whitespace-nowrap"
-                                                    >Date</TableHead
-                                                >
-                                                <TableHead class="w-20"
-                                                    >Niveau</TableHead
-                                                >
+                                                <TableHead class="w-8"></TableHead>
+                                                <TableHead class="w-40 whitespace-nowrap">Date</TableHead>
+                                                <TableHead class="w-20">Niveau</TableHead>
                                                 <TableHead>Message</TableHead>
                                             </TableRow>
                                         </TableHeader>
                                         <TableBody>
-                                            <template
-                                                v-for="log in logs.frontendLogs"
-                                                :key="log._id"
-                                            >
+                                            <template v-for="log in logs.frontendLogs" :key="log._id">
                                                 <TableRow
                                                     class="cursor-pointer"
                                                     :class="{
-                                                        'bg-gray-50':
-                                                            expandedRows.has(
-                                                                log._id,
-                                                            ),
+                                                        'bg-gray-50': expandedRows.has(log._id),
                                                     }"
                                                     @click="toggleRow(log._id)"
                                                 >
-                                                    <TableCell
-                                                        class="text-gray-400"
-                                                    >
+                                                    <TableCell class="text-gray-400">
                                                         <svg
                                                             class="w-4 h-4 transition-transform"
                                                             :class="{
-                                                                'rotate-90':
-                                                                    expandedRows.has(
-                                                                        log._id,
-                                                                    ),
+                                                                'rotate-90': expandedRows.has(log._id),
                                                             }"
                                                             fill="none"
                                                             stroke="currentColor"
@@ -743,23 +559,13 @@ function testError() {
                                                             />
                                                         </svg>
                                                     </TableCell>
-                                                    <TableCell
-                                                        class="text-xs text-gray-500 whitespace-nowrap"
-                                                    >
-                                                        {{
-                                                            formatTimestamp(
-                                                                log.timestamp,
-                                                            )
-                                                        }}
+                                                    <TableCell class="text-xs text-gray-500 whitespace-nowrap">
+                                                        {{ formatTimestamp(log.timestamp) }}
                                                     </TableCell>
                                                     <TableCell>
                                                         <span
                                                             class="inline-flex items-center rounded-md border px-2 py-0.5 text-xs font-semibold"
-                                                            :class="
-                                                                levelColor(
-                                                                    log.level,
-                                                                )
-                                                            "
+                                                            :class="levelColor(log.level)"
                                                         >
                                                             {{ log.level }}
                                                         </span>
@@ -771,39 +577,16 @@ function testError() {
                                                         {{ log.message }}
                                                     </TableCell>
                                                 </TableRow>
-                                                <TableRow
-                                                    v-if="
-                                                        expandedRows.has(
-                                                            log._id,
-                                                        )
-                                                    "
-                                                    class="bg-gray-50"
-                                                >
+                                                <TableRow v-if="expandedRows.has(log._id)" class="bg-gray-50">
                                                     <TableCell></TableCell>
-                                                    <TableCell
-                                                        colspan="3"
-                                                        class="p-4"
-                                                    >
-                                                        <div
-                                                            v-if="
-                                                                hasMetadata(log)
-                                                            "
-                                                            class="space-y-1"
-                                                        >
-                                                            <p
-                                                                class="text-xs font-semibold text-gray-500 uppercase"
-                                                            >
+                                                    <TableCell colspan="3" class="p-4">
+                                                        <div v-if="hasMetadata(log)" class="space-y-1">
+                                                            <p class="text-xs font-semibold text-gray-500 uppercase">
                                                                 Metadata
                                                             </p>
                                                             <pre
                                                                 class="text-xs text-gray-600 bg-white border border-gray-200 rounded p-3 overflow-auto max-h-60"
-                                                                >{{
-                                                                    JSON.stringify(
-                                                                        log.metadata,
-                                                                        null,
-                                                                        2,
-                                                                    )
-                                                                }}</pre
+                                                                >{{ JSON.stringify(log.metadata, null, 2) }}</pre
                                                             >
                                                         </div>
                                                     </TableCell>
@@ -817,33 +600,22 @@ function testError() {
                                     v-if="logs.frontendTotalPages > 1"
                                     class="flex items-center justify-between mt-4 pt-4 border-t border-gray-200"
                                 >
-                                    <div
-                                        class="flex items-center gap-2 text-sm text-gray-500"
-                                    >
+                                    <div class="flex items-center gap-2 text-sm text-gray-500">
                                         <span
-                                            >Page
-                                            {{ logs.frontendFilters.page }} /
-                                            {{ logs.frontendTotalPages }}</span
+                                            >Page {{ logs.frontendFilters.page }} / {{ logs.frontendTotalPages }}</span
                                         >
                                     </div>
                                     <div class="flex items-center gap-2">
                                         <Button
                                             variant="outline"
                                             size="sm"
-                                            :disabled="
-                                                logs.frontendFilters.page <= 1
-                                            "
+                                            :disabled="logs.frontendFilters.page <= 1"
                                             @click="
                                                 logs.frontendFilters.page--;
                                                 logs.fetchFrontendLogs();
                                             "
                                         >
-                                            <svg
-                                                class="w-4 h-4"
-                                                fill="none"
-                                                stroke="currentColor"
-                                                viewBox="0 0 24 24"
-                                            >
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path
                                                     stroke-linecap="round"
                                                     stroke-linejoin="round"
@@ -852,9 +624,7 @@ function testError() {
                                                 />
                                             </svg>
                                         </Button>
-                                        <span
-                                            class="text-sm text-gray-600 min-w-16 text-center"
-                                        >
+                                        <span class="text-sm text-gray-600 min-w-16 text-center">
                                             Page
                                             {{ logs.frontendFilters.page }} /
                                             {{ logs.frontendTotalPages }}
@@ -862,21 +632,13 @@ function testError() {
                                         <Button
                                             variant="outline"
                                             size="sm"
-                                            :disabled="
-                                                logs.frontendFilters.page >=
-                                                logs.frontendTotalPages
-                                            "
+                                            :disabled="logs.frontendFilters.page >= logs.frontendTotalPages"
                                             @click="
                                                 logs.frontendFilters.page++;
                                                 logs.fetchFrontendLogs();
                                             "
                                         >
-                                            <svg
-                                                class="w-4 h-4"
-                                                fill="none"
-                                                stroke="currentColor"
-                                                viewBox="0 0 24 24"
-                                            >
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path
                                                     stroke-linecap="round"
                                                     stroke-linejoin="round"
@@ -887,16 +649,10 @@ function testError() {
                                         </Button>
                                     </div>
                                     <div class="flex items-center gap-2">
-                                        <label
-                                            class="text-sm text-gray-500"
-                                            for="frontend-page-size"
-                                            >Par page</label
-                                        >
+                                        <label class="text-sm text-gray-500" for="frontend-page-size">Par page</label>
                                         <select
                                             id="frontend-page-size"
-                                            v-model="
-                                                logs.frontendFilters.pageSize
-                                            "
+                                            v-model="logs.frontendFilters.pageSize"
                                             @change="
                                                 logs.frontendFilters.page = 1;
                                                 logs.fetchFrontendLogs();
@@ -916,29 +672,19 @@ function testError() {
             </TabsContent>
         </Tabs>
 
-        <Dialog
-            :open="showClearDialog"
-            @update:open="showClearDialog = $event"
-            modal
-        >
+        <Dialog :open="showClearDialog" @update:open="showClearDialog = $event" modal>
             <DialogContent>
                 <DialogHeader>
                     <DialogTitle>Vider les logs</DialogTitle>
                     <DialogDescription>
                         Êtes-vous sûr de vouloir supprimer tous les logs
-                        {{
-                            clearTarget === 'backend' ? 'backend' : 'frontend'
-                        }}
+                        {{ clearTarget === 'backend' ? 'backend' : 'frontend' }}
                         ? Cette action est irréversible.
                     </DialogDescription>
                 </DialogHeader>
                 <DialogFooter>
-                    <Button variant="outline" @click="showClearDialog = false"
-                        >Annuler</Button
-                    >
-                    <Button variant="destructive" @click="handleClear"
-                        >Vider</Button
-                    >
+                    <Button variant="outline" @click="showClearDialog = false">Annuler</Button>
+                    <Button variant="destructive" @click="handleClear">Vider</Button>
                 </DialogFooter>
             </DialogContent>
         </Dialog>

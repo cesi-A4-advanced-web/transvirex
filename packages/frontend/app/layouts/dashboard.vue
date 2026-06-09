@@ -6,18 +6,10 @@
             :class="collapsed ? 'w-16' : 'w-64'"
         >
             <!-- Logo + toggle -->
-            <div
-                class="flex items-center justify-between px-4 py-5 border-b border-white/10"
-            >
+            <div class="flex items-center justify-between px-4 py-5 border-b border-white/10">
                 <div v-if="!collapsed" class="overflow-hidden">
-                    <p
-                        class="text-xl font-bold text-white leading-none whitespace-nowrap"
-                    >
-                        Transvirex
-                    </p>
-                    <p class="text-xs text-blue-300 mt-0.5 whitespace-nowrap">
-                        Moving Intelligence
-                    </p>
+                    <p class="text-xl font-bold text-white leading-none whitespace-nowrap">Transvirex</p>
+                    <p class="text-xs text-blue-300 mt-0.5 whitespace-nowrap">Moving Intelligence</p>
                 </div>
                 <button
                     @click="collapsed = !collapsed"
@@ -56,25 +48,16 @@
                         <component
                             :is="item.icon"
                             class="w-5 h-5 flex-shrink-0"
-                            :class="
-                                isActive(item.href)
-                                    ? 'text-white'
-                                    : 'text-blue-300 group-hover/item:text-white'
-                            "
+                            :class="isActive(item.href) ? 'text-white' : 'text-blue-300 group-hover/item:text-white'"
                         />
-                        <span v-if="!collapsed" class="truncate">{{
-                            item.label
-                        }}</span>
+                        <span v-if="!collapsed" class="truncate">{{ item.label }}</span>
                     </NuxtLink>
                 </template>
             </nav>
 
             <!-- Profil + déconnexion -->
             <div class="border-t border-white/10 p-3">
-                <div
-                    v-if="!collapsed"
-                    class="flex items-center gap-3 px-2 py-2 mb-1 rounded-lg bg-white/5"
-                >
+                <div v-if="!collapsed" class="flex items-center gap-3 px-2 py-2 mb-1 rounded-lg bg-white/5">
                     <div
                         class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0"
                         :class="roleColor"
@@ -115,13 +98,9 @@
                 <div class="flex items-center gap-2 text-sm">
                     <span class="text-gray-400 font-medium">Transvirex</span>
                     <ChevronRight class="w-3.5 h-3.5 text-gray-300" />
-                    <span class="text-gray-400 capitalize">{{
-                        roleLabel
-                    }}</span>
+                    <span class="text-gray-400 capitalize">{{ roleLabel }}</span>
                     <ChevronRight class="w-3.5 h-3.5 text-gray-300" />
-                    <span class="font-semibold text-gray-800">{{
-                        pageTitle
-                    }}</span>
+                    <span class="font-semibold text-gray-800">{{ pageTitle }}</span>
                 </div>
 
                 <!-- Actions droite -->
@@ -130,13 +109,9 @@
                         class="relative p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
                     >
                         <Bell class="w-5 h-5" />
-                        <span
-                            class="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full ring-2 ring-white"
-                        />
+                        <span class="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full ring-2 ring-white" />
                     </button>
-                    <div
-                        class="flex items-center gap-2 pl-3 border-l border-gray-200 ml-1"
-                    >
+                    <div class="flex items-center gap-2 pl-3 border-l border-gray-200 ml-1">
                         <div
                             class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
                             :class="roleColor"
@@ -144,9 +119,7 @@
                             {{ userInitial }}
                         </div>
                         <div class="hidden sm:block">
-                            <p
-                                class="text-sm font-medium text-gray-800 leading-none"
-                            >
+                            <p class="text-sm font-medium text-gray-800 leading-none">
                                 {{ userName }}
                             </p>
                             <p class="text-xs text-gray-400 mt-0.5 capitalize">
@@ -213,14 +186,10 @@ function parseJwt(token: string): Record<string, unknown> | null {
 }
 
 /** Decoded JWT payload from the access token cookie. */
-const jwtPayload = computed(() =>
-    accessToken.value ? parseJwt(accessToken.value) : null,
-);
+const jwtPayload = computed(() => (accessToken.value ? parseJwt(accessToken.value) : null));
 
 /** Current user role extracted from JWT, defaults to 'dispatcher'. */
-const userRole = computed<Role>(
-    () => (jwtPayload.value?.role as Role) ?? 'dispatcher',
-);
+const userRole = computed<Role>(() => (jwtPayload.value?.role as Role) ?? 'dispatcher');
 
 /** Computed full user name from JWT firstname and lastname. */
 const userName = computed(() => {

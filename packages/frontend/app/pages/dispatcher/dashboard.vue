@@ -3,9 +3,7 @@
         <div class="space-y-6">
             <div>
                 <h1 class="text-2xl font-bold tracking-tight">Dashboard</h1>
-                <p class="text-muted-foreground text-sm mt-1">
-                    Opérations en temps réel
-                </p>
+                <p class="text-muted-foreground text-sm mt-1">Opérations en temps réel</p>
             </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
@@ -15,10 +13,7 @@
                         <CardTitle class="text-3xl">{{ kpi.value }}</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <p
-                            class="text-xs"
-                            :class="kpi.urgentColor ?? 'text-muted-foreground'"
-                        >
+                        <p class="text-xs" :class="kpi.urgentColor ?? 'text-muted-foreground'">
                             {{ kpi.sub }}
                         </p>
                     </CardContent>
@@ -27,19 +22,14 @@
 
             <div class="grid grid-cols-1 xl:grid-cols-3 gap-4">
                 <Card class="xl:col-span-2">
-                    <CardHeader
-                        class="flex-row items-center justify-between space-y-0 pb-3"
-                    >
+                    <CardHeader class="flex-row items-center justify-between space-y-0 pb-3">
                         <div class="flex items-center gap-2">
                             <CardTitle class="text-base">À assigner</CardTitle>
-                            <Badge
-                                class="bg-red-100 text-red-600 border-red-200 hover:bg-red-100"
-                                >{{ pendingDeliveries.length }}</Badge
-                            >
+                            <Badge class="bg-red-100 text-red-600 border-red-200 hover:bg-red-100">{{
+                                pendingDeliveries.length
+                            }}</Badge>
                         </div>
-                        <NuxtLink
-                            to="/dispatcher/livraisons"
-                            class="text-xs text-primary hover:underline"
+                        <NuxtLink to="/dispatcher/livraisons" class="text-xs text-primary hover:underline"
                             >Voir tout →</NuxtLink
                         >
                     </CardHeader>
@@ -56,33 +46,16 @@
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                <TableRow
-                                    v-for="d in pendingDeliveries"
-                                    :key="d.ref"
-                                >
-                                    <TableCell
-                                        class="font-mono text-xs text-muted-foreground"
-                                        >{{ d.ref }}</TableCell
-                                    >
-                                    <TableCell class="font-medium">{{
-                                        d.client
-                                    }}</TableCell>
+                                <TableRow v-for="d in pendingDeliveries" :key="d.ref">
+                                    <TableCell class="font-mono text-xs text-muted-foreground">{{ d.ref }}</TableCell>
+                                    <TableCell class="font-medium">{{ d.client }}</TableCell>
                                     <TableCell>{{ d.destination }}</TableCell>
                                     <TableCell
-                                        ><Badge
-                                            :class="priorityClass(d.priority)"
-                                            >{{ d.priority }}</Badge
-                                        ></TableCell
+                                        ><Badge :class="priorityClass(d.priority)">{{ d.priority }}</Badge></TableCell
                                     >
-                                    <TableCell
-                                        class="text-muted-foreground text-xs"
-                                        >{{ d.due }}</TableCell
-                                    >
+                                    <TableCell class="text-muted-foreground text-xs">{{ d.due }}</TableCell>
                                     <TableCell>
-                                        <Button
-                                            variant="link"
-                                            size="sm"
-                                            class="p-0 h-auto text-primary"
+                                        <Button variant="link" size="sm" class="p-0 h-auto text-primary"
                                             >Assigner</Button
                                         >
                                     </TableCell>
@@ -95,9 +68,7 @@
                 <div class="space-y-4">
                     <Card>
                         <CardHeader class="pb-3"
-                            ><CardTitle class="text-base"
-                                >Chauffeurs disponibles</CardTitle
-                            ></CardHeader
+                            ><CardTitle class="text-base">Chauffeurs disponibles</CardTitle></CardHeader
                         >
                         <CardContent class="space-y-2">
                             <div
@@ -115,30 +86,22 @@
                                         <p class="text-sm font-medium">
                                             {{ driver.name }}
                                         </p>
-                                        <p
-                                            class="text-xs text-muted-foreground"
-                                        >
+                                        <p class="text-xs text-muted-foreground">
                                             {{ driver.vehicle }}
                                         </p>
                                     </div>
                                 </div>
-                                <span
-                                    class="text-yellow-500 text-xs font-semibold"
-                                    >★ {{ driver.rating }}</span
-                                >
+                                <span class="text-yellow-500 text-xs font-semibold">★ {{ driver.rating }}</span>
                             </div>
                         </CardContent>
                     </Card>
 
                     <Card>
-                        <CardHeader
-                            class="flex-row items-center justify-between space-y-0 pb-3"
-                        >
+                        <CardHeader class="flex-row items-center justify-between space-y-0 pb-3">
                             <CardTitle class="text-base">Alertes</CardTitle>
-                            <Badge
-                                class="bg-orange-100 text-orange-600 border-orange-200 hover:bg-orange-100"
-                                >{{ alerts.length }}</Badge
-                            >
+                            <Badge class="bg-orange-100 text-orange-600 border-orange-200 hover:bg-orange-100">{{
+                                alerts.length
+                            }}</Badge>
                         </CardHeader>
                         <CardContent class="space-y-2">
                             <div
@@ -147,21 +110,12 @@
                                 class="flex items-start gap-2.5 py-2 px-3 rounded-lg"
                                 :class="alert.bg"
                             >
-                                <component
-                                    :is="alert.icon"
-                                    class="w-4 h-4 flex-shrink-0 mt-0.5"
-                                    :class="alert.color"
-                                />
+                                <component :is="alert.icon" class="w-4 h-4 flex-shrink-0 mt-0.5" :class="alert.color" />
                                 <div>
-                                    <p
-                                        class="text-xs font-semibold"
-                                        :class="alert.color"
-                                    >
+                                    <p class="text-xs font-semibold" :class="alert.color">
                                         {{ alert.ref }}
                                     </p>
-                                    <p
-                                        class="text-xs text-muted-foreground mt-0.5"
-                                    >
+                                    <p class="text-xs text-muted-foreground mt-0.5">
                                         {{ alert.message }}
                                     </p>
                                 </div>
@@ -176,30 +130,10 @@
 
 <script setup lang="ts">
 import { Button } from '@/components/ui/button';
-import {
-    Card,
-    CardHeader,
-    CardTitle,
-    CardDescription,
-    CardContent,
-} from '@/components/ui/card';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import {
-    Table,
-    TableHeader,
-    TableRow,
-    TableHead,
-    TableBody,
-    TableCell,
-} from '@/components/ui/table';
-import {
-    Truck,
-    Clock,
-    CheckCircle,
-    AlertTriangle,
-    XCircle,
-    Package,
-} from 'lucide-vue-next';
+import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/table';
+import { Truck, Clock, CheckCircle, AlertTriangle, XCircle, Package } from 'lucide-vue-next';
 
 definePageMeta({ layout: false });
 useHead({ title: 'Dashboard Dispatcher — Transvirex' });
@@ -311,8 +245,7 @@ function priorityClass(p: string) {
             {
                 Urgent: 'bg-red-100 text-red-700 border-red-200 hover:bg-red-100',
                 High: 'bg-orange-100 text-orange-700 border-orange-200 hover:bg-orange-100',
-                Standard:
-                    'bg-blue-100 text-blue-700 border-blue-200 hover:bg-blue-100',
+                Standard: 'bg-blue-100 text-blue-700 border-blue-200 hover:bg-blue-100',
                 Low: 'bg-gray-100 text-gray-500 border-gray-200 hover:bg-gray-100',
             } as Record<string, string>
         )[p] ?? ''

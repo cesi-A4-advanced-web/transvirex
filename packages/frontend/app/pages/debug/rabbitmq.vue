@@ -1,36 +1,16 @@
 <script setup lang="ts">
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle,
-} from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from '@/components/ui/table';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useRabbitMQStore } from '@/stores/rabbitmq';
 import { storeToRefs } from 'pinia';
 
 useHead({ title: 'RabbitMQ — Transvirex' });
 
 const rabbitmq = useRabbitMQStore();
-const {
-    queues,
-    selectedQueue,
-    messages,
-    loadingQueues,
-    loadingMessages,
-    error,
-} = storeToRefs(rabbitmq);
+const { queues, selectedQueue, messages, loadingQueues, loadingMessages, error } = storeToRefs(rabbitmq);
 
 onMounted(() => rabbitmq.fetchQueues());
 
@@ -53,17 +33,11 @@ function formatContent(raw: string): string {
     <div class="max-w-6xl mx-auto space-y-8">
         <div class="space-y-1">
             <h1 class="text-3xl font-bold text-slate-900">RabbitMQ</h1>
-            <p class="text-gray-500">
-                Visualiser les files d'attente et les messages
-            </p>
+            <p class="text-gray-500">Visualiser les files d'attente et les messages</p>
         </div>
 
         <div class="flex items-center gap-2">
-            <Button
-                @click="rabbitmq.fetchQueues()"
-                :disabled="loadingQueues"
-                size="sm"
-            >
+            <Button @click="rabbitmq.fetchQueues()" :disabled="loadingQueues" size="sm">
                 <svg
                     class="w-4 h-4"
                     :class="{ 'animate-spin': loadingQueues }"
@@ -85,27 +59,14 @@ function formatContent(raw: string): string {
         <Card>
             <CardHeader>
                 <CardTitle>Files d'attente</CardTitle>
-                <CardDescription>
-                    {{ queues.length }} file{{ queues.length > 1 ? 's' : '' }}
-                </CardDescription>
+                <CardDescription> {{ queues.length }} file{{ queues.length > 1 ? 's' : '' }} </CardDescription>
             </CardHeader>
             <CardContent>
-                <div
-                    v-if="loadingQueues"
-                    class="text-center py-8 text-gray-400"
-                >
-                    Chargement des files d'attente...
-                </div>
-                <div
-                    v-else-if="queues.length === 0 && !error"
-                    class="text-center py-8 text-gray-400"
-                >
+                <div v-if="loadingQueues" class="text-center py-8 text-gray-400">Chargement des files d'attente...</div>
+                <div v-else-if="queues.length === 0 && !error" class="text-center py-8 text-gray-400">
                     Aucune file d'attente trouvée
                 </div>
-                <div
-                    v-else-if="error"
-                    class="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg p-4"
-                >
+                <div v-else-if="error" class="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg p-4">
                     {{ error }}
                 </div>
                 <Table v-else>
@@ -113,9 +74,7 @@ function formatContent(raw: string): string {
                         <TableRow>
                             <TableHead>Nom</TableHead>
                             <TableHead class="text-right">Messages</TableHead>
-                            <TableHead class="text-right"
-                                >Consommateurs</TableHead
-                            >
+                            <TableHead class="text-right">Consommateurs</TableHead>
                             <TableHead>État</TableHead>
                             <TableHead></TableHead>
                         </TableRow>
@@ -132,11 +91,7 @@ function formatContent(raw: string): string {
                                 {{ q.name }}
                             </TableCell>
                             <TableCell class="text-right">
-                                <Badge
-                                    :variant="
-                                        q.messages > 0 ? 'default' : 'secondary'
-                                    "
-                                >
+                                <Badge :variant="q.messages > 0 ? 'default' : 'secondary'">
                                     {{ q.messages }}
                                 </Badge>
                             </TableCell>
@@ -144,13 +99,7 @@ function formatContent(raw: string): string {
                                 {{ q.consumers }}
                             </TableCell>
                             <TableCell>
-                                <Badge
-                                    :variant="
-                                        q.state === 'running'
-                                            ? 'outline'
-                                            : 'secondary'
-                                    "
-                                >
+                                <Badge :variant="q.state === 'running' ? 'outline' : 'secondary'">
                                     {{ q.state }}
                                 </Badge>
                             </TableCell>
@@ -177,49 +126,26 @@ function formatContent(raw: string): string {
                     <span class="font-mono text-sm">{{ selectedQueue }}</span>
                 </CardTitle>
                 <CardDescription>
-                    {{ messages.length }} message{{
+                    {{ messages.length }} message{{ messages.length > 1 ? 's' : '' }} récupéré{{
                         messages.length > 1 ? 's' : ''
                     }}
-                    récupéré{{ messages.length > 1 ? 's' : '' }}
                 </CardDescription>
             </CardHeader>
             <CardContent>
-                <div
-                    v-if="loadingMessages"
-                    class="text-center py-8 text-gray-400"
-                >
-                    Chargement des messages...
-                </div>
-                <div
-                    v-else-if="messages.length === 0"
-                    class="text-center py-8 text-gray-400"
-                >
+                <div v-if="loadingMessages" class="text-center py-8 text-gray-400">Chargement des messages...</div>
+                <div v-else-if="messages.length === 0" class="text-center py-8 text-gray-400">
                     Aucun message dans cette file d'attente
                 </div>
                 <ScrollArea v-else class="max-h-96">
                     <div class="space-y-4">
-                        <div
-                            v-for="(msg, i) in messages"
-                            :key="i"
-                            class="border border-gray-200 rounded-lg p-4"
-                        >
-                            <div
-                                class="flex items-center gap-2 text-xs text-gray-500 mb-2"
-                            >
-                                <Badge variant="outline" class="text-xs">
-                                    #{{ i + 1 }}
-                                </Badge>
+                        <div v-for="(msg, i) in messages" :key="i" class="border border-gray-200 rounded-lg p-4">
+                            <div class="flex items-center gap-2 text-xs text-gray-500 mb-2">
+                                <Badge variant="outline" class="text-xs"> #{{ i + 1 }} </Badge>
                                 <span
-                                    >Routing:
-                                    <code class="font-mono">{{
-                                        msg.routingKey || '(vide)'
-                                    }}</code></span
+                                    >Routing: <code class="font-mono">{{ msg.routingKey || '(vide)' }}</code></span
                                 >
                                 <span
-                                    >Exchange:
-                                    <code class="font-mono">{{
-                                        msg.exchange || '(vide)'
-                                    }}</code></span
+                                    >Exchange: <code class="font-mono">{{ msg.exchange || '(vide)' }}</code></span
                                 >
                             </div>
                             <pre

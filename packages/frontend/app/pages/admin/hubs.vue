@@ -4,9 +4,7 @@
             <div class="flex items-center justify-between">
                 <div>
                     <h1 class="text-2xl font-bold tracking-tight">Hubs</h1>
-                    <p class="text-muted-foreground text-sm mt-1">
-                        Centres de distribution
-                    </p>
+                    <p class="text-muted-foreground text-sm mt-1">Centres de distribution</p>
                 </div>
                 <Button><Plus class="w-4 h-4 mr-2" />Nouveau hub</Button>
             </div>
@@ -27,43 +25,26 @@
                                         : 'bg-gray-100 text-gray-500 border-gray-200 hover:bg-gray-100'
                                 "
                             >
-                                {{
-                                    hub.status === 'active'
-                                        ? 'Actif'
-                                        : 'Inactif'
-                                }}
+                                {{ hub.status === 'active' ? 'Actif' : 'Inactif' }}
                             </Badge>
                         </div>
-                        <CardTitle class="text-sm mt-3">{{
-                            hub.name
-                        }}</CardTitle>
-                        <CardDescription class="font-mono text-xs">{{
-                            hub.ref
-                        }}</CardDescription>
+                        <CardTitle class="text-sm mt-3">{{ hub.name }}</CardTitle>
+                        <CardDescription class="font-mono text-xs">{{ hub.ref }}</CardDescription>
                     </CardHeader>
                     <CardContent>
                         <div class="space-y-1.5 text-xs">
                             <div class="flex justify-between">
-                                <span class="text-muted-foreground"
-                                    >Adresse</span
-                                ><span>{{ hub.address }}</span>
+                                <span class="text-muted-foreground">Adresse</span><span>{{ hub.address }}</span>
                             </div>
                             <div class="flex justify-between">
-                                <span class="text-muted-foreground"
-                                    >Capacité/jour</span
-                                ><span class="font-semibold"
-                                    >{{ hub.capacity }} colis</span
-                                >
+                                <span class="text-muted-foreground">Capacité/jour</span
+                                ><span class="font-semibold">{{ hub.capacity }} colis</span>
                             </div>
                             <div class="flex justify-between">
-                                <span class="text-muted-foreground"
-                                    >Chauffeurs</span
-                                ><span>{{ hub.drivers }}</span>
+                                <span class="text-muted-foreground">Chauffeurs</span><span>{{ hub.drivers }}</span>
                             </div>
                             <div class="flex justify-between">
-                                <span class="text-muted-foreground"
-                                    >Téléphone</span
-                                ><span>{{ hub.phone }}</span>
+                                <span class="text-muted-foreground">Téléphone</span><span>{{ hub.phone }}</span>
                             </div>
                         </div>
                     </CardContent>
@@ -75,13 +56,7 @@
 
 <script setup lang="ts">
 import { Button } from '@/components/ui/button';
-import {
-    Card,
-    CardHeader,
-    CardTitle,
-    CardDescription,
-    CardContent,
-} from '@/components/ui/card';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Plus, Building2 } from 'lucide-vue-next';
 

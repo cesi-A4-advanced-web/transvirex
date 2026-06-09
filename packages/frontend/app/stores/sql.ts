@@ -209,17 +209,14 @@ export const useSqlStore = defineStore('sql', () => {
         tableError.value = null;
         selectedTable.value = table;
         try {
-            const res = await fetch(
-                `/api/debug/postgresql/tables/${encodeURIComponent(table)}/data`,
-                {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        page,
-                        pageSize: tablePageSize.value,
-                    }),
-                },
-            );
+            const res = await fetch(`/api/debug/postgresql/tables/${encodeURIComponent(table)}/data`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    page,
+                    pageSize: tablePageSize.value,
+                }),
+            });
             if (!res.ok) {
                 const body = await res.json().catch(() => null);
                 throw new Error(body?.message ?? `Erreur ${res.status}`);

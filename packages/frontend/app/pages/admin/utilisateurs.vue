@@ -3,12 +3,8 @@
         <div class="space-y-4">
             <div class="flex items-center justify-between">
                 <div>
-                    <h1 class="text-2xl font-bold tracking-tight">
-                        Utilisateurs
-                    </h1>
-                    <p class="text-muted-foreground text-sm mt-1">
-                        Gestion des comptes et accès
-                    </p>
+                    <h1 class="text-2xl font-bold tracking-tight">Utilisateurs</h1>
+                    <p class="text-muted-foreground text-sm mt-1">Gestion des comptes et accès</p>
                 </div>
                 <Button><Plus class="w-4 h-4 mr-2" />Nouvel utilisateur</Button>
             </div>
@@ -16,14 +12,8 @@
             <Card>
                 <CardContent class="p-4 flex flex-wrap gap-3">
                     <div class="relative flex-1 min-w-48 max-w-sm">
-                        <Search
-                            class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground"
-                        />
-                        <Input
-                            v-model="search"
-                            placeholder="Nom, email..."
-                            class="pl-9"
-                        />
+                        <Search class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                        <Input v-model="search" placeholder="Nom, email..." class="pl-9" />
                     </div>
                     <select
                         v-model="filterRole"
@@ -53,10 +43,7 @@
                         </TableHeader>
                         <TableBody>
                             <TableRow v-for="u in filtered" :key="u.ref">
-                                <TableCell
-                                    class="font-mono text-xs text-muted-foreground"
-                                    >{{ u.ref }}</TableCell
-                                >
+                                <TableCell class="font-mono text-xs text-muted-foreground">{{ u.ref }}</TableCell>
                                 <TableCell>
                                     <div class="flex items-center gap-2.5">
                                         <div
@@ -65,19 +52,12 @@
                                         >
                                             {{ u.name.charAt(0) }}
                                         </div>
-                                        <span class="font-medium">{{
-                                            u.name
-                                        }}</span>
+                                        <span class="font-medium">{{ u.name }}</span>
                                     </div>
                                 </TableCell>
+                                <TableCell class="text-xs text-muted-foreground">{{ u.email }}</TableCell>
                                 <TableCell
-                                    class="text-xs text-muted-foreground"
-                                    >{{ u.email }}</TableCell
-                                >
-                                <TableCell
-                                    ><Badge :class="roleBadge(u.role)">{{
-                                        u.role
-                                    }}</Badge></TableCell
+                                    ><Badge :class="roleBadge(u.role)">{{ u.role }}</Badge></TableCell
                                 >
                                 <TableCell>{{ u.hub }}</TableCell>
                                 <TableCell>
@@ -88,19 +68,13 @@
                                                 : 'bg-gray-100 text-gray-500 border-gray-200 hover:bg-gray-100'
                                         "
                                     >
-                                        {{
-                                            u.status === 'active'
-                                                ? 'Actif'
-                                                : 'Inactif'
-                                        }}
+                                        {{ u.status === 'active' ? 'Actif' : 'Inactif' }}
                                     </Badge>
                                 </TableCell>
                             </TableRow>
                         </TableBody>
                     </Table>
-                    <div
-                        class="px-4 py-3 border-t text-xs text-muted-foreground"
-                    >
+                    <div class="px-4 py-3 border-t text-xs text-muted-foreground">
                         {{ filtered.length }} utilisateur(s)
                     </div>
                 </CardContent>
@@ -114,14 +88,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import {
-    Table,
-    TableHeader,
-    TableRow,
-    TableHead,
-    TableBody,
-    TableCell,
-} from '@/components/ui/table';
+import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/table';
 import { Plus, Search } from 'lucide-vue-next';
 
 definePageMeta({ layout: false });
@@ -187,10 +154,7 @@ const filtered = computed(() =>
     users.filter(
         (u) =>
             (filterRole.value === '' || u.role === filterRole.value) &&
-            (!search.value ||
-                Object.values(u).some((v) =>
-                    v.toLowerCase().includes(search.value.toLowerCase()),
-                )),
+            (!search.value || Object.values(u).some((v) => v.toLowerCase().includes(search.value.toLowerCase()))),
     ),
 );
 /** Return Tailwind background color for a role avatar. */
@@ -212,11 +176,9 @@ function roleBadge(r: string) {
         (
             {
                 admin: 'bg-red-100 text-red-700 border-red-200 hover:bg-red-100',
-                dispatcher:
-                    'bg-blue-100 text-blue-700 border-blue-200 hover:bg-blue-100',
+                dispatcher: 'bg-blue-100 text-blue-700 border-blue-200 hover:bg-blue-100',
                 driver: 'bg-green-100 text-green-700 border-green-200 hover:bg-green-100',
-                business_manager:
-                    'bg-purple-100 text-purple-700 border-purple-200 hover:bg-purple-100',
+                business_manager: 'bg-purple-100 text-purple-700 border-purple-200 hover:bg-purple-100',
             } as Record<string, string>
         )[r] ?? ''
     );

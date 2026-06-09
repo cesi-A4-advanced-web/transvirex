@@ -69,13 +69,9 @@ export const useHealthStore = defineStore('health', () => {
     const lastChecked = ref<string | null>(null);
 
     /** Number of services currently reporting OK status. */
-    const servicesOk = computed(
-        () => services.value.filter((s) => s.status === 'ok').length,
-    );
+    const servicesOk = computed(() => services.value.filter((s) => s.status === 'ok').length);
     /** Number of services currently reporting an error. */
-    const servicesError = computed(
-        () => services.value.filter((s) => s.status === 'error').length,
-    );
+    const servicesError = computed(() => services.value.filter((s) => s.status === 'error').length);
 
     /**
      * Check the health of a single service.

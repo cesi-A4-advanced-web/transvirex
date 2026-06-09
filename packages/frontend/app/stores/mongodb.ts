@@ -73,9 +73,7 @@ export const useMongoDBStore = defineStore('mongodb', () => {
                 throw new Error(body?.message ?? `Erreur ${res.status}`);
             }
             const data = await res.json();
-            collections.value = (data.collections ?? []).map(
-                (c: any) => c.name,
-            );
+            collections.value = (data.collections ?? []).map((c: any) => c.name);
         } catch (e: any) {
             collectionError.value = e?.message ?? 'Erreur de connexion';
         } finally {
@@ -88,26 +86,20 @@ export const useMongoDBStore = defineStore('mongodb', () => {
      * @param collection - The collection name.
      * @param navigatePage - Optional page number to navigate to.
      */
-    async function fetchCollectionData(
-        collection: string,
-        navigatePage?: number,
-    ) {
+    async function fetchCollectionData(collection: string, navigatePage?: number) {
         const page = navigatePage ?? collectionPage.value;
         collectionDataLoading.value = true;
         collectionError.value = null;
         selectedCollection.value = collection;
         try {
-            const res = await fetch(
-                `/api/debug/mongodb/collections/${encodeURIComponent(collection)}/data`,
-                {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        page,
-                        pageSize: collectionPageSize.value,
-                    }),
-                },
-            );
+            const res = await fetch(`/api/debug/mongodb/collections/${encodeURIComponent(collection)}/data`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    page,
+                    pageSize: collectionPageSize.value,
+                }),
+            });
             if (!res.ok) {
                 const body = await res.json().catch(() => null);
                 throw new Error(body?.message ?? `Erreur ${res.status}`);

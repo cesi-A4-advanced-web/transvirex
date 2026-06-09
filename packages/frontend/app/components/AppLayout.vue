@@ -5,18 +5,10 @@
             class="flex flex-col flex-shrink-0 bg-[#1a3f7a] shadow-xl transition-all duration-300"
             :class="collapsed ? 'w-16' : 'w-64'"
         >
-            <div
-                class="flex items-center justify-between px-4 py-5 border-b border-white/10"
-            >
+            <div class="flex items-center justify-between px-4 py-5 border-b border-white/10">
                 <div v-if="!collapsed">
-                    <p
-                        class="text-xl font-bold text-white leading-none whitespace-nowrap"
-                    >
-                        Transvirex
-                    </p>
-                    <p class="text-xs text-blue-300 mt-0.5 whitespace-nowrap">
-                        Moving Intelligence
-                    </p>
+                    <p class="text-xl font-bold text-white leading-none whitespace-nowrap">Transvirex</p>
+                    <p class="text-xs text-blue-300 mt-0.5 whitespace-nowrap">Moving Intelligence</p>
                 </div>
                 <Button
                     variant="ghost"
@@ -55,24 +47,15 @@
                         <component
                             :is="item.icon"
                             class="w-5 h-5 flex-shrink-0"
-                            :class="
-                                isActive(item.href)
-                                    ? 'text-white'
-                                    : 'text-blue-300'
-                            "
+                            :class="isActive(item.href) ? 'text-white' : 'text-blue-300'"
                         />
-                        <span v-if="!collapsed" class="truncate">{{
-                            item.label
-                        }}</span>
+                        <span v-if="!collapsed" class="truncate">{{ item.label }}</span>
                     </NuxtLink>
                 </template>
             </ScrollArea>
 
             <div class="border-t border-white/10 p-3">
-                <div
-                    v-if="!collapsed"
-                    class="flex items-center gap-3 px-2 py-2 mb-1 rounded-lg bg-white/5"
-                >
+                <div v-if="!collapsed" class="flex items-center gap-3 px-2 py-2 mb-1 rounded-lg bg-white/5">
                     <div
                         class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0"
                         :class="roleColor"
@@ -108,21 +91,11 @@
                 class="h-14 bg-background border-b border-border flex items-center justify-between px-6 flex-shrink-0 z-10"
             >
                 <div class="flex items-center gap-2 text-sm">
-                    <span class="text-muted-foreground font-medium"
-                        >Transvirex</span
-                    >
-                    <ChevronRight
-                        class="w-3.5 h-3.5 text-muted-foreground/50"
-                    />
-                    <span class="text-muted-foreground capitalize">{{
-                        roleLabel
-                    }}</span>
-                    <ChevronRight
-                        class="w-3.5 h-3.5 text-muted-foreground/50"
-                    />
-                    <span class="font-semibold text-foreground">{{
-                        pageTitle
-                    }}</span>
+                    <span class="text-muted-foreground font-medium">Transvirex</span>
+                    <ChevronRight class="w-3.5 h-3.5 text-muted-foreground/50" />
+                    <span class="text-muted-foreground capitalize">{{ roleLabel }}</span>
+                    <ChevronRight class="w-3.5 h-3.5 text-muted-foreground/50" />
+                    <span class="font-semibold text-foreground">{{ pageTitle }}</span>
                 </div>
                 <div class="flex items-center gap-3">
                     <Button variant="ghost" size="icon" class="relative">
@@ -205,22 +178,14 @@ function parseJwt(token: string): Record<string, unknown> | null {
 }
 
 /** Decoded JWT payload from the access token cookie. */
-const jwtPayload = computed(() =>
-    accessToken.value ? parseJwt(accessToken.value) : null,
-);
+const jwtPayload = computed(() => (accessToken.value ? parseJwt(accessToken.value) : null));
 /** Current user role, defaults to 'dispatcher'. */
-const userRole = computed<Role>(
-    () => (jwtPayload.value?.role as Role) ?? 'dispatcher',
-);
+const userRole = computed<Role>(() => (jwtPayload.value?.role as Role) ?? 'dispatcher');
 /** Computed full user name from JWT firstname and lastname. */
 const userName = computed(() => {
     const p = jwtPayload.value;
     if (!p) return 'Utilisateur';
-    return (
-        `${p.firstname ?? ''} ${p.lastname ?? ''}`.trim() ||
-        (p.email as string) ||
-        'Utilisateur'
-    );
+    return `${p.firstname ?? ''} ${p.lastname ?? ''}`.trim() || (p.email as string) || 'Utilisateur';
 });
 /** First character of the user name for avatar display. */
 const userInitial = computed(() => userName.value.charAt(0).toUpperCase());

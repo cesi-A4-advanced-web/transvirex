@@ -52,13 +52,7 @@ export default defineNuxtConfig({
             ],
         },
         optimizeDeps: {
-            include: [
-                '@vueuse/core',
-                'class-variance-authority',
-                'clsx',
-                'reka-ui',
-                'tailwind-merge',
-            ],
+            include: ['@vueuse/core', 'class-variance-authority', 'clsx', 'reka-ui', 'tailwind-merge'],
         },
     },
 });

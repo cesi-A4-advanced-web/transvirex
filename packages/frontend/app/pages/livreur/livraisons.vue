@@ -3,22 +3,15 @@
         <div class="space-y-4">
             <div class="flex items-center justify-between gap-4">
                 <div>
-                    <h1 class="text-2xl font-bold tracking-tight">
-                        Mes livraisons
-                    </h1>
-                    <p class="text-muted-foreground text-sm mt-1">
-                        Historique et suivi de vos missions
-                    </p>
+                    <h1 class="text-2xl font-bold tracking-tight">Mes livraisons</h1>
+                    <p class="text-muted-foreground text-sm mt-1">Historique et suivi de vos missions</p>
                 </div>
                 <Button
                     class="bg-[#1a3f7a] hover:bg-[#15336a] text-white gap-2 shrink-0"
                     :disabled="generatingPdf"
                     @click="downloadMission"
                 >
-                    <Loader2
-                        v-if="generatingPdf"
-                        class="w-4 h-4 animate-spin"
-                    />
+                    <Loader2 v-if="generatingPdf" class="w-4 h-4 animate-spin" />
                     <FileDown v-else class="w-4 h-4" />
                     Ordre de mission du jour
                 </Button>
@@ -32,9 +25,7 @@
                     size="sm"
                     @click="activeTab = tab.value"
                     :class="
-                        activeTab === tab.value
-                            ? 'bg-green-600 hover:bg-green-700 text-white border-green-600'
-                            : ''
+                        activeTab === tab.value ? 'bg-green-600 hover:bg-green-700 text-white border-green-600' : ''
                     "
                 >
                     {{ tab.label }}
@@ -56,17 +47,10 @@
                         </TableHeader>
                         <TableBody>
                             <TableRow v-for="d in filtered" :key="d.ref">
-                                <TableCell
-                                    class="font-mono text-xs text-muted-foreground"
-                                    >{{ d.ref }}</TableCell
-                                >
-                                <TableCell class="font-medium">{{
-                                    d.client
-                                }}</TableCell>
+                                <TableCell class="font-mono text-xs text-muted-foreground">{{ d.ref }}</TableCell>
+                                <TableCell class="font-medium">{{ d.client }}</TableCell>
                                 <TableCell>{{ d.destination }}</TableCell>
-                                <TableCell class="text-muted-foreground"
-                                    >{{ d.parcels }} colis</TableCell
-                                >
+                                <TableCell class="text-muted-foreground">{{ d.parcels }} colis</TableCell>
                                 <TableCell>
                                     <Badge :class="statusClass(d.status)">
                                         <span
@@ -76,16 +60,11 @@
                                         {{ d.status }}
                                     </Badge>
                                 </TableCell>
-                                <TableCell
-                                    class="text-muted-foreground font-mono text-xs"
-                                    >{{ d.time }}</TableCell
-                                >
+                                <TableCell class="text-muted-foreground font-mono text-xs">{{ d.time }}</TableCell>
                             </TableRow>
                         </TableBody>
                     </Table>
-                    <div
-                        class="px-4 py-3 border-t text-xs text-muted-foreground"
-                    >
+                    <div class="px-4 py-3 border-t text-xs text-muted-foreground">
                         {{ filtered.length }} livraison(s)
                     </div>
                 </CardContent>
@@ -98,19 +77,9 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import {
-    Table,
-    TableHeader,
-    TableRow,
-    TableHead,
-    TableBody,
-    TableCell,
-} from '@/components/ui/table';
+import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/table';
 import { FileDown, Loader2 } from 'lucide-vue-next';
-import {
-    exportOrdreMissionPdf,
-    type MissionData,
-} from '@/composables/usePdfExport';
+import { exportOrdreMissionPdf, type MissionData } from '@/composables/usePdfExport';
 import { useCookie } from '#app';
 
 definePageMeta({ layout: false });
@@ -119,18 +88,14 @@ useHead({ title: 'Mes livraisons — Livreur' });
 /** Decode a JWT payload without validation. */
 function parseJwt(token: string) {
     try {
-        return JSON.parse(
-            atob(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')),
-        );
+        return JSON.parse(atob(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
     } catch {
         return null;
     }
 }
 const accessToken = useCookie('access_token');
 /** Decoded JWT payload from the access token. */
-const payload = computed(() =>
-    accessToken.value ? parseJwt(accessToken.value) : null,
-);
+const payload = computed(() => (accessToken.value ? parseJwt(accessToken.value) : null));
 /** Full driver name extracted from the JWT. */
 const driverName = computed(() => {
     const f = (payload.value?.firstname as string) ?? '';
@@ -267,10 +232,8 @@ function statusClass(s: string) {
         (
             {
                 Livré: 'bg-green-100 text-green-700 border-green-200 hover:bg-green-100',
-                'En cours':
-                    'bg-blue-100 text-blue-700 border-blue-200 hover:bg-blue-100',
-                Planifié:
-                    'bg-gray-100 text-gray-500 border-gray-200 hover:bg-gray-100',
+                'En cours': 'bg-blue-100 text-blue-700 border-blue-200 hover:bg-blue-100',
+                Planifié: 'bg-gray-100 text-gray-500 border-gray-200 hover:bg-gray-100',
             } as Record<string, string>
         )[s] ?? ''
     );

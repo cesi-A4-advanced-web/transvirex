@@ -43,9 +43,7 @@ export default defineNuxtRouteMiddleware(async (to) => {
 
     // Vérifier que l'utilisateur accède uniquement aux pages de son rôle
     const allowedPrefix = ROLE_ALLOWED_PREFIX[user.value.role];
-    const isProtectedRoute = Object.values(ROLE_ALLOWED_PREFIX).some((prefix) =>
-        to.path.startsWith(prefix),
-    );
+    const isProtectedRoute = Object.values(ROLE_ALLOWED_PREFIX).some((prefix) => to.path.startsWith(prefix));
 
     if (isProtectedRoute && !to.path.startsWith(allowedPrefix)) {
         return navigateTo('/');
