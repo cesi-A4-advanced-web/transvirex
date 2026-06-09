@@ -188,6 +188,23 @@ export class GatewayService {
         return this.fetchHealth('billing', this.serviceUrls.billing);
     }
 
+    /** List invoices via the billing service. */
+    getBillings(
+        page: number,
+        limit: number,
+        user?: { sub: string; email: string; role: string },
+    ) {
+        return this.proxyGet(
+            `${this.serviceUrls.billing}/billing?page=${page}&limit=${limit}`,
+            user,
+        );
+    }
+
+    /** Get an invoice by ID via the billing service. */
+    getBilling(id: string, user?: { sub: string; email: string; role: string }) {
+        return this.proxyGet(`${this.serviceUrls.billing}/billing/${id}`, user);
+    }
+
     /** Proxy health check to the stock service. */
     getStockHealth() {
         return this.fetchHealth('stock', this.serviceUrls.stock);
