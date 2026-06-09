@@ -18,13 +18,13 @@ RUN pnpm run build:delivery
 FROM node:26-slim AS runtime
 WORKDIR /app
 COPY --from=build /app/node_modules ./node_modules
-COPY --from=build /app/dist/apps/delivery/ ./dist/apps/delivery/
+COPY --from=build /app/dist/apps/delivery/ ./apps/delivery/
 COPY --from=build /app/dist/libs/ ./libs/
 COPY --from=build /app/prisma ./prisma
 COPY --from=build /app/dist/prisma/ ./prisma/
 COPY --from=build /app/prisma.config.ts ./prisma.config.ts
 COPY --from=build /app/tsconfig.json ./tsconfig.json
-CMD ["sh", "-c", "node_modules/.bin/prisma migrate deploy && node -r tsconfig-paths/register dist/apps/delivery/src/main.js"]
+CMD ["sh", "-c", "node_modules/.bin/prisma migrate deploy && node -r tsconfig-paths/register apps/delivery/src/main.js"]
 
 # +--------------------------------------------------------+
 # |                      DEVELOPMENT                       |

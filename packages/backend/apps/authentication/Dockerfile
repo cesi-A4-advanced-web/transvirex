@@ -19,13 +19,13 @@ RUN pnpm run build:authentication
 FROM node:26-slim AS runtime
 WORKDIR /app
 COPY --from=build /app/node_modules ./node_modules
-COPY --from=build /app/dist/apps/authentication/ ./dist/apps/authentication/
+COPY --from=build /app/dist/apps/authentication/ ./apps/authentication/
 COPY --from=build /app/dist/libs/ ./libs/
 COPY --from=build /app/prisma ./prisma
 COPY --from=build /app/dist/prisma/ ./prisma/
 COPY --from=build /app/prisma.config.ts ./prisma.config.ts
 COPY --from=build /app/tsconfig.json ./tsconfig.json
-CMD ["sh", "-c", "node_modules/.bin/prisma migrate deploy && node -r tsconfig-paths/register dist/apps/authentication/src/main.js"]
+CMD ["sh", "-c", "node_modules/.bin/prisma migrate deploy && node -r tsconfig-paths/register apps/authentication/src/main.js"]
 
 # +--------------------------------------------------------+
 # |                      DEVELOPMENT                       |
