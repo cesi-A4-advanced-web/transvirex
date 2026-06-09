@@ -11,7 +11,27 @@ import {
 import { BlockInProduction } from '@app/guards';
 import { Request, Response } from 'express';
 import type { Request, Response } from 'express';
+import type { Request, Response } from 'express';
 import { GatewayService } from './gateway.service';
+import { Public } from './decorators/public.decorator';
+import { LoginDto } from './dto/login.dto';
+
+const ACCESS_TOKEN_TTL = 15 * 60 * 1000;
+const REFRESH_TOKEN_TTL = 7 * 24 * 60 * 60 * 1000;
+
+const accessTokenCookieOptions = (maxAge: number) => ({
+    httpOnly: false,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'strict' as const,
+    maxAge,
+});
+
+const refreshTokenCookieOptions = (maxAge: number) => ({
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'strict' as const,
+    maxAge,
+});
 import { Public } from './decorators/public.decorator';
 import { LoginDto } from './dto/login.dto';
 
@@ -37,11 +57,13 @@ export class GatewayController {
     constructor(private readonly gatewayService: GatewayService) {}
 
     @Public()
+    @Public()
     @Get()
     getHello(): string {
         return this.gatewayService.getHello();
     }
 
+    @Public()
     @Public()
     @Get('gateway/health')
     getGatewayHealth() {
@@ -49,11 +71,13 @@ export class GatewayController {
     }
 
     @Public()
+    @Public()
     @Get('auth/health')
     getAuthHealth() {
         return this.gatewayService.getAuthHealth();
     }
 
+    @Public()
     @Public()
     @Get('billing/health')
     getBillingHealth() {
@@ -61,11 +85,13 @@ export class GatewayController {
     }
 
     @Public()
+    @Public()
     @Get('stock/health')
     getStockHealth() {
         return this.gatewayService.getStockHealth();
     }
 
+    @Public()
     @Public()
     @Get('delivery/health')
     getDeliveryHealth() {
@@ -73,11 +99,13 @@ export class GatewayController {
     }
 
     @Public()
+    @Public()
     @Get('users/health')
     getUsersHealth() {
         return this.gatewayService.getUsersHealth();
     }
 
+    @Public()
     @Public()
     @Post('debug/postgresql')
     @BlockInProduction()
@@ -90,6 +118,12 @@ export class GatewayController {
         return this.gatewayService.executePostgreSQL(query);
     }
 
+    @Get('auth/me')
+    me(@Req() req: Request) {
+        return (req as any).user;
+    }
+
+    @Public()
     @Get('auth/me')
     me(@Req() req: Request) {
         return (req as any).user;
@@ -159,6 +193,15 @@ export class GatewayController {
         res.clearCookie('access_token');
         res.clearCookie('refresh_token');
         return { success: true };
+    async logout(
+        @Req() req: Request,
+        @Res({ passthrough: true }) res: Response,
+    ) {
+        const refreshToken = req.cookies?.refresh_token;
+        await this.gatewayService.logout({ refresh_token: refreshToken });
+        res.clearCookie('access_token');
+        res.clearCookie('refresh_token');
+        return { success: true };
     }
 
     @Public()
@@ -209,6 +252,7 @@ export class GatewayController {
         return this.gatewayService.listPostgresTables();
     }
 
+
     @Public()
     @Post('debug/postgresql/tables/:table/data')
     @BlockInProduction()
@@ -229,6 +273,7 @@ export class GatewayController {
     async seedDatabase() {
         return this.gatewayService.seedDatabase();
     }
+
 
     @Public()
     @Get('debug/mongodb/collections')
