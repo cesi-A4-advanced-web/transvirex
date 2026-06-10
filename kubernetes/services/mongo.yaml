@@ -1,0 +1,64 @@
+apiVersion: app/v1
+kind: Deployment
+metadata:
+    name: mongo
+    namespace: production
+    labels:
+        app: mongo
+spec:
+    replicas: 1
+    selector:
+        matchLabels:
+            app: mongo
+    template:
+        metadata:
+            labels:
+                app: mongo
+        spec:
+            containers:
+                - name: mongo
+                  image: mongo:6.0
+                  ports:
+                      - containerPort: 27017
+                  env:
+                      - name: MONGO_INITDB_ROOT_USERNAME
+                        valueFrom:
+                            configMapKeyRef:
+                                name: transvirex-config
+                                key: MONGODB_USER
+                      - name: MONGO_INITDB_ROOT_PASSWORD
+                        valueFrom:
+                            configMapKeyRef:
+                                name: transvirex-config
+                                key: MONGODB_PASSWORD
+                      - name: MONGO_INITDB_DATABASE
+                        valueFrom:
+                            configMapKeyRef:
+                                name: transvirex-config
+                                key: MONGODB_DB
+                  volumeMounts:
+                      - name: mongo-data
+                        mountPath: /data/db
+                  resources:
+                      requests:
+                          cpu: 100m
+                          memory: 128Mi
+                      limits:
+                          cpu: 500m
+                          memory: 512Mi
+            volumes:
+                - name: mongo-data
+                  persistentVolumeClaim:
+                      claimName: mongo-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+    name: mongo
+    namespace: production
+spec:
+    selector:
+        app: mongo
+    ports:
+        - port: 27017
+          targetPort: 27017
