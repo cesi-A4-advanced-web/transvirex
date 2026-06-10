@@ -13,115 +13,144 @@
                     </div>
                 </CardContent>
             </Card>
-            <Card>
-                <CardContent class="p-0">
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>Référence</TableHead>
-                                <TableHead>Facture</TableHead>
-                                <TableHead>Client</TableHead>
-                                <TableHead>Poids (kg)</TableHead>
-                                <TableHead>Livraison</TableHead>
-                                <TableHead>Statut</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            <TableRow v-for="c in filtered" :key="c.ref">
-                                <TableCell class="font-mono text-xs text-muted-foreground">{{ c.ref }}</TableCell>
-                                <TableCell class="font-mono text-xs text-primary">{{ c.invoice }}</TableCell>
-                                <TableCell class="font-medium">{{ c.client }}</TableCell>
-                                <TableCell>{{ c.weight }}</TableCell>
-                                <TableCell class="font-mono text-xs text-muted-foreground">{{ c.delivery }}</TableCell>
-                                <TableCell
-                                    ><Badge :class="statusClass(c.status)">{{ c.status }}</Badge></TableCell
-                                >
-                            </TableRow>
-                        </TableBody>
-                    </Table>
-                </CardContent>
-            </Card>
+
+            <div v-if="loading" class="flex items-center justify-center py-12">
+                <Loader2 class="w-6 h-6 animate-spin text-muted-foreground" />
+            </div>
+
+            <template v-else>
+                <Card>
+                    <CardContent class="p-0">
+                        <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead>Référence</TableHead>
+                                    <TableHead>Facture</TableHead>
+                                    <TableHead>Client</TableHead>
+                                    <TableHead>Poids (kg)</TableHead>
+                                    <TableHead>Livraison</TableHead>
+                                    <TableHead>Statut</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                <TableRow v-for="c in filtered" :key="c.ref">
+                                    <TableCell class="font-mono text-xs text-muted-foreground">{{ c.ref }}</TableCell>
+                                    <TableCell class="font-mono text-xs text-primary">{{ c.invoice }}</TableCell>
+                                    <TableCell class="font-medium">{{ c.client }}</TableCell>
+                                    <TableCell>{{ c.weight }}</TableCell>
+                                    <TableCell class="font-mono text-xs text-muted-foreground">{{ c.delivery }}</TableCell>
+                                    <TableCell>
+                                        <Badge :class="statusClass(c.status)">{{ c.status }}</Badge>
+                                    </TableCell>
+                                </TableRow>
+                                <TableRow v-if="filtered.length === 0">
+                                    <TableCell colspan="6" class="text-center text-muted-foreground py-6">
+                                        Aucun colis trouvé
+                                    </TableCell>
+                                </TableRow>
+                            </TableBody>
+                        </Table>
+                    </CardContent>
+                </Card>
+            </template>
         </div>
     </AppLayout>
 </template>
+
 <script setup lang="ts">
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Search } from '@lucide/vue';
+import { Loader2, Search } from '@lucide/vue';
+import { useApi, type ApiParcel } from '@/composables/useApi';
+
 definePageMeta({ layout: false });
 useHead({ title: 'Colis — Dispatcher' });
-/** Search/filter input value. */
-const search = ref('');
-/** Static list of parcels for the demo table. */
-const parcels = [
-    {
-        ref: 'PCL-0001',
-        invoice: 'FAC-2026-001',
-        client: 'Société Durand',
-        weight: '12.5',
-        delivery: '#LIV-0091',
-        status: 'Livré',
-    },
-    {
-        ref: 'PCL-0002',
-        invoice: 'FAC-2026-001',
-        client: 'Société Durand',
-        weight: '8.0',
-        delivery: '#LIV-0091',
-        status: 'Livré',
-    },
-    {
-        ref: 'PCL-0003',
-        invoice: 'FAC-2026-002',
-        client: 'SARL Martin',
-        weight: '25.0',
-        delivery: '#LIV-0092',
-        status: 'En cours',
-    },
-    {
-        ref: 'PCL-0004',
-        invoice: 'FAC-2026-003',
-        client: 'Express Cargo',
-        weight: '5.5',
-        delivery: '#LIV-0093',
-        status: 'En attente',
-    },
-    {
-        ref: 'PCL-0005',
-        invoice: 'FAC-2026-004',
-        client: 'TGV Express',
-        weight: '18.0',
-        delivery: '#LIV-0094',
-        status: 'En attente',
-    },
-    {
-        ref: 'PCL-0006',
-        invoice: 'FAC-2026-005',
-        client: 'Logistics Plus',
-        weight: '3.2',
-        delivery: '#LIV-0095',
-        status: 'En cours',
-    },
-];
-/** Parcels filtered by the search query. */
-const filtered = computed(() =>
-    parcels.filter(
-        (c) => !search.value || Object.values(c).some((v) => v.toLowerCase().includes(search.value.toLowerCase())),
-    ),
-);
-/** Return Tailwind badge classes for a parcel status. */
-function statusClass(s: string) {
-    return (
-        (
-            {
-                Livré: 'bg-green-100 text-green-700 border-green-200 hover:bg-green-100',
-                'En cours': 'bg-blue-100 text-blue-700 border-blue-200 hover:bg-blue-100',
-                'En attente': 'bg-yellow-100 text-yellow-700 border-yellow-200 hover:bg-yellow-100',
-            } as Record<string, string>
-        )[s] ?? ''
-    );
-}
-</script>
 
+const { get } = useApi();
+
+const loading = ref(true);
+const search = ref('');
+const parcelsData = ref<{
+    ref: string;
+    invoice: string;
+    client: string;
+    weight: string;
+    delivery: string;
+    status: string;
+}[]>([]);
+
+const statusLabels: Record<string, string> = {
+    planned: 'Planifié',
+    delivering: 'En cours',
+    delivered: 'Livré',
+    cancelled: 'Annulé',
+    blocked: 'Bloqué',
+    delayed: 'Retardé',
+};
+
+const filtered = computed(() =>
+    parcelsData.value.filter(
+        (c) => !search.value || [c.ref, c.invoice, c.client].some((v) => v.toLowerCase().includes(search.value.toLowerCase()))
+    )
+);
+
+function statusClass(s: string) {
+    return ({
+        delivered: 'bg-green-100 text-green-700 border-green-200 hover:bg-green-100',
+        delivering: 'bg-blue-100 text-blue-700 border-blue-200 hover:bg-blue-100',
+        planned: 'bg-yellow-100 text-yellow-700 border-yellow-200 hover:bg-yellow-100',
+    } as Record<string, string>)[s] ?? ''
+}
+
+async function fetchData() {
+    loading.value = true;
+    try {
+        const invRes = await get<{ data: any[]; total: number }>('/invoices', { limit: 50, status: 'purchase_order' });
+        const invoiceIds = invRes.data.map((inv) => inv.id);
+
+        const results: {
+            ref: string;
+            invoice: string;
+            client: string;
+            weight: string;
+            delivery: string;
+            status: string;
+        }[] = [];
+
+        const details = await Promise.all(
+            invoiceIds.map((id) =>
+                get<any>(`/invoices/${id}`).catch(() => null)
+            )
+        );
+
+        for (const detail of details) {
+            if (!detail) continue;
+            const invoiceRef = detail.reference;
+            const clientName = detail.customer?.customer_name ?? '—';
+            const deliveries = detail.deliveries ?? [];
+
+            for (const parcel of detail.parcels ?? []) {
+                const delivery = deliveries[0];
+                results.push({
+                    ref: parcel.reference,
+                    invoice: invoiceRef,
+                    client: clientName,
+                    weight: parcel.weight.toFixed(1),
+                    delivery: delivery?.reference ?? '—',
+                    status: delivery ? (statusLabels[delivery.status] ?? delivery.status) : '—',
+                });
+            }
+        }
+
+        parcelsData.value = results;
+    } catch (e) {
+        console.error('Failed to load parcels', e);
+    } finally {
+        loading.value = false;
+    }
+}
+
+onMounted(fetchData);
+</script>

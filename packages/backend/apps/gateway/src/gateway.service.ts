@@ -264,6 +264,12 @@ export class GatewayService {
         return this.proxyDelete(`${this.serviceUrls.billing}/invoices/${invoiceId}/parcels/${parcelId}`, user);
     }
 
+    /** List customers via the billing service. */
+    listCustomers(hub_id?: string, user?: { sub: string; email: string; role: string }) {
+        const query = hub_id ? `?hub_id=${encodeURIComponent(hub_id)}` : '';
+        return this.proxyGet(`${this.serviceUrls.billing}/customers${query}`, user);
+    }
+
     /** Proxy health check to the authentication service. */
     getAuthHealth() {
         return this.fetchHealth('auth', this.serviceUrls.auth);
