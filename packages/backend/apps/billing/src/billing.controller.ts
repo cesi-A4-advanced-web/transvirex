@@ -23,7 +23,6 @@ import type { UpdateInvoiceDto } from './dto/update-invoice.dto';
 export class BillingController {
     constructor(private readonly billingService: BillingService) {}
 
-    /** HTTP health-check endpoint. */
     @Get('health')
     getHealthHttp() {
         return { status: 'ok', service: 'billing' };
@@ -73,10 +72,24 @@ export class BillingController {
         return this.billingService.remove(id);
     }
 
-    /** RabbitMQ health-check handler. */
     @MessagePattern('health')
     getHealth() {
         return { status: 'ok', service: 'billing' };
+    }
+
+    @Post('invoices/:id/parcels')
+    addParcel(@Param('id') id: string, @Body() body: { weight: number; reference?: string }) {
+        return this.billingService.addParcel(id, body);
+    }
+
+    @Get('invoices/:id/parcels')
+    listParcels(@Param('id') id: string) {
+        return this.billingService.listParcels(id);
+    }
+
+    @Delete('invoices/:id/parcels/:parcelId')
+    deleteParcel(@Param('id') id: string, @Param('parcelId') parcelId: string) {
+        return this.billingService.deleteParcel(id, parcelId);
     }
 
     @ApiTags('Billing')

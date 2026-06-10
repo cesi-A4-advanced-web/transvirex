@@ -49,6 +49,12 @@ const STATUS_TRANSITIONS: Record<InvoiceStatus, InvoiceStatus | null> = {
     invoice: null,
 };
 
+const RATES: Record<string, number> = {
+    express: 15,
+    standard: 8,
+    freight: 5,
+};
+
 /** Service handling billing-related business logic — invoice confirmation and RabbitMQ event consumption. */
 @Injectable()
 export class BillingService {
@@ -121,6 +127,79 @@ export class BillingService {
         });
 
         this.logger.log(`Invoice ${invoice.reference} confirmed for delivery ${data.deliveryId}`);
+    }
+
+    private async generateParcelReference(): Promise<string> {
+        const last = await this.prisma.parcel.findFirst({
+            orderBy: { reference: 'desc' },
+            select: { reference: true },
+        });
+        let nextNum = 1;
+        if (last) {
+            const match = last.reference.match(/PAR-(\d+)/);
+            if (match) nextNum = parseInt(match[1], 10) + 1;
+        }
+        return `PAR-${String(nextNum).padStart(3, '0')}`;
+    }
+
+    private async recalculateAmount(invoiceId: string) {
+        const invoice = await this.prisma.invoice.findUnique({
+            where: { id: invoiceId },
+            include: { parcels: true },
+        });
+        if (!invoice) return;
+
+        const rate = RATES[invoice.service_type ?? 'standard'] ?? RATES.standard;
+        const amount = invoice.parcels.reduce((sum, p) => sum + p.weight * rate, 0);
+
+        await this.prisma.invoice.update({
+            where: { id: invoiceId },
+            data: { amount: Math.round(amount * 100) / 100 },
+        });
+    }
+
+    async addParcel(invoiceId: string, dto: { weight: number; reference?: string }) {
+        const invoice = await this.prisma.invoice.findUnique({ where: { id: invoiceId } });
+        if (!invoice) throw new NotFoundException('Facture introuvable');
+
+        const reference = dto.reference ?? (await this.generateParcelReference());
+
+        const parcel = await this.prisma.parcel.create({
+            data: {
+                invoice_id: invoiceId,
+                reference,
+                weight: dto.weight,
+            },
+        });
+
+        await this.recalculateAmount(invoiceId);
+        return parcel;
+    }
+
+    async listParcels(invoiceId: string) {
+        const invoice = await this.prisma.invoice.findUnique({ where: { id: invoiceId } });
+        if (!invoice) throw new NotFoundException('Facture introuvable');
+
+        return this.prisma.parcel.findMany({
+            where: { invoice_id: invoiceId },
+            orderBy: { reference: 'asc' },
+        });
+    }
+
+    async deleteParcel(invoiceId: string, parcelId: string) {
+        const invoice = await this.prisma.invoice.findUnique({ where: { id: invoiceId } });
+        if (!invoice) throw new NotFoundException('Facture introuvable');
+
+        const parcel = await this.prisma.parcel.findUnique({ where: { id: parcelId } });
+        if (!parcel) throw new NotFoundException('Colis introuvable');
+
+        if (parcel.invoice_id !== invoiceId) {
+            throw new NotFoundException("Ce colis n'appartient pas à cette facture");
+        }
+
+        await this.prisma.parcel.delete({ where: { id: parcelId } });
+        await this.recalculateAmount(invoiceId);
+        return { success: true };
     }
 
     private getPricePerKg(): number {
