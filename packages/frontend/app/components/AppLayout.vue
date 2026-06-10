@@ -139,6 +139,7 @@ import { Separator } from '@/components/ui/separator';
 import {
     BarChart3,
     Bell,
+    Bot,
     Building2,
     Car,
     ChevronLeft,
@@ -155,6 +156,7 @@ import {
     Users,
 } from '@lucide/vue';
 import { $fetch } from 'ofetch';
+import { useNotifications } from '@/composables/useNotifications';
 
 /** Possible user roles for navigation and display. */
 type Role = 'admin' | 'dispatcher' | 'driver' | 'business_manager';
@@ -162,8 +164,15 @@ type Role = 'admin' | 'dispatcher' | 'driver' | 'business_manager';
 const route = useRoute();
 /** Whether the sidebar is collapsed. */
 const collapsed = ref(false);
+const notifOpen = ref(false);
 const accessToken = useCookie('access_token');
 const refreshToken = useCookie('refresh_token');
+
+const { notifications, unreadCount, markRead, markAllRead, startPolling } = useNotifications();
+onMounted(() => {
+    if (!accessToken.value) return navigateTo('/');
+    if (userRole.value === 'dispatcher') startPolling();
+});
 
 /**
  * Parse a JWT token and return its decoded payload.
@@ -406,6 +415,16 @@ const visibleGroups = computed(() => {
                 ],
             },
             {
+                label: 'Assistant',
+                items: [
+                    {
+                        label: 'Assistant IA',
+                        href: `${base}/assistant`,
+                        icon: Bot,
+                    },
+                ],
+            },
+            {
                 label: 'Mon profil',
                 items: [
                     {
@@ -436,10 +455,6 @@ const pageTitle = computed(() => {
         if (match) return match.label;
     }
     return 'Dashboard';
-});
-
-onMounted(() => {
-    if (!accessToken.value) navigateTo('/');
 });
 
 /**
