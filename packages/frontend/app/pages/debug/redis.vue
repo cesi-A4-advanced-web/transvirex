@@ -126,3 +126,4 @@ function insertCommand(cmd: string) {
         </div>
     </div>
 </template>
+

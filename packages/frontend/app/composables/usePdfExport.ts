@@ -715,3 +715,4 @@ export async function exportOrdreMissionPdf(m: MissionData) {
 export function usePdfExport() {
     return { exportFacturePdf, exportBonCommandePdf, exportOrdreMissionPdf };
 }
+

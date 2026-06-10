@@ -71,3 +71,4 @@ const { services, loading } = storeToRefs(health);
         </UiCard>
     </div>
 </template>
+

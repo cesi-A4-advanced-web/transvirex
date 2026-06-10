@@ -12,3 +12,4 @@ export default defineNitroPlugin((nitroApp) => {
         }
     });
 });
+

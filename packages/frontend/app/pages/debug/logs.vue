@@ -2,13 +2,7 @@
 definePageMeta({ layout: 'debug' });
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle,
-} from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import {
     Dialog,
     DialogContent,
@@ -18,31 +12,31 @@ import {
     DialogTitle,
 } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from '@/components/ui/table';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useLogsStore } from '@/stores/logs';
+import { useErrorLogger } from '@/composables/useErrorLogger';
 import type { LogEntry } from '@/stores/logs';
+import { useLogsStore } from '@/stores/logs';
+import { ChevronLeft, ChevronRight, FileText, RefreshCw, TestTube2Icon, Trash2 } from '@lucide/vue';
 
 useHead({ title: 'Logs — Transvirex' });
 
 const logs = useLogsStore();
+/** Whether the clear confirmation dialog is visible. */
 const showClearDialog = ref(false);
+/** Target log source for the clear action. */
 const clearTarget = ref<'backend' | 'frontend'>('backend');
+/** Set of row IDs currently expanded to show metadata. */
 const expandedRows = ref<Set<string>>(new Set());
 
+/** Available log-level filter options. */
 const levels = ['all', 'log', 'warn', 'error', 'debug', 'verbose'];
 
 onMounted(() => {
     logs.fetchBackendLogs();
 });
 
+/** Return Tailwind classes for a log-level badge. */
 function levelColor(level: string): string {
     switch (level) {
         case 'error':
@@ -60,6 +54,7 @@ function levelColor(level: string): string {
     }
 }
 
+/** Format an ISO timestamp to a French locale string. */
 function formatTimestamp(ts: string): string {
     const d = new Date(ts);
     return d.toLocaleString('fr-FR', {
@@ -72,6 +67,7 @@ function formatTimestamp(ts: string): string {
     });
 }
 
+/** Toggle expanded state for a log row. */
 function toggleRow(id: string) {
     if (expandedRows.value.has(id)) {
         expandedRows.value.delete(id);
@@ -80,7 +76,8 @@ function toggleRow(id: string) {
     }
 }
 
-function onTabChange(tab: string) {
+/** Fetch logs when switching between backend/frontend tabs. */
+function onTabChange(tab: string | number) {
     if (tab === 'backend' && logs.backendLogs.length === 0) {
         logs.fetchBackendLogs();
     } else if (tab === 'frontend' && logs.frontendLogs.length === 0) {
@@ -88,11 +85,13 @@ function onTabChange(tab: string) {
     }
 }
 
+/** Show the clear confirmation dialog for the given target. */
 function confirmClear(target: 'backend' | 'frontend') {
     clearTarget.value = target;
     showClearDialog.value = true;
 }
 
+/** Execute the clear action on the selected target. */
 function handleClear() {
     if (clearTarget.value === 'backend') {
         logs.clearBackendLogs();
@@ -102,8 +101,23 @@ function handleClear() {
     showClearDialog.value = false;
 }
 
+/** Check whether a log entry has rich metadata. */
 function hasMetadata(log: LogEntry): boolean {
     return !!(log.metadata && Object.keys(log.metadata).length > 0);
+}
+
+/** Test error logging from the UI. */
+function testError() {
+    try {
+        throw new Error('Test error from Logs page');
+    } catch (err) {
+        useErrorLogger().logError('error', (err as Error).message, {
+            source: 'LogsPage',
+            test: true,
+        });
+    }
+
+    logs.fetchFrontendLogs();
 }
 </script>
 
@@ -111,9 +125,7 @@ function hasMetadata(log: LogEntry): boolean {
     <div class="max-w-6xl mx-auto space-y-8">
         <div class="space-y-1">
             <h1 class="text-3xl font-bold text-slate-900">Logs</h1>
-            <p class="text-gray-500">
-                Consultation des logs applicatifs
-            </p>
+            <p class="text-gray-500">Consultation des logs applicatifs</p>
         </div>
 
         <Tabs default-value="backend" class="w-full" @update:model-value="onTabChange">
@@ -149,11 +161,7 @@ function hasMetadata(log: LogEntry): boolean {
                                         class="text-sm border border-gray-300 rounded-md px-2 py-1.5"
                                     >
                                         <option value="">Tous</option>
-                                        <option
-                                            v-for="s in logs.backendServices"
-                                            :key="s"
-                                            :value="s"
-                                        >
+                                        <option v-for="s in logs.backendServices" :key="s" :value="s">
                                             {{ s }}
                                         </option>
                                     </select>
@@ -165,20 +173,7 @@ function hasMetadata(log: LogEntry): boolean {
                                         @click="logs.fetchBackendLogs()"
                                         :disabled="logs.loading"
                                     >
-                                        <svg
-                                            class="w-4 h-4"
-                                            :class="{ 'animate-spin': logs.loading }"
-                                            fill="none"
-                                            stroke="currentColor"
-                                            viewBox="0 0 24 24"
-                                        >
-                                            <path
-                                                stroke-linecap="round"
-                                                stroke-linejoin="round"
-                                                stroke-width="2"
-                                                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-                                            />
-                                        </svg>
+                                        <RefreshCw class="w-4 h-4" :class="{ 'animate-spin': logs.loading }" />
                                         Actualiser
                                     </Button>
                                     <Button
@@ -187,19 +182,7 @@ function hasMetadata(log: LogEntry): boolean {
                                         class="text-red-600 border-red-200 hover:bg-red-50"
                                         @click="confirmClear('backend')"
                                     >
-                                        <svg
-                                            class="w-4 h-4"
-                                            fill="none"
-                                            stroke="currentColor"
-                                            viewBox="0 0 24 24"
-                                        >
-                                            <path
-                                                stroke-linecap="round"
-                                                stroke-linejoin="round"
-                                                stroke-width="2"
-                                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                                            />
-                                        </svg>
+                                        <Trash2 class="w-4 h-4" />
                                         Vider
                                     </Button>
                                 </div>
@@ -215,16 +198,20 @@ function hasMetadata(log: LogEntry): boolean {
                             </CardDescription>
                         </CardHeader>
                         <CardContent>
-                            <div v-if="logs.loading && logs.backendLogs.length === 0" class="text-center py-12 text-gray-400">
+                            <div
+                                v-if="logs.loading && logs.backendLogs.length === 0"
+                                class="text-center py-12 text-gray-400"
+                            >
                                 Chargement...
                             </div>
-                            <div v-else-if="logs.error" class="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg p-4">
+                            <div
+                                v-else-if="logs.error"
+                                class="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg p-4"
+                            >
                                 {{ logs.error }}
                             </div>
                             <div v-else-if="logs.backendLogs.length === 0" class="text-center py-12 text-gray-400">
-                                <svg class="w-16 h-16 mx-auto text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                </svg>
+                                <FileText class="w-16 h-16 mx-auto text-gray-300 mb-4" />
                                 <p>Aucun log disponible</p>
                             </div>
                             <div v-else>
@@ -244,19 +231,18 @@ function hasMetadata(log: LogEntry): boolean {
                                             <template v-for="log in logs.backendLogs" :key="log._id">
                                                 <TableRow
                                                     class="cursor-pointer"
-                                                    :class="{ 'bg-gray-50': expandedRows.has(log._id) }"
+                                                    :class="{
+                                                        'bg-gray-50': expandedRows.has(log._id),
+                                                    }"
                                                     @click="toggleRow(log._id)"
                                                 >
                                                     <TableCell class="text-gray-400">
-                                                        <svg
+                                                        <ChevronRight
                                                             class="w-4 h-4 transition-transform"
-                                                            :class="{ 'rotate-90': expandedRows.has(log._id) }"
-                                                            fill="none"
-                                                            stroke="currentColor"
-                                                            viewBox="0 0 24 24"
-                                                        >
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                                                        </svg>
+                                                            :class="{
+                                                                'rotate-90': expandedRows.has(log._id),
+                                                            }"
+                                                        />
                                                     </TableCell>
                                                     <TableCell class="text-xs text-gray-500 whitespace-nowrap">
                                                         {{ formatTimestamp(log.timestamp) }}
@@ -275,7 +261,10 @@ function hasMetadata(log: LogEntry): boolean {
                                                     <TableCell class="text-sm text-gray-700 max-w-32 truncate">
                                                         {{ log.context || '-' }}
                                                     </TableCell>
-                                                    <TableCell class="text-sm text-gray-700 max-w-md truncate" :title="log.message">
+                                                    <TableCell
+                                                        class="text-sm text-gray-700 max-w-md truncate"
+                                                        :title="log.message"
+                                                    >
                                                         {{ log.message }}
                                                     </TableCell>
                                                 </TableRow>
@@ -284,12 +273,26 @@ function hasMetadata(log: LogEntry): boolean {
                                                     <TableCell colspan="5" class="p-4">
                                                         <div class="space-y-2">
                                                             <div v-if="log.metadata?.trace" class="space-y-1">
-                                                                <p class="text-xs font-semibold text-gray-500 uppercase">Stack Trace</p>
-                                                                <pre class="text-xs text-red-600 bg-red-50 border border-red-200 rounded p-3 overflow-auto max-h-40">{{ log.metadata.trace }}</pre>
+                                                                <p
+                                                                    class="text-xs font-semibold text-gray-500 uppercase"
+                                                                >
+                                                                    Stack Trace
+                                                                </p>
+                                                                <pre
+                                                                    class="text-xs text-red-600 bg-red-50 border border-red-200 rounded p-3 overflow-auto max-h-40"
+                                                                    >{{ log.metadata.trace }}</pre
+                                                                >
                                                             </div>
                                                             <div v-if="hasMetadata(log)" class="space-y-1">
-                                                                <p class="text-xs font-semibold text-gray-500 uppercase">Metadata</p>
-                                                                <pre class="text-xs text-gray-600 bg-white border border-gray-200 rounded p-3 overflow-auto max-h-60">{{ JSON.stringify(log.metadata, null, 2) }}</pre>
+                                                                <p
+                                                                    class="text-xs font-semibold text-gray-500 uppercase"
+                                                                >
+                                                                    Metadata
+                                                                </p>
+                                                                <pre
+                                                                    class="text-xs text-gray-600 bg-white border border-gray-200 rounded p-3 overflow-auto max-h-60"
+                                                                    >{{ JSON.stringify(log.metadata, null, 2) }}</pre
+                                                                >
                                                             </div>
                                                         </div>
                                                     </TableCell>
@@ -299,7 +302,10 @@ function hasMetadata(log: LogEntry): boolean {
                                     </Table>
                                 </ScrollArea>
 
-                                <div v-if="logs.backendTotalPages > 1" class="flex items-center justify-between mt-4 pt-4 border-t border-gray-200">
+                                <div
+                                    v-if="logs.backendTotalPages > 1"
+                                    class="flex items-center justify-between mt-4 pt-4 border-t border-gray-200"
+                                >
                                     <div class="flex items-center gap-2 text-sm text-gray-500">
                                         <span>Page {{ logs.backendFilters.page }} / {{ logs.backendTotalPages }}</span>
                                     </div>
@@ -308,24 +314,28 @@ function hasMetadata(log: LogEntry): boolean {
                                             variant="outline"
                                             size="sm"
                                             :disabled="logs.backendFilters.page <= 1"
-                                            @click="logs.backendFilters.page--; logs.fetchBackendLogs()"
+                                            @click="
+                                                logs.backendFilters.page--;
+                                                logs.fetchBackendLogs();
+                                            "
                                         >
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-                                            </svg>
+                                            <ChevronLeft class="w-4 h-4" />
                                         </Button>
                                         <span class="text-sm text-gray-600 min-w-16 text-center">
-                                            Page {{ logs.backendFilters.page }} / {{ logs.backendTotalPages }}
+                                            Page
+                                            {{ logs.backendFilters.page }} /
+                                            {{ logs.backendTotalPages }}
                                         </span>
                                         <Button
                                             variant="outline"
                                             size="sm"
                                             :disabled="logs.backendFilters.page >= logs.backendTotalPages"
-                                            @click="logs.backendFilters.page++; logs.fetchBackendLogs()"
+                                            @click="
+                                                logs.backendFilters.page++;
+                                                logs.fetchBackendLogs();
+                                            "
                                         >
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                                            </svg>
+                                            <ChevronRight class="w-4 h-4" />
                                         </Button>
                                     </div>
                                     <div class="flex items-center gap-2">
@@ -333,7 +343,10 @@ function hasMetadata(log: LogEntry): boolean {
                                         <select
                                             id="backend-page-size"
                                             v-model="logs.backendFilters.pageSize"
-                                            @change="logs.backendFilters.page = 1; logs.fetchBackendLogs()"
+                                            @change="
+                                                logs.backendFilters.page = 1;
+                                                logs.fetchBackendLogs();
+                                            "
                                             class="text-sm border border-gray-300 rounded-md px-2 py-1"
                                         >
                                             <option :value="20">20</option>
@@ -372,16 +385,12 @@ function hasMetadata(log: LogEntry): boolean {
                                         @click="logs.fetchFrontendLogs()"
                                         :disabled="logs.loading"
                                     >
-                                        <svg
-                                            class="w-4 h-4"
-                                            :class="{ 'animate-spin': logs.loading }"
-                                            fill="none"
-                                            stroke="currentColor"
-                                            viewBox="0 0 24 24"
-                                        >
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                                        </svg>
+                                        <RefreshCw class="w-4 h-4" :class="{ 'animate-spin': logs.loading }" />
                                         Actualiser
+                                    </Button>
+                                    <Button variant="outline" size="sm" @click="testError()">
+                                        <TestTube2Icon class="w-4 h-4" />
+                                        Tester
                                     </Button>
                                     <Button
                                         variant="outline"
@@ -389,9 +398,7 @@ function hasMetadata(log: LogEntry): boolean {
                                         class="text-red-600 border-red-200 hover:bg-red-50"
                                         @click="confirmClear('frontend')"
                                     >
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                        </svg>
+                                        <Trash2 class="w-4 h-4" />
                                         Vider
                                     </Button>
                                 </div>
@@ -407,16 +414,20 @@ function hasMetadata(log: LogEntry): boolean {
                             </CardDescription>
                         </CardHeader>
                         <CardContent>
-                            <div v-if="logs.loading && logs.frontendLogs.length === 0" class="text-center py-12 text-gray-400">
+                            <div
+                                v-if="logs.loading && logs.frontendLogs.length === 0"
+                                class="text-center py-12 text-gray-400"
+                            >
                                 Chargement...
                             </div>
-                            <div v-else-if="logs.error" class="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg p-4">
+                            <div
+                                v-else-if="logs.error"
+                                class="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg p-4"
+                            >
                                 {{ logs.error }}
                             </div>
                             <div v-else-if="logs.frontendLogs.length === 0" class="text-center py-12 text-gray-400">
-                                <svg class="w-16 h-16 mx-auto text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                </svg>
+                                <FileText class="w-16 h-16 mx-auto text-gray-300 mb-4" />
                                 <p>Aucun log disponible</p>
                             </div>
                             <div v-else>
@@ -434,19 +445,18 @@ function hasMetadata(log: LogEntry): boolean {
                                             <template v-for="log in logs.frontendLogs" :key="log._id">
                                                 <TableRow
                                                     class="cursor-pointer"
-                                                    :class="{ 'bg-gray-50': expandedRows.has(log._id) }"
+                                                    :class="{
+                                                        'bg-gray-50': expandedRows.has(log._id),
+                                                    }"
                                                     @click="toggleRow(log._id)"
                                                 >
                                                     <TableCell class="text-gray-400">
-                                                        <svg
+                                                        <ChevronRight
                                                             class="w-4 h-4 transition-transform"
-                                                            :class="{ 'rotate-90': expandedRows.has(log._id) }"
-                                                            fill="none"
-                                                            stroke="currentColor"
-                                                            viewBox="0 0 24 24"
-                                                        >
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                                                        </svg>
+                                                            :class="{
+                                                                'rotate-90': expandedRows.has(log._id),
+                                                            }"
+                                                        />
                                                     </TableCell>
                                                     <TableCell class="text-xs text-gray-500 whitespace-nowrap">
                                                         {{ formatTimestamp(log.timestamp) }}
@@ -459,7 +469,10 @@ function hasMetadata(log: LogEntry): boolean {
                                                             {{ log.level }}
                                                         </span>
                                                     </TableCell>
-                                                    <TableCell class="text-sm text-gray-700 max-w-md truncate" :title="log.message">
+                                                    <TableCell
+                                                        class="text-sm text-gray-700 max-w-md truncate"
+                                                        :title="log.message"
+                                                    >
                                                         {{ log.message }}
                                                     </TableCell>
                                                 </TableRow>
@@ -467,8 +480,13 @@ function hasMetadata(log: LogEntry): boolean {
                                                     <TableCell></TableCell>
                                                     <TableCell colspan="3" class="p-4">
                                                         <div v-if="hasMetadata(log)" class="space-y-1">
-                                                            <p class="text-xs font-semibold text-gray-500 uppercase">Metadata</p>
-                                                            <pre class="text-xs text-gray-600 bg-white border border-gray-200 rounded p-3 overflow-auto max-h-60">{{ JSON.stringify(log.metadata, null, 2) }}</pre>
+                                                            <p class="text-xs font-semibold text-gray-500 uppercase">
+                                                                Metadata
+                                                            </p>
+                                                            <pre
+                                                                class="text-xs text-gray-600 bg-white border border-gray-200 rounded p-3 overflow-auto max-h-60"
+                                                                >{{ JSON.stringify(log.metadata, null, 2) }}</pre
+                                                            >
                                                         </div>
                                                     </TableCell>
                                                 </TableRow>
@@ -477,33 +495,42 @@ function hasMetadata(log: LogEntry): boolean {
                                     </Table>
                                 </ScrollArea>
 
-                                <div v-if="logs.frontendTotalPages > 1" class="flex items-center justify-between mt-4 pt-4 border-t border-gray-200">
+                                <div
+                                    v-if="logs.frontendTotalPages > 1"
+                                    class="flex items-center justify-between mt-4 pt-4 border-t border-gray-200"
+                                >
                                     <div class="flex items-center gap-2 text-sm text-gray-500">
-                                        <span>Page {{ logs.frontendFilters.page }} / {{ logs.frontendTotalPages }}</span>
+                                        <span
+                                            >Page {{ logs.frontendFilters.page }} / {{ logs.frontendTotalPages }}</span
+                                        >
                                     </div>
                                     <div class="flex items-center gap-2">
                                         <Button
                                             variant="outline"
                                             size="sm"
                                             :disabled="logs.frontendFilters.page <= 1"
-                                            @click="logs.frontendFilters.page--; logs.fetchFrontendLogs()"
+                                            @click="
+                                                logs.frontendFilters.page--;
+                                                logs.fetchFrontendLogs();
+                                            "
                                         >
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-                                            </svg>
+                                            <ChevronLeft class="w-4 h-4" />
                                         </Button>
                                         <span class="text-sm text-gray-600 min-w-16 text-center">
-                                            Page {{ logs.frontendFilters.page }} / {{ logs.frontendTotalPages }}
+                                            Page
+                                            {{ logs.frontendFilters.page }} /
+                                            {{ logs.frontendTotalPages }}
                                         </span>
                                         <Button
                                             variant="outline"
                                             size="sm"
                                             :disabled="logs.frontendFilters.page >= logs.frontendTotalPages"
-                                            @click="logs.frontendFilters.page++; logs.fetchFrontendLogs()"
+                                            @click="
+                                                logs.frontendFilters.page++;
+                                                logs.fetchFrontendLogs();
+                                            "
                                         >
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                                            </svg>
+                                            <ChevronRight class="w-4 h-4" />
                                         </Button>
                                     </div>
                                     <div class="flex items-center gap-2">
@@ -511,7 +538,10 @@ function hasMetadata(log: LogEntry): boolean {
                                         <select
                                             id="frontend-page-size"
                                             v-model="logs.frontendFilters.pageSize"
-                                            @change="logs.frontendFilters.page = 1; logs.fetchFrontendLogs()"
+                                            @change="
+                                                logs.frontendFilters.page = 1;
+                                                logs.fetchFrontendLogs();
+                                            "
                                             class="text-sm border border-gray-300 rounded-md px-2 py-1"
                                         >
                                             <option :value="20">20</option>
@@ -532,8 +562,9 @@ function hasMetadata(log: LogEntry): boolean {
                 <DialogHeader>
                     <DialogTitle>Vider les logs</DialogTitle>
                     <DialogDescription>
-                        Êtes-vous sûr de vouloir supprimer tous les logs {{ clearTarget === 'backend' ? 'backend' : 'frontend' }} ?
-                        Cette action est irréversible.
+                        Êtes-vous sûr de vouloir supprimer tous les logs
+                        {{ clearTarget === 'backend' ? 'backend' : 'frontend' }}
+                        ? Cette action est irréversible.
                     </DialogDescription>
                 </DialogHeader>
                 <DialogFooter>
@@ -544,3 +575,4 @@ function hasMetadata(log: LogEntry): boolean {
         </Dialog>
     </div>
 </template>
+

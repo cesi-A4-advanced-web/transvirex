@@ -1,4 +1,4 @@
-import type { QueryResult, PagedResult } from './sql';
+import type { PagedResult, QueryResult } from './sql';
 
 /**
  * Pinia store for the MongoDB debug console.
@@ -141,3 +141,4 @@ export const useMongoDBStore = defineStore('mongodb', () => {
         goToCollectionPage,
     };
 });
+

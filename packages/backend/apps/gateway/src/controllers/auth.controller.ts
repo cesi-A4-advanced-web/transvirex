@@ -1,12 +1,4 @@
-import {
-    Body,
-    Controller,
-    Get,
-    Post,
-    Req,
-    Res,
-    UseGuards,
-} from '@nestjs/common';
+import { Body, Controller, Get, Post, Req, Res, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Throttle, ThrottlerGuard } from '@nestjs/throttler';
 import type { Request, Response } from 'express';
@@ -58,7 +50,11 @@ export class AuthController {
         description: 'Authenticate with email and password. Sets access_token and refresh_token cookies on success.',
     })
     @ApiBody({ type: LoginDto })
-    @ApiResponse({ status: 201, description: 'Login successful - cookies set', schema: { type: 'object', properties: { success: { type: 'boolean', example: true } } } })
+    @ApiResponse({
+        status: 201,
+        description: 'Login successful - cookies set',
+        schema: { type: 'object', properties: { success: { type: 'boolean', example: true } } },
+    })
     @ApiResponse({ status: 401, description: 'Invalid email or password' })
     async login(@Body() body: LoginDto, @Res({ passthrough: true }) res: Response) {
         const data = await this.gatewayService.login(body);
@@ -100,3 +96,4 @@ export class AuthController {
         return { success: true };
     }
 }
+

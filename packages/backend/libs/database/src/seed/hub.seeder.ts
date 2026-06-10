@@ -22,3 +22,4 @@ export async function seedHubs(prisma: PrismaClient, count: number, addressIds: 
 
     return hubs;
 }
+

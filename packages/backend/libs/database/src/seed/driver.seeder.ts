@@ -20,3 +20,4 @@ export async function seedDrivers(prisma: PrismaClient, driverUserIds: string[],
 
     return drivers;
 }
+

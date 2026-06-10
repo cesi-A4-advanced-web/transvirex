@@ -16,3 +16,4 @@ export async function seedParcels(prisma: PrismaClient, parcelsPerInvoice: numbe
         }
     }
 }
+

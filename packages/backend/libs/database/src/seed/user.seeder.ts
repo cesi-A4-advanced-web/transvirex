@@ -1,6 +1,6 @@
 import { faker } from '@faker-js/faker';
 import type { PrismaClient } from '@generated/prisma';
-import { nextUserRef, hashPassword } from './helpers';
+import { hashPassword, nextUserRef } from './helpers';
 
 /** Shape of a static (hardcoded) user entry. */
 interface StaticUser {
@@ -80,3 +80,4 @@ export async function seedUsers(prisma: PrismaClient, hubIds: string[], extraCou
 
     return users;
 }
+

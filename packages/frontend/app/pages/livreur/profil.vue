@@ -123,3 +123,4 @@ const initials = computed(() =>
         .slice(0, 2),
 );
 </script>
+

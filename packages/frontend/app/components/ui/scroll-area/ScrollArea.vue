@@ -20,3 +20,4 @@ const delegatedProps = reactiveOmit(props, 'class');
         <ScrollAreaCorner />
     </ScrollAreaRoot>
 </template>
+

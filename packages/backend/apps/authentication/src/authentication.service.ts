@@ -1,6 +1,6 @@
-import { Injectable, UnauthorizedException, Inject } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '@app/database';
+import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
 import { randomUUID } from 'crypto';
 import type { Redis } from 'ioredis';
@@ -64,3 +64,4 @@ export class AuthenticationService {
         return { access_token: accessToken, refresh_token: refreshToken };
     }
 }
+

@@ -190,3 +190,4 @@ const { servicesOk, servicesError, lastChecked, services } = storeToRefs(health)
         </UiCard>
     </div>
 </template>
+

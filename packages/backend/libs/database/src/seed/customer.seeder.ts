@@ -30,3 +30,4 @@ export async function seedCustomers(prisma: PrismaClient, count: number, hubIds:
 
     return customers;
 }
+

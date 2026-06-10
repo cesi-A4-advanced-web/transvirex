@@ -30,3 +30,4 @@ const delegatedProps = reactiveOmit(props, 'class');
         </TableCell>
     </TableRow>
 </template>
+

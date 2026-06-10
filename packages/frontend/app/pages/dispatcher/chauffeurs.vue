@@ -18,6 +18,12 @@
                                 {{ stat.label }}
                             </p>
                         </div>
+                        <div>
+                            <p class="text-2xl font-bold">{{ stat.value }}</p>
+                            <p class="text-xs text-muted-foreground">
+                                {{ stat.label }}
+                            </p>
+                        </div>
                     </CardContent>
                 </Card>
             </div>
@@ -195,3 +201,4 @@ function statusClass(s: string) {
     );
 }
 </script>
+
