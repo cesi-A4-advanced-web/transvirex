@@ -154,7 +154,6 @@
 import { nextTick } from 'vue';
 import { useCookie } from '#app';
 import { Bell, Bot, Mic, MicOff, Send } from '@lucide/vue';
-import { AppLayout } from '#components';
 import { useAiAssistant, useSpeechRecognition } from '@/composables/useAiAssistant';
 
 definePageMeta({ layout: false });
