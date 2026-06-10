@@ -5,7 +5,6 @@ class Settings(BaseSettings):
     deepseek_api_key: str
     deepseek_base_url: str = "https://api.deepseek.com"
     deepseek_chat_model: str = "deepseek-chat"
-    deepseek_embedding_model: str = "deepseek-embedding"
 
     mongodb_host: str = "mongodb"
     mongodb_port: int = 27017

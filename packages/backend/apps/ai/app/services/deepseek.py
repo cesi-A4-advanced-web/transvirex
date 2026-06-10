@@ -14,14 +14,6 @@ def get_client() -> AsyncOpenAI:
     return _client
 
 
-async def get_embedding(text: str) -> list[float]:
-    response = await get_client().embeddings.create(
-        model=settings.deepseek_embedding_model,
-        input=text,
-    )
-    return response.data[0].embedding
-
-
 async def chat_completion(
     messages: list[dict],
     system: str | None = None,
