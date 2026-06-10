@@ -19,7 +19,7 @@ spec:
                 - name: ghcr-secret
             containers:
                 - name: frontend
-                  image: ghcr.io/alecfoucher/transvirex-frontend:latest
+                  image: ghcr.io/cesi-A4-advanced-web/transvirex-frontend:latest
                   imagePullPolicy: Always
                   env:
                       - name: NODE_ENV
@@ -74,3 +74,4 @@ spec:
           targetPort: 3000
           name: http
           protocol: TCP
+

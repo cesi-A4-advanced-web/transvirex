@@ -11,7 +11,7 @@ spec:
             restartPolicy: Never
             containers:
                 - name: seed
-                  image: ghcr.io/alecfoucher/transvirex-authentication-service:latest
+                  image: ghcr.io/cesi-A4-advanced-web/transvirex-authentication-service:latest
                   command:
                       - sh
                       - -c
