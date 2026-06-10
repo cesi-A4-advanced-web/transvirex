@@ -54,23 +54,3 @@ export class HubsController {
         return this.gatewayService.updateHub(id, body, (req as any).user);
     }
 }
-
-@Controller()
-export class HubsController {
-    constructor(private readonly gatewayService: GatewayService) {}
-
-    @ApiTags('Hubs')
-    @Get('hubs/:id/capacity')
-    @ApiBearerAuth('JWT-auth')
-    @Roles('admin', 'dispatcher')
-    @ApiOperation({
-        summary: 'Get hub capacity',
-        description: 'Returns current load vs capacity_parcels_day with alert if > 80%.',
-    })
-    @ApiParam({ name: 'id', description: 'Hub UUID' })
-    @ApiResponse({ status: 200, description: 'Hub capacity data' })
-    getHubCapacity(@Param('id') id: string, @Req() req: Request) {
-        return this.gatewayService.getHubCapacity(id, (req as any).user);
-    }
-}
-
