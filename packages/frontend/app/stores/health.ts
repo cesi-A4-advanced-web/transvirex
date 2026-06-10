@@ -1,12 +1,23 @@
+/** Represents the health status of a single backend service. */
 export interface ServiceHealth {
+    /** Display name of the service. */
     name: string;
+    /** Health check endpoint URL. */
     url: string;
+    /** Current health status. */
     status: 'initializing' | 'pending' | 'ok' | 'error';
+    /** Response time in milliseconds, or null if not checked. */
     responseTime: number | null;
+    /** Additional detail about the health status. */
     detail: string | null;
 }
 
+/**
+ * Pinia store for monitoring backend service health.
+ * Provides reactive state and actions to check all defined services.
+ */
 export const useHealthStore = defineStore('health', () => {
+    /** List of services with their current health status. */
     const services = ref<ServiceHealth[]>([
         {
             name: 'API Gateway',
@@ -52,16 +63,20 @@ export const useHealthStore = defineStore('health', () => {
         },
     ]);
 
+    /** Whether a health check is currently running. */
     const loading = ref(false);
+    /** Timestamp of the last health check, or null. */
     const lastChecked = ref<string | null>(null);
 
-    const servicesOk = computed(
-        () => services.value.filter((s) => s.status === 'ok').length,
-    );
-    const servicesError = computed(
-        () => services.value.filter((s) => s.status === 'error').length,
-    );
+    /** Number of services currently reporting OK status. */
+    const servicesOk = computed(() => services.value.filter((s) => s.status === 'ok').length);
+    /** Number of services currently reporting an error. */
+    const servicesError = computed(() => services.value.filter((s) => s.status === 'error').length);
 
+    /**
+     * Check the health of a single service.
+     * Updates the service's status, response time, and detail fields.
+     */
     async function checkOne(service: ServiceHealth) {
         if (service.status === 'pending') return;
 
@@ -83,6 +98,10 @@ export const useHealthStore = defineStore('health', () => {
         }
     }
 
+    /**
+     * Check the health of all defined services concurrently.
+     * Updates `lastChecked` with the current time when complete.
+     */
     async function checkAll() {
         if (loading.value) return;
 

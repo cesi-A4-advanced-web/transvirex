@@ -2,11 +2,8 @@ import { faker } from '@faker-js/faker';
 import type { PrismaClient } from '@generated/prisma';
 import { nextParcelRef } from './helpers';
 
-export async function seedParcels(
-    prisma: PrismaClient,
-    parcelsPerInvoice: number,
-    invoices: { id: string }[],
-) {
+/** Seed a given number of parcels per invoice. */
+export async function seedParcels(prisma: PrismaClient, parcelsPerInvoice: number, invoices: { id: string }[]) {
     for (const invoice of invoices) {
         for (let i = 0; i < parcelsPerInvoice; i++) {
             await prisma.parcel.create({

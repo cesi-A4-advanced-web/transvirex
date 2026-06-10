@@ -1,6 +1,6 @@
 <template>
     <div class="min-h-screen flex flex-col md:flex-row">
-        <!-- Panneau gauche — branding -->
+        <!-- Branding panel -->
         <div
             class="relative flex flex-col justify-between bg-[#1a3f7a] text-white md:w-[42%] md:min-h-screen px-8 py-8 md:px-12 md:py-12"
         >
@@ -8,23 +8,15 @@
                 <p class="text-xl font-bold leading-none">Transvirex</p>
                 <p class="text-sm text-blue-200 mt-0.5">Moving Intelligence</p>
             </div>
-
             <div class="hidden md:block">
-                <h1 class="text-5xl font-extrabold leading-tight mb-4">
-                    La logistique,<br />repensée.
-                </h1>
+                <h1 class="text-5xl font-extrabold leading-tight mb-4">La logistique,<br />repensée.</h1>
                 <p class="text-blue-200 text-base leading-relaxed max-w-xs">
-                    Centralisez vos opérations, suivez vos livraisons en temps
-                    réel, pilotez votre flotte.
+                    Centralisez vos opérations, suivez vos livraisons en temps réel, pilotez votre flotte.
                 </p>
             </div>
-
             <div class="md:hidden mt-6 mb-4">
-                <h1 class="text-3xl font-extrabold leading-tight">
-                    Bienvenue sur<br />votre espace.
-                </h1>
+                <h1 class="text-3xl font-extrabold leading-tight">Bienvenue sur<br />votre espace.</h1>
             </div>
-
             <div class="hidden md:flex items-center gap-6 text-sm">
                 <div>
                     <p class="text-2xl font-bold">15 000</p>
@@ -43,107 +35,74 @@
             </div>
         </div>
 
-        <!-- Panneau droit — formulaire -->
-        <div
-            class="flex-1 flex flex-col bg-[#f0f2f5] px-6 py-8 md:px-0 md:py-0 md:items-center md:justify-center"
-        >
-            <div
-                class="w-full max-w-md bg-white rounded-2xl shadow-sm p-8 md:p-10"
-            >
-                <h2 class="text-2xl font-bold text-gray-900">Connexion</h2>
-                <p class="text-sm text-gray-500 mt-1 mb-6">
-                    Accédez à votre espace Transvirex
-                </p>
-
-                <!-- Sélecteur de rôle -->
-                <div class="flex gap-2 mb-6">
-                    <button
-                        v-for="role in roles"
-                        :key="role.value"
-                        type="button"
-                        :class="[
-                            'px-4 py-1.5 rounded-full text-sm font-medium border transition-colors',
-                            selectedRole === role.value
-                                ? 'bg-blue-600 text-white border-blue-600'
-                                : 'bg-white text-gray-600 border-gray-300 hover:border-blue-400',
-                        ]"
-                        @click="selectedRole = role.value"
-                    >
-                        {{ role.label }}
-                    </button>
-                </div>
-
-                <form @submit.prevent="handleSubmit" class="space-y-5">
-                    <div>
-                        <label
-                            class="block text-sm font-medium text-gray-700 mb-1"
+        <!-- Form panel -->
+        <div class="flex-1 flex flex-col bg-muted px-6 py-8 md:px-0 md:py-0 md:items-center md:justify-center">
+            <Card class="w-full max-w-md shadow-sm">
+                <CardHeader class="pb-4">
+                    <CardTitle class="text-2xl">Connexion</CardTitle>
+                    <CardDescription>Accédez à votre espace Transvirex</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <div class="flex gap-2 mb-6">
+                        <Button
+                            v-for="role in roles"
+                            :key="role.value"
+                            type="button"
+                            :variant="selectedRole === role.value ? 'default' : 'outline'"
+                            size="sm"
+                            class="rounded-full"
+                            @click="selectedRole = role.value"
                         >
-                            Email
-                        </label>
-                        <input
-                            v-model="email"
-                            type="email"
-                            required
-                            :placeholder="`${selectedRole}@transvirex.fr`"
-                            class="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
-                        />
+                            {{ role.label }}
+                        </Button>
                     </div>
 
-                    <div>
-                        <div class="flex justify-between items-center mb-1">
-                            <label
-                                class="block text-sm font-medium text-gray-700"
-                            >
-                                Mot de passe
-                            </label>
-                            <a
-                                href="#"
-                                class="text-xs text-blue-600 hover:underline"
-                            >
-                                Mot de passe oublié ?
-                            </a>
+                    <form @submit.prevent="handleSubmit" class="space-y-4">
+                        <div class="space-y-1.5">
+                            <Label for="email">Email</Label>
+                            <Input
+                                id="email"
+                                v-model="email"
+                                type="email"
+                                required
+                                :placeholder="`${selectedRole}@transvirex.fr`"
+                            />
                         </div>
-                        <input
-                            v-model="password"
-                            type="password"
-                            required
-                            placeholder="••••••••••••"
-                            class="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
-                        />
+                        <div class="space-y-1.5">
+                            <div class="flex justify-between items-center">
+                                <Label for="password">Mot de passe</Label>
+                                <a href="#" class="text-xs text-primary hover:underline">Mot de passe oublié ?</a>
+                            </div>
+                            <Input
+                                id="password"
+                                v-model="password"
+                                type="password"
+                                required
+                                placeholder="••••••••••••"
+                            />
+                        </div>
+
+                        <p v-if="error" class="text-sm text-destructive">
+                            {{ error }}
+                        </p>
+
+                        <Button type="submit" class="w-full" :disabled="loading" size="lg">
+                            {{ loading ? 'Connexion...' : 'Se connecter' }}
+                        </Button>
+                    </form>
+
+                    <div class="md:hidden mt-6">
+                        <div class="flex items-center gap-3 my-4">
+                            <Separator />
+                            <span class="text-xs text-muted-foreground whitespace-nowrap">Ou continuer avec</span>
+                            <Separator />
+                        </div>
+                        <Button variant="outline" class="w-full">Face ID</Button>
                     </div>
+                </CardContent>
+            </Card>
 
-                    <p v-if="error" class="text-sm text-red-500 -mt-1">
-                        {{ error }}
-                    </p>
-
-                    <button
-                        type="submit"
-                        :disabled="loading"
-                        class="w-full py-3 bg-blue-600 hover:bg-blue-700 disabled:opacity-60 text-white font-semibold rounded-lg text-sm transition"
-                    >
-                        {{ loading ? 'Connexion...' : 'Se connecter' }}
-                    </button>
-                </form>
-
-                <!-- Face ID mobile uniquement -->
-                <div class="md:hidden mt-6">
-                    <div class="flex items-center gap-3 my-4">
-                        <div class="flex-1 h-px bg-gray-200" />
-                        <span class="text-xs text-gray-400"
-                            >Ou continuer avec</span
-                        >
-                        <div class="flex-1 h-px bg-gray-200" />
-                    </div>
-                    <button
-                        type="button"
-                        class="w-full py-2.5 border border-gray-300 rounded-lg text-sm text-gray-700 font-medium hover:bg-gray-50 transition"
-                    >
-                        Face ID
-                    </button>
-                </div>
-            </div>
-
-            <p class="mt-6 text-xs text-gray-400 text-center">
+            <p class="mt-6 text-xs text-muted-foreground text-center">
                 © 2026 Transvirex Logistics — Tous droits réservés
             </p>
         </div>
@@ -151,30 +110,70 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { navigateTo, useCookie } from '#app';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Separator } from '@/components/ui/separator';
 
 definePageMeta({ layout: false });
 
 const { login } = useAuth();
 
+/** Available role options for the login form. */
 const roles = [
     { label: 'Dispatcher', value: 'dispatcher' },
     { label: 'Chauffeur', value: 'driver' },
     { label: 'Admin', value: 'admin' },
 ];
-
+/** Currently selected role in the login form. */
 const selectedRole = ref('dispatcher');
+/** Email input value. */
 const email = ref('');
+/** Password input value. */
 const password = ref('');
+/** Login error message displayed to the user. */
 const error = ref('');
+/** Whether the login request is in progress. */
 const loading = ref(false);
 
+/**
+ * Parse a JWT token and return its decoded payload.
+ */
+function parseJwt(token: string): Record<string, unknown> | null {
+    try {
+        const b64 = token.split('.')[1]?.replace(/-/g, '+').replace(/_/g, '/');
+        if (!b64) return null;
+        return JSON.parse(atob(b64));
+    } catch {
+        return null;
+    }
+}
+
+/**
+ * Determine the dashboard URL to redirect to based on user role.
+ */
+function redirectByRole(token: string) {
+    const payload = parseJwt(token);
+    const role = payload?.role as string;
+    if (role === 'admin' || role === 'business_manager') return '/admin/dashboard';
+    if (role === 'dispatcher') return '/dispatcher/dashboard';
+    if (role === 'driver') return '/livreur/dashboard';
+    return '/admin/dashboard';
+}
+
+/**
+ * Handle login form submission.
+ * Calls the auth login API, then redirects to the role-appropriate dashboard.
+ */
 async function handleSubmit() {
     loading.value = true;
     error.value = '';
     try {
         await login(email.value, password.value);
-        await navigateTo('/health-service');
+        const tokenCookie = useCookie('access_token');
+        await navigateTo(redirectByRole(tokenCookie.value ?? ''));
     } catch (e: unknown) {
         const err = e as { data?: { message?: string } };
         error.value = err?.data?.message || 'Identifiants invalides';

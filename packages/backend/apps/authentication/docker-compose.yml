@@ -25,6 +25,7 @@ services:
             - REDIS_PORT=${REDIS_PORT:-6379}
             - REDIS_PASSWORD=${REDIS_PASSWORD:-redis_password}
             - REDIS_DB=${REDIS_DB:-0}
+            - JWT_SECRET=${JWT_SECRET}
         volumes:
             # - ./:/app/apps/authentication
             - /app/node_modules
@@ -41,11 +42,11 @@ services:
                   ignore:
                       - node_modules
                       - dist
-                  action: sync
+                  action: sync+restart
                   target: /app/apps/authentication
                 - path: ../../libs/
                   ignore:
                       - node_modules
                       - dist
-                  action: sync
+                  action: sync+restart
                   target: /app/libs

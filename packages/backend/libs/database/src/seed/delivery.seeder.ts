@@ -2,6 +2,7 @@ import { faker } from '@faker-js/faker';
 import type { PrismaClient } from '@generated/prisma';
 import { nextDeliveryRef } from './helpers';
 
+/** Seed a given number of random deliveries linked to invoices and drivers. */
 export async function seedDeliveries(
     prisma: PrismaClient,
     count: number,
@@ -13,7 +14,12 @@ export async function seedDeliveries(
     for (let i = 0; i < count; i++) {
         const invoice = faker.helpers.arrayElement(invoices);
         const status = faker.helpers.arrayElement([
-            'delivered', 'planned', 'delivering', 'cancelled', 'blocked', 'delayed',
+            'delivered',
+            'planned',
+            'delivering',
+            'cancelled',
+            'blocked',
+            'delayed',
         ]);
 
         const hasPosition = faker.datatype.boolean(0.3);
@@ -26,11 +32,19 @@ export async function seedDeliveries(
                 notes: faker.datatype.boolean(0.4) ? faker.lorem.sentence() : undefined,
                 ...(hasPosition
                     ? {
-                        position_history: JSON.stringify([
-                            { lat: faker.location.latitude(), lng: faker.location.longitude(), ts: faker.date.recent().toISOString() },
-                            { lat: faker.location.latitude(), lng: faker.location.longitude(), ts: faker.date.recent().toISOString() },
-                        ]),
-                    }
+                          position_history: JSON.stringify([
+                              {
+                                  lat: faker.location.latitude(),
+                                  lng: faker.location.longitude(),
+                                  ts: faker.date.recent().toISOString(),
+                              },
+                              {
+                                  lat: faker.location.latitude(),
+                                  lng: faker.location.longitude(),
+                                  ts: faker.date.recent().toISOString(),
+                              },
+                          ]),
+                      }
                     : {}),
             },
         });

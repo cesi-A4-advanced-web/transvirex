@@ -30,6 +30,7 @@ services:
             - MONGODB_USER=${MONGODB_USER:-mongo_user}
             - MONGODB_PASSWORD=${MONGODB_PASSWORD:-mongo_password}
             - MONGODB_DB=${MONGODB_DB:-transvirex}
+            - JWT_SECRET=${JWT_SECRET}
             - AUTH_SERVICE_URL=http://authentication-service:3000
             - BILLING_SERVICE_URL=http://billing-service:3000
             - DELIVERY_SERVICE_URL=http://delivery-service:3000
@@ -52,11 +53,11 @@ services:
                   ignore:
                       - node_modules
                       - dist
-                  action: sync
+                  action: sync+restart
                   target: /app/apps/gateway
                 - path: ../../libs/
                   ignore:
                       - node_modules
                       - dist
-                  action: sync
+                  action: sync+restart
                   target: /app/libs

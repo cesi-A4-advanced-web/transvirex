@@ -1,10 +1,17 @@
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { Transport } from '@nestjs/microservices';
+import { LoggingService, LoggingInterceptor } from '@app/logging';
 import { UsersModule } from './users.module';
 
+/** Bootstrap the users microservice with HTTP + RabbitMQ transport. */
 async function bootstrap() {
-    const app = await NestFactory.create(UsersModule);
+    const app = await NestFactory.create(UsersModule, { bufferLogs: true });
+
+    const logger = app.get(LoggingService);
+    logger.setServiceName('users');
+    app.useLogger(logger);
+    app.useGlobalInterceptors(app.get(LoggingInterceptor));
 
     app.connectMicroservice({
         transport: Transport.RMQ,
@@ -24,7 +31,7 @@ async function bootstrap() {
 
     const PORT = process.env.PORT || 3000;
     await app.listen(PORT);
-    console.log(`Users service listening on port ${PORT} (HTTP + RabbitMQ)`);
+    logger.log(`Users service listening on port ${PORT} (HTTP + RabbitMQ)`, 'Bootstrap');
 }
 bootstrap().catch((error) => {
     console.error('Error starting users service:', error);

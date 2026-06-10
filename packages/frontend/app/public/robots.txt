@@ -1,0 +1,2 @@
+cat ".\packages\frontend\docker-compose.yml"cat ".\packages\frontend\docker-compose.yml"User-Agent: *
+Disallow:

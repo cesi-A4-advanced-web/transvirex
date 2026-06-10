@@ -1,5 +1,5 @@
 export default {
-    printWidth: 80,
+    printWidth: 120,
     semi: true,
     singleQuote: true,
     tabWidth: 4,

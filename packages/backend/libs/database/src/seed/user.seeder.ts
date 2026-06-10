@@ -2,6 +2,7 @@ import { faker } from '@faker-js/faker';
 import type { PrismaClient } from '@generated/prisma';
 import { nextUserRef, hashPassword } from './helpers';
 
+/** Shape of a static (hardcoded) user entry. */
 interface StaticUser {
     firstname: string;
     lastname: string;
@@ -10,23 +11,28 @@ interface StaticUser {
     password: string;
 }
 
+/** Predetermined users inserted on every seed. */
 const STATIC_USERS: StaticUser[] = [
     { firstname: 'Admin', lastname: 'Transvirex', email: 'admin@transvirex.fr', role: 'admin', password: 'Admin123!' },
-    { firstname: 'Jean', lastname: 'Dupont', email: 'dispatcher@transvirex.fr', role: 'dispatcher', password: 'Dispatcher123!' },
+    {
+        firstname: 'Jean',
+        lastname: 'Dupont',
+        email: 'dispatcher@transvirex.fr',
+        role: 'dispatcher',
+        password: 'Dispatcher123!',
+    },
     { firstname: 'Pierre', lastname: 'Martin', email: 'driver@transvirex.fr', role: 'driver', password: 'Driver123!' },
 ];
 
+/** Shape of a user seed result. */
 interface UserResult {
     id: string;
     role: string;
     email: string | null;
 }
 
-export async function seedUsers(
-    prisma: PrismaClient,
-    hubIds: string[],
-    extraCount: number,
-) {
+/** Seed static users plus a given number of random additional users. */
+export async function seedUsers(prisma: PrismaClient, hubIds: string[], extraCount: number) {
     const users: UserResult[] = [];
 
     for (const su of STATIC_USERS) {
@@ -45,9 +51,8 @@ export async function seedUsers(
         users.push({ id: user.id, role: su.role, email: su.email });
     }
 
-    const ROLES: ('dispatcher' | 'driver' | 'driver' | 'business_manager' | 'business_manager' | 'admin' | 'driver')[] = [
-        'dispatcher', 'driver', 'driver', 'business_manager', 'business_manager', 'admin', 'driver',
-    ];
+    const ROLES: ('dispatcher' | 'driver' | 'driver' | 'business_manager' | 'business_manager' | 'admin' | 'driver')[] =
+        ['dispatcher', 'driver', 'driver', 'business_manager', 'business_manager', 'admin', 'driver'];
 
     for (let i = 0; i < extraCount; i++) {
         const role = ROLES[i % ROLES.length];

@@ -1,11 +1,13 @@
 import { Injectable, OnModuleDestroy } from '@nestjs/common';
 import Redis from 'ioredis';
 
+/** Redis connection credentials (from environment or defaults). */
 const REDIS_HOST = process.env.REDIS_HOST || 'redis';
 const REDIS_PORT = Number(process.env.REDIS_PORT) || 6379;
 const REDIS_PASSWORD = process.env.REDIS_PASSWORD || '';
 const REDIS_DB = Number(process.env.REDIS_DB) || 0;
 
+/** Service wrapping an ioredis client for executing commands from the debug endpoints. */
 @Injectable()
 export class RedisService implements OnModuleDestroy {
     private client: Redis;
@@ -20,10 +22,12 @@ export class RedisService implements OnModuleDestroy {
         });
     }
 
+    /** Quit the Redis connection on module destroy. */
     async onModuleDestroy() {
         await this.client.quit();
     }
 
+    /** Parse and execute a Redis command string, returning tabular results. */
     async executeCommand(command: string): Promise<{ columns: string[]; rows: any[]; rowCount: number }> {
         const trimmed = command.trim();
         const parts = trimmed.split(/\s+/);

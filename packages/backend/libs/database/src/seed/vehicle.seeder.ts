@@ -2,11 +2,8 @@ import { faker } from '@faker-js/faker';
 import type { PrismaClient } from '@generated/prisma';
 import { nextVehicleRef } from './helpers';
 
-export async function seedVehicles(
-    prisma: PrismaClient,
-    count: number,
-    hubIds: string[],
-) {
+/** Seed a given number of random vehicles. */
+export async function seedVehicles(prisma: PrismaClient, count: number, hubIds: string[]) {
     const vehicles: { id: string; hub_id: string | null }[] = [];
     const types = ['van', 'truck', 'refrigerated', 'flatbed', 'box'];
 

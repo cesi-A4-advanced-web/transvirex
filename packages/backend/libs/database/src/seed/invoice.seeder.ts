@@ -2,6 +2,7 @@ import { faker } from '@faker-js/faker';
 import type { PrismaClient } from '@generated/prisma';
 import { nextInvoiceRef } from './helpers';
 
+/** Seed a given number of random invoices. */
 export async function seedInvoices(
     prisma: PrismaClient,
     count: number,

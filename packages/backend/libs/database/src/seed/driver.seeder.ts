@@ -2,11 +2,8 @@ import { faker } from '@faker-js/faker';
 import type { PrismaClient } from '@generated/prisma';
 import { nextDriverRef } from './helpers';
 
-export async function seedDrivers(
-    prisma: PrismaClient,
-    driverUserIds: string[],
-    vehicles: { id: string }[],
-) {
+/** Seed driver records for each provided user ID, assigning a random vehicle. */
+export async function seedDrivers(prisma: PrismaClient, driverUserIds: string[], vehicles: { id: string }[]) {
     const drivers: { id: string; user_id: string }[] = [];
 
     for (const userId of driverUserIds) {

@@ -1,10 +1,12 @@
 import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { DatabaseModule } from '@app/database';
+import { LoggingModule } from '@app/logging';
 import { AuthenticationController } from './authentication.controller';
 import { AuthenticationService } from './authentication.service';
 import Redis from 'ioredis';
 
+/** Provider factory for a Redis connection used to store refresh tokens. */
 const RedisProvider = {
     provide: 'REDIS',
     useFactory: () =>
@@ -16,12 +18,14 @@ const RedisProvider = {
         }),
 };
 
+/** Root module for the authentication microservice. */
 @Module({
     imports: [
+        LoggingModule,
         DatabaseModule,
         JwtModule.register({
-            secret: process.env.JWT_SECRET || 'dev_secret',
-            signOptions: { expiresIn: '15m' },
+            secret: process.env.JWT_SECRET,
+            signOptions: { expiresIn: (process.env.JWT_ACCESS_TTL ? `${process.env.JWT_ACCESS_TTL}s` : '180s') as any },
         }),
     ],
     controllers: [AuthenticationController],
