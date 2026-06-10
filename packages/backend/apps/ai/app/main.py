@@ -3,7 +3,7 @@ from fastapi import FastAPI
 from mcp.server.fastmcp import FastMCP
 
 from .database import close_db
-from .routes import chat, incidents, knowledge
+from .routes import chat, incidents, knowledge, process, notifications
 from .services.rag import rag_chat, ingest_document
 from .services.incidents import process_incident
 

@@ -85,6 +85,17 @@ async def process_incident(
     notified = False
     if severity in ("CRITICAL", "HIGH"):
         await _call_delivery_service(delivery_id, summary, severity, driver_id)
+        await db["notifications"].insert_one(
+            {
+                "incident_id": str(result.inserted_id),
+                "driver_id": driver_id,
+                "delivery_id": delivery_id,
+                "summary": summary,
+                "severity": severity,
+                "read": False,
+                "created_at": datetime.now(timezone.utc),
+            }
+        )
         notified = True
 
     return {
