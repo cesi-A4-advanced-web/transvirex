@@ -266,6 +266,7 @@ export class DebugController {
 
     @ApiTags('Debug')
     @Delete('debug/logs/backend')
+    @Public()
     @BlockInProduction()
     @ApiOperation({
         summary: 'Clear backend logs',
@@ -278,6 +279,7 @@ export class DebugController {
 
     @ApiTags('Debug')
     @Delete('debug/logs/frontend')
+    @Public()
     @BlockInProduction()
     @ApiOperation({
         summary: 'Clear frontend logs',

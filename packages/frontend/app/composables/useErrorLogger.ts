@@ -17,7 +17,11 @@ export function useErrorLogger() {
         try {
             await $fetch('/api/logs/frontend', {
                 method: 'POST',
-                body: { level, message, metadata },
+                body: {
+                    level,
+                    message,
+                    metadata: { ...metadata, url: typeof window !== 'undefined' ? window.location.href : 'N/A' },
+                },
             });
         } catch {
             // Fail silently — logging should never crash the app
