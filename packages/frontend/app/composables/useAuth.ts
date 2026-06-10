@@ -21,6 +21,11 @@ export const useAuth = () => {
     /** Reactive current user state, or null if not authenticated. */
     const user = useState<AuthUser | null>('auth:user', () => null);
 
+    // On SSR the browser cookies are not automatically forwarded — capture them
+    // synchronously here (while the Nuxt request context is still available) so
+    // they can be passed to every outgoing fetch.
+    const ssrHeaders = import.meta.server ? useRequestHeaders(['cookie']) : {};
+
     /**
      * Fetch the current authenticated user from the API.
      * Attempts a token refresh if the initial request returns 401.
@@ -30,6 +35,7 @@ export const useAuth = () => {
         try {
             const data = await $fetch<AuthUser>('/api/auth/me', {
                 credentials: 'include',
+                headers: ssrHeaders,
             });
             user.value = data;
             return true;
@@ -39,9 +45,11 @@ export const useAuth = () => {
                     await $fetch('/api/auth/refresh', {
                         method: 'POST',
                         credentials: 'include',
+                        headers: ssrHeaders,
                     });
                     const data = await $fetch<AuthUser>('/api/auth/me', {
                         credentials: 'include',
+                        headers: ssrHeaders,
                     });
                     user.value = data;
                     return true;
