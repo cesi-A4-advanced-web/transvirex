@@ -283,17 +283,18 @@ jobs:
                   username: ${{ github.actor }}
                   password: ${{ secrets.GITHUB_TOKEN }}
 
-            - name: 📋 Create production namespace & registry secret
+            - name: 📋 Create production namespace & secrets
               uses: appleboy/ssh-action@v0.1.7
               env:
                   GHCR_USERNAME: ${{ github.actor }}
                   GHCR_TOKEN: ${{ secrets.GHCR_PAT }}
+                  JWT_SECRET: ${{ secrets.JWT_SECRET }}
               with:
                   host: ${{ secrets.VPS_HOST }}
                   username: github-actions
                   key: ${{ secrets.VPS_SSH_KEY }}
                   port: 22
-                  envs: GHCR_USERNAME,GHCR_TOKEN
+                  envs: GHCR_USERNAME,GHCR_TOKEN,JWT_SECRET
                   script: |
                       kubectl create namespace production --kubeconfig ~/.kube/config 2>/dev/null || true
                       kubectl delete secret ghcr-secret -n production --kubeconfig ~/.kube/config 2>/dev/null || true
@@ -301,6 +302,11 @@ jobs:
                         --docker-server=ghcr.io \
                         --docker-username=$GHCR_USERNAME \
                         --docker-password=$GHCR_TOKEN \
+                        -n production \
+                        --kubeconfig ~/.kube/config
+                      kubectl delete secret transvirex-secrets -n production --kubeconfig ~/.kube/config 2>/dev/null || true
+                      kubectl create secret generic transvirex-secrets \
+                        --from-literal=JWT_SECRET=$JWT_SECRET \
                         -n production \
                         --kubeconfig ~/.kube/config
                       rm -rf /tmp/k8s-manifests && mkdir -p /tmp/k8s-manifests
