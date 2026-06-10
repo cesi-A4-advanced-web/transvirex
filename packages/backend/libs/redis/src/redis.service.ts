@@ -27,6 +27,24 @@ export class RedisService implements OnModuleDestroy {
         await this.client.quit();
     }
 
+    /** Set a key with an optional TTL (in seconds). */
+    async set(key: string, value: string, ttl?: number): Promise<'OK'> {
+        if (ttl) {
+            return this.client.set(key, value, 'EX', ttl);
+        }
+        return this.client.set(key, value);
+    }
+
+    /** Get the value of a key. Returns null if the key does not exist. */
+    async get(key: string): Promise<string | null> {
+        return this.client.get(key);
+    }
+
+    /** Delete one or more keys. */
+    async del(...keys: string[]): Promise<number> {
+        return this.client.del(...keys);
+    }
+
     /** Parse and execute a Redis command string, returning tabular results. */
     async executeCommand(command: string): Promise<{ columns: string[]; rows: any[]; rowCount: number }> {
         const trimmed = command.trim();

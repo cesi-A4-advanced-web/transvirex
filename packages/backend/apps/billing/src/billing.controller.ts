@@ -1,3 +1,4 @@
+import { Roles } from '@app/guards/roles.decorator';
 import {
     Body,
     Controller,
@@ -10,14 +11,14 @@ import {
     Post,
     Query,
 } from '@nestjs/common';
-import { MessagePattern } from '@nestjs/microservices';
+import { EventPattern, MessagePattern } from '@nestjs/microservices';
+import { ApiBearerAuth, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { BillingService } from './billing.service';
 import type { CreateInvoiceDto } from './dto/create-invoice.dto';
 import type { InvoiceFiltersDto } from './dto/invoice-filters.dto';
-import type { UpdateInvoiceDto } from './dto/update-invoice.dto';
 import type { UpdateInvoiceStatusDto } from './dto/update-invoice-status.dto';
+import type { UpdateInvoiceDto } from './dto/update-invoice.dto';
 
-/** HTTP and RabbitMQ controller for billing operations. */
 @Controller()
 export class BillingController {
     constructor(private readonly billingService: BillingService) {}
@@ -53,10 +54,7 @@ export class BillingController {
     }
 
     @Patch('invoices/:id/status')
-    transitionStatus(
-        @Param('id') id: string,
-        @Body() body: UpdateInvoiceStatusDto,
-    ) {
+    transitionStatus(@Param('id') id: string, @Body() body: UpdateInvoiceStatusDto) {
         return this.billingService.transitionStatus(id, body);
     }
 
@@ -79,5 +77,28 @@ export class BillingController {
     @MessagePattern('health')
     getHealth() {
         return { status: 'ok', service: 'billing' };
+    }
+
+    @ApiTags('Billing')
+    @Patch('invoices/:id/confirm')
+    @ApiBearerAuth('JWT-auth')
+    @Roles('admin', 'business_manager')
+    @ApiOperation({ summary: 'Confirm an invoice and emit delivery.created' })
+    @ApiParam({ name: 'id', description: 'Invoice UUID' })
+    @ApiResponse({ status: 200, description: 'Invoice confirmed' })
+    @ApiResponse({ status: 404, description: 'Invoice not found' })
+    async confirmInvoice(@Param('id') id: string) {
+        return this.billingService.confirmInvoice(id);
+    }
+
+    /** Consume delivery status change events to trigger invoicing. */
+    @EventPattern('delivery.status_changed')
+    async handleDeliveryStatusChanged(data: {
+        deliveryId: string;
+        previousStatus: string;
+        newStatus: string;
+        timestamp: string;
+    }) {
+        await this.billingService.handleDeliveryDelivered(data);
     }
 }

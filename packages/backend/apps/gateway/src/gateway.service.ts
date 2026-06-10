@@ -213,6 +213,21 @@ export class GatewayService {
         return this.proxyPatch(`${this.serviceUrls.delivery}/hubs/${id}`, body, user);
     }
 
+    /** Update driver GPS position via the delivery service. */
+    updatePosition(body: unknown, user?: { sub: string; email: string; role: string }) {
+        return this.proxyPatch(`${this.serviceUrls.delivery}/deliveries/position`, body, user);
+    }
+
+    /** Get driver position via the delivery service. */
+    getDriverPosition(id: string, user?: { sub: string; email: string; role: string }) {
+        return this.proxyGet(`${this.serviceUrls.delivery}/drivers/${id}/position`, user);
+    }
+
+    /** Update delivery status via the delivery service. */
+    updateDeliveryStatus(id: string, body: unknown, user?: { sub: string; email: string; role: string }) {
+        return this.proxyPatch(`${this.serviceUrls.delivery}/deliveries/${id}/status`, body, user);
+    }
+
     /** Proxy health check to the authentication service. */
     getAuthHealth() {
         return this.fetchHealth('auth', this.serviceUrls.auth);
