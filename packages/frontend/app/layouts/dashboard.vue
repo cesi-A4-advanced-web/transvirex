@@ -209,7 +209,6 @@ import { navigateTo, useCookie, useRoute } from '#app';
 import {
     BarChart3,
     Bell,
-    Bot,
     Building2,
     Car,
     ChevronLeft,
@@ -234,6 +233,12 @@ type Role = 'admin' | 'dispatcher' | 'driver' | 'business_manager';
 const route = useRoute();
 /** Whether the sidebar is collapsed. */
 const collapsed = ref(false);
+/** Whether the notification panel is open. */
+const notifOpen = ref(false);
+
+// ── Notifications (dispatcher only) ──────────────────────────────────────────
+const { notifications, unreadCount, markRead, markAllRead, startPolling } = useNotifications();
+onMounted(() => { if (userRole.value === 'dispatcher') startPolling(); });
 
 // ── Auth ──────────────────────────────────────────────────────────────────────
 const accessToken = useCookie('access_token');
