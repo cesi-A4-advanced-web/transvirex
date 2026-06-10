@@ -130,7 +130,7 @@
                                         </span>
                                         <div class="flex-1 min-w-0">
                                             <p class="text-xs text-foreground leading-snug">{{ n.summary }}</p>
-                                            <p class="text-[10px] text-muted-foreground mt-0.5 font-mono">Livraison {{ n.delivery_id.slice(0, 8) }}</p>
+                                            <p v-if="n.delivery_id" class="text-[10px] text-muted-foreground mt-0.5 font-mono">Livraison {{ n.delivery_id.slice(0, 8) }}</p>
                                         </div>
                                         <span v-if="!n.read" class="w-2 h-2 rounded-full bg-orange-400 flex-shrink-0 mt-1" />
                                     </div>

@@ -23,7 +23,7 @@ class ProcessResponse(BaseModel):
 async def process(body: ProcessRequest):
     intent = await detect_intent(body.text)
 
-    if intent == "incident" and body.delivery_id:
+    if intent == "incident":
         incident = await process_incident(body.text, body.driver_id, body.delivery_id)
         severity_labels = {
             "CRITICAL": "critique",
