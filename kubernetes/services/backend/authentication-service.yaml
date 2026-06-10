@@ -19,7 +19,7 @@ spec:
                 - name: ghcr-secret
             containers:
                 - name: authentication
-                  image: ghcr.io/cesi-A4-advanced-web/transvirex-authentication-service:latest
+                  image: ghcr.io/cesi-a4-advanced-web/transvirex-authentication-service:latest
                   imagePullPolicy: Always
                   env:
                       - name: NODE_ENV
