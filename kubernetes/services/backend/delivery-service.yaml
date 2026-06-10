@@ -19,7 +19,7 @@ spec:
                 - name: ghcr-secret
             containers:
                 - name: delivery
-                  image: ghcr.io/alecfoucher/transvirex-delivery-service:latest
+                  image: ghcr.io/cesi-A4-advanced-web/transvirex-delivery-service:latest
                   imagePullPolicy: Always
                   env:
                       - name: NODE_ENV
