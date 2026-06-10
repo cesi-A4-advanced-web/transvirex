@@ -1,7 +1,14 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+    BadRequestException,
+    Injectable,
+    NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from '@app/database';
+import type { InvoiceStatus, Prisma } from '@generated/prisma';
 import type { CreateInvoiceDto } from './dto/create-invoice.dto';
+import type { InvoiceFiltersDto } from './dto/invoice-filters.dto';
 import type { UpdateInvoiceDto } from './dto/update-invoice.dto';
+import type { UpdateInvoiceStatusDto } from './dto/update-invoice-status.dto';
 
 const invoiceInclude = {
     customer: true,
@@ -17,55 +24,114 @@ const invoiceInclude = {
     },
 } as const;
 
+const invoiceDetailInclude = {
+    ...invoiceInclude,
+    parcels: true,
+    deliveries: {
+        include: {
+            driver: {
+                include: {
+                    user: {
+                        select: {
+                            id: true,
+                            reference: true,
+                            firstname: true,
+                            lastname: true,
+                            email: true,
+                        },
+                    },
+                },
+            },
+        },
+    },
+} as const;
+
+const STATUS_TRANSITIONS: Record<InvoiceStatus, InvoiceStatus | null> = {
+    quotation: 'purchase_order',
+    purchase_order: 'invoice',
+    invoice: null,
+};
+
 /** Service handling billing-related business logic. */
 @Injectable()
 export class BillingService {
     constructor(private readonly prisma: PrismaService) {}
 
+    private getPricePerKg(): number {
+        return Number(process.env.INVOICE_PRICE_PER_KG ?? 10);
+    }
+
+    private async calculateAmountFromParcels(invoiceId: string): Promise<number> {
+        const parcels = await this.prisma.parcel.findMany({
+            where: { invoice_id: invoiceId },
+            select: { weight: true },
+        });
+        const rate = this.getPricePerKg();
+        return parcels.reduce((sum, parcel) => sum + parcel.weight * rate, 0);
+    }
+
+    private buildInvoiceWhere(filters?: InvoiceFiltersDto): Prisma.InvoiceWhereInput {
+        const where: Prisma.InvoiceWhereInput = {};
+        if (filters?.status) where.status = filters.status;
+        if (filters?.customer_id) where.customer_id = filters.customer_id;
+        if (filters?.hub_id) where.hub_id = filters.hub_id;
+        if (filters?.due_date_from || filters?.due_date_to) {
+            where.due_date = {};
+            if (filters.due_date_from) {
+                where.due_date.gte = new Date(filters.due_date_from);
+            }
+            if (filters.due_date_to) {
+                where.due_date.lte = new Date(filters.due_date_to);
+            }
+        }
+        return where;
+    }
+
     /**
-     * Find an invoice by its ID
-     * @param id - The ID of the invoice
-     * @returns The invoice
-     * @throws NotFoundException if the invoice is not found
+     * Find an invoice by its ID with parcels and deliveries.
      */
     async findById(id: string) {
         const invoice = await this.prisma.invoice.findUnique({
             where: { id },
-            include: invoiceInclude,
+            include: invoiceDetailInclude,
         });
 
         if (!invoice) {
             throw new NotFoundException(`Invoice ${id} not found`);
         }
 
+        const amount = await this.calculateAmountFromParcels(id);
+        if (amount !== invoice.amount) {
+            return this.prisma.invoice.update({
+                where: { id },
+                data: { amount },
+                include: invoiceDetailInclude,
+            });
+        }
+
         return invoice;
     }
 
-    /**
-     * Find all invoices with pagination
-     * @param page - The page number (1-based)
-     * @param limit - The number of invoices per page
-     */
-    async findAll(page: number, limit: number) {
+    /** Find all invoices with pagination and optional filters. */
+    async findAll(page: number, limit: number, filters?: InvoiceFiltersDto) {
+        const where = this.buildInvoiceWhere(filters);
         const [data, total] = await Promise.all([
             this.prisma.invoice.findMany({
+                where,
                 skip: (page - 1) * limit,
                 take: limit,
+                include: invoiceInclude,
+                orderBy: { reference: 'asc' },
             }),
-            this.prisma.invoice.count(),
+            this.prisma.invoice.count({ where }),
         ]);
 
-        return {
-            data,
-            page,
-            limit,
-            total,
-        };
+        return { data, page, limit, total };
     }
 
-    /** Create a new invoice */
+    /** Create a new invoice (defaults to quotation status). */
     async create(dto: CreateInvoiceDto) {
-        return this.prisma.invoice.create({
+        const invoice = await this.prisma.invoice.create({
             data: {
                 customer_id: dto.customer_id,
                 hub_id: dto.hub_id,
@@ -79,14 +145,25 @@ export class BillingService {
                 payment_date: dto.payment_date
                     ? new Date(dto.payment_date)
                     : null,
-                amount: dto.amount ?? 0,
-                status: dto.status,
+                amount: 0,
+                status: 'quotation',
             },
             include: invoiceInclude,
         });
+
+        const amount = await this.calculateAmountFromParcels(invoice.id);
+        if (amount > 0) {
+            return this.prisma.invoice.update({
+                where: { id: invoice.id },
+                data: { amount },
+                include: invoiceInclude,
+            });
+        }
+
+        return invoice;
     }
 
-    /** Update an invoice */
+    /** Update an invoice (status changes use transitionStatus). */
     async update(id: string, dto: UpdateInvoiceDto) {
         const existing = await this.prisma.invoice.findUnique({ where: { id } });
         if (!existing) {
@@ -114,17 +191,44 @@ export class BillingService {
                 ? new Date(dto.payment_date)
                 : null;
         }
-        if (dto.amount !== undefined) updateData.amount = dto.amount;
-        if (dto.status !== undefined) updateData.status = dto.status;
 
-        return this.prisma.invoice.update({
+        await this.prisma.invoice.update({
             where: { id },
             data: updateData,
+        });
+
+        const amount = await this.calculateAmountFromParcels(id);
+        return this.prisma.invoice.update({
+            where: { id },
+            data: { amount },
             include: invoiceInclude,
         });
     }
 
-    /** Delete an invoice */
+    /** Transition invoice status (quotation → purchase_order → invoice). */
+    async transitionStatus(id: string, dto: UpdateInvoiceStatusDto) {
+        const existing = await this.prisma.invoice.findUnique({ where: { id } });
+        if (!existing) {
+            throw new NotFoundException(`Invoice ${id} not found`);
+        }
+
+        const currentStatus = existing.status ?? 'quotation';
+        const allowedNext = STATUS_TRANSITIONS[currentStatus];
+        if (!allowedNext || allowedNext !== dto.status) {
+            throw new BadRequestException(
+                `Invalid status transition from ${currentStatus} to ${dto.status}`,
+            );
+        }
+
+        const amount = await this.calculateAmountFromParcels(id);
+        return this.prisma.invoice.update({
+            where: { id },
+            data: { status: dto.status, amount },
+            include: invoiceInclude,
+        });
+    }
+
+    /** Delete an invoice and related data. */
     async remove(id: string) {
         const existing = await this.prisma.invoice.findUnique({ where: { id } });
         if (!existing) {

@@ -49,6 +49,21 @@ export class GatewayService {
         };
     }
 
+    /** Append optional query parameters to a URL. */
+    private appendQuery(
+        base: string,
+        params: Record<string, string | number | undefined>,
+    ): string {
+        const search = new URLSearchParams();
+        for (const [key, value] of Object.entries(params)) {
+            if (value !== undefined && value !== '') {
+                search.set(key, String(value));
+            }
+        }
+        const query = search.toString();
+        return query ? `${base}?${query}` : base;
+    }
+
     /** Proxy a POST request to a downstream microservice. */
     private async proxyPost(url: string, body: unknown, user?: { sub: string; email: string; role: string }) {
         try {
@@ -209,52 +224,82 @@ export class GatewayService {
     }
 
     /** List invoices via the billing service. */
-    getBillings(
+    getInvoices(
         page: number,
         limit: number,
+        filters: {
+            status?: string;
+            customer_id?: string;
+            hub_id?: string;
+            due_date_from?: string;
+            due_date_to?: string;
+        } = {},
         user?: { sub: string; email: string; role: string },
     ) {
         return this.proxyGet(
-            `${this.serviceUrls.billing}/billing?page=${page}&limit=${limit}`,
+            this.appendQuery(`${this.serviceUrls.billing}/invoices`, {
+                page,
+                limit,
+                ...filters,
+            }),
             user,
         );
     }
 
     /** Get an invoice by ID via the billing service. */
-    getBilling(id: string, user?: { sub: string; email: string; role: string }) {
-        return this.proxyGet(`${this.serviceUrls.billing}/billing/${id}`, user);
+    getInvoice(id: string, user?: { sub: string; email: string; role: string }) {
+        return this.proxyGet(`${this.serviceUrls.billing}/invoices/${id}`, user);
     }
 
     /** Create an invoice via the billing service. */
-    createBilling(
+    createInvoice(
         body: unknown,
         user?: { sub: string; email: string; role: string },
     ) {
-        return this.proxyPost(`${this.serviceUrls.billing}/billing`, body, user);
+        return this.proxyPost(`${this.serviceUrls.billing}/invoices`, body, user);
     }
 
     /** Update an invoice via the billing service. */
-    updateBilling(
+    updateInvoice(
         id: string,
         body: unknown,
         user?: { sub: string; email: string; role: string },
     ) {
-        return this.proxyPatch(`${this.serviceUrls.billing}/billing/${id}`, body, user);
+        return this.proxyPatch(`${this.serviceUrls.billing}/invoices/${id}`, body, user);
     }
 
-    /** Delete an invoice via the billing service. */
-    deleteBilling(id: string, user?: { sub: string; email: string; role: string }) {
-        return this.proxyDelete(`${this.serviceUrls.billing}/billing/${id}`, user);
+    /** Transition invoice status via the billing service. */
+    updateInvoiceStatus(
+        id: string,
+        body: unknown,
+        user?: { sub: string; email: string; role: string },
+    ) {
+        return this.proxyPatch(
+            `${this.serviceUrls.billing}/invoices/${id}/status`,
+            body,
+            user,
+        );
     }
 
     /** List deliveries via the delivery service. */
     getDeliveries(
         page: number,
         limit: number,
+        filters: {
+            status?: string;
+            hub_id?: string;
+            driver_id?: string;
+            date_from?: string;
+            date_to?: string;
+        } = {},
         user?: { sub: string; email: string; role: string },
     ) {
         return this.proxyGet(
-            `${this.serviceUrls.delivery}/deliveries?page=${page}&limit=${limit}`,
+            this.appendQuery(`${this.serviceUrls.delivery}/deliveries`, {
+                page,
+                limit,
+                ...filters,
+            }),
             user,
         );
     }
@@ -290,10 +335,19 @@ export class GatewayService {
     getUsers(
         page: number,
         limit: number,
+        filters: {
+            hub_id?: string;
+            role?: string;
+            status?: string;
+        } = {},
         user?: { sub: string; email: string; role: string },
     ) {
         return this.proxyGet(
-            `${this.serviceUrls.users}/users?page=${page}&limit=${limit}`,
+            this.appendQuery(`${this.serviceUrls.users}/users`, {
+                page,
+                limit,
+                ...filters,
+            }),
             user,
         );
     }

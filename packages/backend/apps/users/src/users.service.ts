@@ -7,6 +7,7 @@ import {
 import * as bcrypt from 'bcryptjs';
 import type { CreateUserDto } from './dto/create-user.dto';
 import type { UpdateUserDto } from './dto/update-user.dto';
+import type { UserFiltersDto } from './dto/user-filters.dto';
 
 const userSelect = {
     id: true,
@@ -56,15 +57,25 @@ export class UsersService {
         return `DRV-${String(nextNum).padStart(3, '0')}`;
     }
 
-    async findAll(page: number, limit: number) {
+    async findAll(page: number, limit: number, filters?: UserFiltersDto) {
+        const where: {
+            hub_id?: string;
+            role?: UserFiltersDto['role'];
+            status?: UserFiltersDto['status'];
+        } = {};
+        if (filters?.hub_id) where.hub_id = filters.hub_id;
+        if (filters?.role) where.role = filters.role;
+        if (filters?.status) where.status = filters.status;
+
         const [data, total] = await Promise.all([
             this.prisma.user.findMany({
+                where,
                 skip: (page - 1) * limit,
                 take: limit,
                 select: userSelect,
                 orderBy: { reference: 'asc' },
             }),
-            this.prisma.user.count(),
+            this.prisma.user.count({ where }),
         ]);
 
         return { data, page, limit, total };
@@ -133,21 +144,21 @@ export class UsersService {
     }
 
     async remove(id: string) {
-        const existing = await this.prisma.user.findUnique({
-            where: { id },
-            include: { _count: { select: { managed_invoices: true } } },
-        });
+        const existing = await this.prisma.user.findUnique({ where: { id } });
         if (!existing) throw new NotFoundException(`User ${id} not found`);
 
-        if (existing._count.managed_invoices > 0) {
-            throw new BadRequestException(
-                'Cannot delete user linked to managed invoices',
-            );
+        if (existing.status === 'inactive') {
+            return this.prisma.user.findUnique({
+                where: { id },
+                select: userSelect,
+            });
         }
 
-        await this.prisma.driver.deleteMany({ where: { user_id: id } });
-        await this.prisma.user.delete({ where: { id } });
-        return { success: true, id };
+        return this.prisma.user.update({
+            where: { id },
+            data: { status: 'inactive' },
+            select: userSelect,
+        });
     }
 
     /**

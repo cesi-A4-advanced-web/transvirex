@@ -17,6 +17,7 @@ describe('BillingController', () => {
                         findAll: jest.fn(),
                         create: jest.fn(),
                         update: jest.fn(),
+                        transitionStatus: jest.fn(),
                         remove: jest.fn(),
                     },
                 },
@@ -76,10 +77,16 @@ describe('BillingController', () => {
             jest.spyOn(billingService, 'findAll').mockResolvedValue(
                 result as never,
             );
-            await expect(billingController.findAll(1, 10)).resolves.toEqual(
-                result,
-            );
-            expect(billingService.findAll).toHaveBeenCalledWith(1, 10);
+            await expect(
+                billingController.findAll(1, 10, undefined, undefined, undefined, undefined, undefined),
+            ).resolves.toEqual(result);
+            expect(billingService.findAll).toHaveBeenCalledWith(1, 10, {
+                status: undefined,
+                customer_id: undefined,
+                hub_id: undefined,
+                due_date_from: undefined,
+                due_date_to: undefined,
+            });
         });
     });
 });

@@ -1,8 +1,4 @@
-import type {
-    InvoicePriority,
-    InvoiceServiceType,
-    InvoiceStatus,
-} from '@generated/prisma';
+import type { InvoicePriority, InvoiceServiceType } from '@generated/prisma';
 
 export type CreateInvoiceDto = {
     customer_id: string;
@@ -15,6 +11,4 @@ export type CreateInvoiceDto = {
     due_date: string;
     service_type?: InvoiceServiceType;
     payment_date?: string | null;
-    amount?: number;
-    status?: InvoiceStatus;
 };

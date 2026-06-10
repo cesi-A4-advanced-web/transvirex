@@ -37,8 +37,15 @@ export class UsersController {
     findAll(
         @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
         @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number,
+        @Query('hub_id') hub_id?: string,
+        @Query('role') role?: string,
+        @Query('status') status?: string,
     ) {
-        return this.usersService.findAll(page, limit);
+        return this.usersService.findAll(page, limit, {
+            hub_id,
+            role: role as never,
+            status: status as never,
+        });
     }
 
     @Post('users')

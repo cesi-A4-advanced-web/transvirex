@@ -23,7 +23,8 @@ async function bootstrap() {
             .setTitle('Transvirex ERP - Gateway API')
             .setDescription(
                 'API Gateway for Transvirex ERP microservices. ' +
-                    'Provides authentication, health checks, debugging tools, and log ingestion.',
+                    'Provides authentication, billing (invoices), deliveries, users, hubs, ' +
+                    'health checks, debugging tools, and log ingestion.',
             )
             .setVersion('1.0')
             .addBearerAuth(
