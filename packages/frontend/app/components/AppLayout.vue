@@ -2,19 +2,19 @@
     <div class="flex h-screen bg-muted overflow-hidden">
         <!-- Sidebar -->
         <aside
-            class="flex flex-col flex-shrink-0 bg-[#1a3f7a] shadow-xl transition-all duration-300"
+            class="flex flex-col flex-shrink-0 bg-primary-dark shadow-xl transition-all duration-300"
             :class="collapsed ? 'w-16' : 'w-64'"
         >
             <div class="flex items-center justify-between px-4 py-5 border-b border-white/10">
                 <div v-if="!collapsed">
                     <p class="text-xl font-bold text-white leading-none whitespace-nowrap">Transvirex</p>
-                    <p class="text-xs text-blue-300 mt-0.5 whitespace-nowrap">Moving Intelligence</p>
+                    <p class="text-xs text-primary-light mt-0.5 whitespace-nowrap">Moving Intelligence</p>
                 </div>
                 <Button
                     variant="ghost"
                     size="icon-sm"
                     @click="collapsed = !collapsed"
-                    class="text-blue-300 hover:text-white hover:bg-white/10 flex-shrink-0"
+                    class="text-primary-light hover:text-white hover:bg-white/10 flex-shrink-0"
                     :class="collapsed ? 'mx-auto' : ''"
                 >
                     <ChevronLeft v-if="!collapsed" class="w-4 h-4" />
@@ -26,7 +26,7 @@
                 <template v-for="group in visibleGroups" :key="group.label">
                     <p
                         v-if="!collapsed"
-                        class="px-3 pt-4 pb-1 text-[10px] font-semibold uppercase tracking-widest text-blue-400/70 select-none"
+                        class="px-3 pt-4 pb-1 text-[10px] font-semibold uppercase tracking-widest text-primary-light/70 select-none"
                     >
                         {{ group.label }}
                     </p>
@@ -39,7 +39,7 @@
                         :class="[
                             isActive(item.href)
                                 ? 'bg-white/15 text-white'
-                                : 'text-blue-200 hover:bg-white/10 hover:text-white',
+                                : 'text-primary-light hover:bg-white/10 hover:text-white',
                             collapsed ? 'justify-center' : '',
                         ]"
                         :title="collapsed ? item.label : undefined"
@@ -47,7 +47,7 @@
                         <component
                             :is="item.icon"
                             class="w-5 h-5 flex-shrink-0"
-                            :class="isActive(item.href) ? 'text-white' : 'text-blue-300'"
+                            :class="isActive(item.href) ? 'text-white' : 'text-primary-light'"
                         />
                         <span v-if="!collapsed" class="truncate">{{ item.label }}</span>
                     </NuxtLink>
@@ -76,7 +76,7 @@
                 <Button
                     variant="ghost"
                     @click="logout"
-                    class="w-full text-blue-300 hover:text-white hover:bg-white/10"
+                    class="w-full text-primary-light hover:text-white hover:bg-white/10"
                     :class="collapsed ? 'justify-center px-0' : 'justify-start'"
                 >
                     <LogOut class="w-4 h-4" />

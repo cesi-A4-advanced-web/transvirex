@@ -255,10 +255,10 @@ function statusClass(s: string) {
     return (
         (
             {
-                Livré: 'bg-green-100 text-green-700 border-green-200 hover:bg-green-100',
-                'En cours': 'bg-blue-100 text-blue-700 border-blue-200 hover:bg-blue-100',
-                'En attente': 'bg-yellow-100 text-yellow-700 border-yellow-200 hover:bg-yellow-100',
-                Retardé: 'bg-red-100 text-red-700 border-red-200 hover:bg-red-100',
+                Livré: 'bg-green-100 text-green-700 border-green-100 hover:bg-green-100',
+                'En cours': 'bg-blue-100 text-blue-700 border-blue-100 hover:bg-blue-100',
+                'En attente': 'bg-orange-100 text-orange-700 border-orange-100 hover:bg-orange-100',
+                Retardé: 'bg-red-100 text-red-700 border-red-100 hover:bg-red-100',
             } as Record<string, string>
         )[s] ?? ''
     );

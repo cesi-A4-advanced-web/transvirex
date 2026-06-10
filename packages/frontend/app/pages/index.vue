@@ -2,15 +2,15 @@
     <div class="min-h-screen flex flex-col md:flex-row">
         <!-- Branding panel -->
         <div
-            class="relative flex flex-col justify-between bg-[#1a3f7a] text-white md:w-[42%] md:min-h-screen px-8 py-8 md:px-12 md:py-12"
+            class="relative flex flex-col justify-between bg-primary-dark text-white md:w-[42%] md:min-h-screen px-8 py-8 md:px-12 md:py-12"
         >
             <div>
                 <p class="text-xl font-bold leading-none">Transvirex</p>
-                <p class="text-sm text-blue-200 mt-0.5">Moving Intelligence</p>
+                <p class="text-sm text-primary-light mt-0.5">Moving Intelligence</p>
             </div>
             <div class="hidden md:block">
                 <h1 class="text-5xl font-extrabold leading-tight mb-4">La logistique,<br />repensée.</h1>
-                <p class="text-blue-200 text-base leading-relaxed max-w-xs">
+                <p class="text-primary-light text-base leading-relaxed max-w-xs">
                     Centralisez vos opérations, suivez vos livraisons en temps réel, pilotez votre flotte.
                 </p>
             </div>
@@ -20,17 +20,17 @@
             <div class="hidden md:flex items-center gap-6 text-sm">
                 <div>
                     <p class="text-2xl font-bold">15 000</p>
-                    <p class="text-blue-300">Livraisons/mois</p>
+                    <p class="text-primary-light/80">Livraisons/mois</p>
                 </div>
-                <div class="w-px h-10 bg-blue-600" />
+                <div class="w-px h-10 bg-primary-light/20" />
                 <div>
                     <p class="text-2xl font-bold">160+</p>
-                    <p class="text-blue-300">Chauffeurs actifs</p>
+                    <p class="text-primary-light/80">Chauffeurs actifs</p>
                 </div>
-                <div class="w-px h-10 bg-blue-600" />
+                <div class="w-px h-10 bg-primary-light/20" />
                 <div>
                     <p class="text-2xl font-bold">12</p>
-                    <p class="text-blue-300">Hubs</p>
+                    <p class="text-primary-light/80">Hubs</p>
                 </div>
             </div>
         </div>

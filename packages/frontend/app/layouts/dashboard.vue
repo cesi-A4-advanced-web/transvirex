@@ -1,19 +1,19 @@
 <template>
-    <div class="flex h-screen bg-[#f0f2f5] overflow-hidden">
+    <div class="flex h-screen bg-background overflow-hidden">
         <!-- ───── Sidebar ───── -->
         <aside
-            class="flex flex-col flex-shrink-0 bg-[#1a3f7a] shadow-xl transition-all duration-300"
+            class="flex flex-col shrink-0 bg-primary-dark shadow-xl transition-all duration-300 fixed top-0 left-0 h-full z-20"
             :class="collapsed ? 'w-16' : 'w-64'"
         >
             <!-- Logo + toggle -->
             <div class="flex items-center justify-between px-4 py-5 border-b border-white/10">
                 <div v-if="!collapsed" class="overflow-hidden">
                     <p class="text-xl font-bold text-white leading-none whitespace-nowrap">Transvirex</p>
-                    <p class="text-xs text-blue-300 mt-0.5 whitespace-nowrap">Moving Intelligence</p>
+                    <p class="text-xs text-primary-light mt-0.5 whitespace-nowrap">Moving Intelligence</p>
                 </div>
                 <button
                     @click="collapsed = !collapsed"
-                    class="p-1.5 rounded-lg text-blue-300 hover:text-white hover:bg-white/10 transition-colors flex-shrink-0"
+                    class="p-1.5 rounded-lg text-primary-light hover:text-white hover:bg-white/10 transition-colors shrink-0"
                     :class="collapsed ? 'mx-auto' : ''"
                 >
                     <ChevronLeft v-if="!collapsed" class="w-4 h-4" />
@@ -26,7 +26,7 @@
                 <template v-for="group in visibleGroups" :key="group.label">
                     <p
                         v-if="!collapsed"
-                        class="px-3 pt-4 pb-1 text-[10px] font-semibold uppercase tracking-widest text-blue-400/70 select-none"
+                        class="px-3 pt-4 pb-1 text-[10px] font-semibold uppercase tracking-widest text-primary-light/70 select-none"
                     >
                         {{ group.label }}
                     </p>
@@ -40,15 +40,17 @@
                         :class="[
                             isActive(item.href)
                                 ? 'bg-white/15 text-white'
-                                : 'text-blue-200 hover:bg-white/10 hover:text-white',
+                                : 'text-primary-light hover:bg-white/10 hover:text-white',
                             collapsed ? 'justify-center' : '',
                         ]"
                         :title="collapsed ? item.label : undefined"
                     >
                         <component
                             :is="item.icon"
-                            class="w-5 h-5 flex-shrink-0"
-                            :class="isActive(item.href) ? 'text-white' : 'text-blue-300 group-hover/item:text-white'"
+                            class="w-5 h-5 shrink-0"
+                            :class="
+                                isActive(item.href) ? 'text-white' : 'text-primary-light group-hover/item:text-white'
+                            "
                         />
                         <span v-if="!collapsed" class="truncate">{{ item.label }}</span>
                     </NuxtLink>
@@ -59,7 +61,7 @@
             <div class="border-t border-white/10 p-3">
                 <div v-if="!collapsed" class="flex items-center gap-3 px-2 py-2 mb-1 rounded-lg bg-white/5">
                     <div
-                        class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0"
+                        class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold shrink-0"
                         :class="roleColor"
                     >
                         {{ userInitial }}
@@ -78,11 +80,11 @@
                 </div>
                 <button
                     @click="logout"
-                    class="flex items-center gap-2 w-full px-3 py-2 rounded-lg text-sm text-blue-300 hover:text-white hover:bg-white/10 transition-colors"
+                    class="flex items-center gap-2 w-full px-3 py-2 rounded-lg text-sm text-primary-light hover:text-white hover:bg-white/10 transition-colors"
                     :class="collapsed ? 'justify-center' : ''"
                     :title="collapsed ? 'Se déconnecter' : undefined"
                 >
-                    <LogOut class="w-4 h-4 flex-shrink-0" />
+                    <LogOut class="w-4 h-4 shrink-0" />
                     <span v-if="!collapsed">Se déconnecter</span>
                 </button>
             </div>
@@ -91,38 +93,38 @@
         <!-- ───── Zone principale ───── -->
         <div class="flex-1 flex flex-col overflow-hidden">
             <!-- Header / Topbar -->
-            <header
-                class="h-14 bg-white border-b border-gray-200 flex items-center justify-between px-6 flex-shrink-0 z-10"
-            >
+            <header class="h-14 bg-card border-b border-border flex items-center justify-between px-6 shrink-0 z-10">
                 <!-- Breadcrumb -->
                 <div class="flex items-center gap-2 text-sm">
-                    <span class="text-gray-400 font-medium">Transvirex</span>
-                    <ChevronRight class="w-3.5 h-3.5 text-gray-300" />
-                    <span class="text-gray-400 capitalize">{{ roleLabel }}</span>
-                    <ChevronRight class="w-3.5 h-3.5 text-gray-300" />
-                    <span class="font-semibold text-gray-800">{{ pageTitle }}</span>
+                    <span class="text-muted-foreground font-medium">Transvirex</span>
+                    <ChevronRight class="w-3.5 h-3.5 text-muted-foreground/50" />
+                    <span class="text-muted-foreground capitalize">{{ roleLabel }}</span>
+                    <ChevronRight class="w-3.5 h-3.5 text-muted-foreground/50" />
+                    <span class="font-semibold text-foreground">{{ pageTitle }}</span>
                 </div>
 
                 <!-- Actions droite -->
                 <div class="flex items-center gap-2">
                     <button
-                        class="relative p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                        class="relative p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-colors"
                     >
                         <Bell class="w-5 h-5" />
-                        <span class="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full ring-2 ring-white" />
+                        <span
+                            class="absolute top-1.5 right-1.5 w-2 h-2 bg-destructive rounded-full ring-2 ring-background"
+                        />
                     </button>
-                    <div class="flex items-center gap-2 pl-3 border-l border-gray-200 ml-1">
+                    <div class="flex items-center gap-2 pl-3 border-l border-border ml-1">
                         <div
-                            class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
+                            class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0"
                             :class="roleColor"
                         >
                             {{ userInitial }}
                         </div>
                         <div class="hidden sm:block">
-                            <p class="text-sm font-medium text-gray-800 leading-none">
+                            <p class="text-sm font-medium text-foreground leading-none">
                                 {{ userName }}
                             </p>
-                            <p class="text-xs text-gray-400 mt-0.5 capitalize">
+                            <p class="text-xs text-muted-foreground mt-0.5 capitalize">
                                 {{ roleLabel }}
                             </p>
                         </div>
@@ -477,4 +479,3 @@ async function logout() {
     }
 }
 </script>
-

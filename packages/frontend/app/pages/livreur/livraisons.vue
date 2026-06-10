@@ -7,7 +7,7 @@
                     <p class="text-muted-foreground text-sm mt-1">Historique et suivi de vos missions</p>
                 </div>
                 <Button
-                    class="bg-[#1a3f7a] hover:bg-[#15336a] text-white gap-2 shrink-0"
+                    class="bg-primary-dark hover:bg-primary text-white gap-2 shrink-0"
                     :disabled="generatingPdf"
                     @click="downloadMission"
                 >
@@ -25,7 +25,7 @@
                     size="sm"
                     @click="activeTab = tab.value"
                     :class="
-                        activeTab === tab.value ? 'bg-green-600 hover:bg-green-700 text-white border-green-600' : ''
+                        activeTab === tab.value ? 'bg-secondary hover:bg-secondary-dark text-white border-secondary' : ''
                     "
                 >
                     {{ tab.label }}
@@ -231,9 +231,9 @@ function statusClass(s: string) {
     return (
         (
             {
-                Livré: 'bg-green-100 text-green-700 border-green-200 hover:bg-green-100',
-                'En cours': 'bg-blue-100 text-blue-700 border-blue-200 hover:bg-blue-100',
-                Planifié: 'bg-gray-100 text-gray-500 border-gray-200 hover:bg-gray-100',
+                Livré: 'bg-green-100 text-green-700 border-green-100 hover:bg-green-100',
+                'En cours': 'bg-blue-100 text-blue-700 border-blue-100 hover:bg-blue-100',
+                Planifié: 'bg-muted text-muted-foreground border-border hover:bg-muted',
             } as Record<string, string>
         )[s] ?? ''
     );
