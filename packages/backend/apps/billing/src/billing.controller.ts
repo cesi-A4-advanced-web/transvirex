@@ -23,7 +23,7 @@ import type { UpdateInvoiceDto } from './dto/update-invoice.dto';
 export class BillingController {
     constructor(private readonly billingService: BillingService) {}
 
-    @Get('health')
+    @Get('billing/health')
     getHealthHttp() {
         return { status: 'ok', service: 'billing' };
     }
@@ -77,7 +77,7 @@ export class BillingController {
         return this.billingService.remove(id);
     }
 
-    @MessagePattern('health')
+    @MessagePattern('billing.health')
     getHealth() {
         return { status: 'ok', service: 'billing' };
     }
