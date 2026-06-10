@@ -31,6 +31,8 @@ services:
             - MONGODB_PASSWORD=${MONGODB_PASSWORD:-mongo_password}
             - MONGODB_DB=${MONGODB_DB:-transvirex}
             - JWT_SECRET=${JWT_SECRET}
+            - ACCESS_TOKEN_TTL=${ACCESS_TOKEN_TTL:-180s}
+            - REFRESH_TOKEN_TTL=${REFRESH_TOKEN_TTL:-604800s}
             - AUTH_SERVICE_URL=http://authentication-service:3000
             - BILLING_SERVICE_URL=http://billing-service:3000
             - DELIVERY_SERVICE_URL=http://delivery-service:3000

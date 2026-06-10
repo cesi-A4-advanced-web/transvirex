@@ -58,7 +58,7 @@ async function handleSeed() {
 </script>
 
 <template>
-    <div class="flex h-screen bg-gray-50">
+    <div class="flex h-screen overflow-hidden bg-gray-50">
         <aside class="w-64 bg-slate-900 text-white flex flex-col shrink-0">
             <div
                 class="flex items-center gap-3 px-6 py-5 border-b border-slate-700"
