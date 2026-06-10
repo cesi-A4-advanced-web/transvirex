@@ -1,5 +1,4 @@
 <script setup lang="ts">
-definePageMeta({ layout: 'debug' });
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import {
@@ -304,7 +303,7 @@ function selectCollection(name: string) {
                                             />
                                         </Button>
                                     </div>
-                                    <ScrollArea class="h-[500px]">
+                                    <ScrollArea class="h-125">
                                         <div
                                             v-if="mongodb.collectionsLoading"
                                             class="text-sm text-gray-400 text-center py-8"

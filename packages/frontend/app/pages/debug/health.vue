@@ -1,7 +1,10 @@
 <script setup lang="ts">
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { RefreshCw } from '@lucide/vue';
 import { storeToRefs } from 'pinia';
-definePageMeta({ layout: 'debug' });
 
 useHead({ title: 'Santé des Services — Transvirex' });
 
@@ -11,64 +14,62 @@ const { services, loading } = storeToRefs(health);
 
 <template>
     <div class="max-w-5xl mx-auto space-y-6">
-        <UiCard>
-            <UiCardHeader>
-                <UiCardTitle>État des services</UiCardTitle>
-                <UiCardDescription>
+        <Card>
+            <CardHeader>
+                <CardTitle>État des services</CardTitle>
+                <CardDescription>
                     Vérification en temps réel des endpoints
                     <code class="text-xs bg-gray-100 px-1.5 py-0.5 rounded">/health</code>
-                </UiCardDescription>
-            </UiCardHeader>
-            <UiCardContent>
+                </CardDescription>
+            </CardHeader>
+            <CardContent>
                 <div class="mb-6">
-                    <UiButton @click="health.checkAll" :disabled="loading">
+                    <Button @click="health.checkAll" :disabled="loading">
                         <RefreshCw class="w-4 h-4" :class="{ 'animate-spin': loading }" />
                         {{ loading ? 'Vérification...' : 'Rafraîchir' }}
-                    </UiButton>
+                    </Button>
                 </div>
 
-                <UiTable>
-                    <UiTableHeader>
-                        <UiTableRow>
-                            <UiTableHead>Service</UiTableHead>
-                            <UiTableHead>URL</UiTableHead>
-                            <UiTableHead>Statut</UiTableHead>
-                            <UiTableHead>Temps de réponse</UiTableHead>
-                            <UiTableHead>Détails</UiTableHead>
-                        </UiTableRow>
-                    </UiTableHeader>
-                    <UiTableBody>
-                        <UiTableRow v-for="service in services" :key="service.name">
-                            <UiTableCell class="font-medium">
+                <Table>
+                    <TableHeader>
+                        <TableRow>
+                            <TableHead>Service</TableHead>
+                            <TableHead>URL</TableHead>
+                            <TableHead>Statut</TableHead>
+                            <TableHead>Temps de réponse</TableHead>
+                            <TableHead>Détails</TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        <TableRow v-for="service in services" :key="service.name">
+                            <TableCell class="font-medium">
                                 {{ service.name }}
-                            </UiTableCell>
-                            <UiTableCell class="text-xs text-gray-500">
+                            </TableCell>
+                            <TableCell class="text-xs text-gray-500">
                                 {{ service.url }}
-                            </UiTableCell>
-                            <UiTableCell>
-                                <UiBadge v-if="service.status === 'pending'" variant="secondary">
-                                    En attente...
-                                </UiBadge>
-                                <UiBadge
+                            </TableCell>
+                            <TableCell>
+                                <Badge v-if="service.status === 'pending'" variant="secondary"> En attente... </Badge>
+                                <Badge
                                     v-else-if="service.status === 'ok'"
                                     variant="default"
                                     class="bg-green-600 text-white"
                                 >
                                     OK
-                                </UiBadge>
-                                <UiBadge v-else variant="destructive"> Erreur </UiBadge>
-                            </UiTableCell>
-                            <UiTableCell class="text-sm">
+                                </Badge>
+                                <Badge v-else variant="destructive"> Erreur </Badge>
+                            </TableCell>
+                            <TableCell class="text-sm">
                                 {{ service.responseTime != null ? `${service.responseTime} ms` : '—' }}
-                            </UiTableCell>
-                            <UiTableCell class="text-sm text-gray-500">
+                            </TableCell>
+                            <TableCell class="text-sm text-gray-500">
                                 {{ service.detail ?? '—' }}
-                            </UiTableCell>
-                        </UiTableRow>
-                    </UiTableBody>
-                </UiTable>
-            </UiCardContent>
-        </UiCard>
+                            </TableCell>
+                        </TableRow>
+                    </TableBody>
+                </Table>
+            </CardContent>
+        </Card>
     </div>
 </template>
 
