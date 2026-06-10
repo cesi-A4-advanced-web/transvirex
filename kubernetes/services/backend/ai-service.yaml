@@ -1,0 +1,83 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: transvirex-ai
+    namespace: production
+    labels:
+        app: transvirex-ai
+spec:
+    replicas: 1
+    selector:
+        matchLabels:
+            app: transvirex-ai
+    template:
+        metadata:
+            labels:
+                app: transvirex-ai
+        spec:
+            imagePullSecrets:
+                - name: ghcr-secret
+            containers:
+                - name: ai
+                  image: ghcr.io/alecfoucher/transvirex-ai-service:latest
+                  imagePullPolicy: Always
+                  env:
+                      - name: DEEPSEEK_API_KEY
+                        valueFrom:
+                            secretKeyRef:
+                                name: transvirex-secrets
+                                key: DEEPSEEK_API_KEY
+                      - name: MONGODB_HOST
+                        valueFrom:
+                            configMapKeyRef:
+                                name: transvirex-config
+                                key: MONGODB_HOST
+                      - name: MONGODB_PORT
+                        valueFrom:
+                            configMapKeyRef:
+                                name: transvirex-config
+                                key: MONGODB_PORT
+                      - name: MONGODB_USER
+                        valueFrom:
+                            configMapKeyRef:
+                                name: transvirex-config
+                                key: MONGODB_USER
+                      - name: MONGODB_PASSWORD
+                        valueFrom:
+                            configMapKeyRef:
+                                name: transvirex-config
+                                key: MONGODB_PASSWORD
+                      - name: MONGODB_DB
+                        valueFrom:
+                            configMapKeyRef:
+                                name: transvirex-config
+                                key: MONGODB_DB
+                      - name: DELIVERY_SERVICE_URL
+                        value: "http://transvirex-delivery:3000"
+                  ports:
+                      - containerPort: 5000
+                        name: http
+                  resources:
+                      requests:
+                          cpu: 100m
+                          memory: 128Mi
+                      limits:
+                          cpu: 500m
+                          memory: 512Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+    name: transvirex-ai
+    namespace: production
+    labels:
+        app: transvirex-ai
+spec:
+    type: ClusterIP
+    selector:
+        app: transvirex-ai
+    ports:
+        - port: 5000
+          targetPort: 5000
+          name: http
+          protocol: TCP
