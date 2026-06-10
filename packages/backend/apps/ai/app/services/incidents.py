@@ -49,6 +49,7 @@ async def _call_delivery_service(delivery_id: str, summary: str, severity: str, 
         pass
 
 
+<<<<<<< HEAD
 async def persist_incident(
     text: str,
     driver_id: str,
@@ -65,6 +66,28 @@ async def persist_incident(
     if severity not in _SEVERITY_LEVELS:
         severity = "MEDIUM"
     summary = summary or text[:300]
+=======
+async def process_incident(
+    text: str,
+    driver_id: str,
+    delivery_id: str,
+) -> dict:
+    raw = await chat_completion(
+        [{"role": "user", "content": _ANALYSIS_PROMPT.format(text=text)}]
+    )
+
+    try:
+        start = raw.find("{")
+        end = raw.rfind("}") + 1
+        analysis = json.loads(raw[start:end])
+    except (ValueError, IndexError):
+        analysis = {}
+
+    severity = analysis.get("severity", "MEDIUM")
+    if severity not in _SEVERITY_LEVELS:
+        severity = "MEDIUM"
+    summary = analysis.get("summary") or text[:300]
+>>>>>>> 3cf97f20 (feat: add AI service configuration, database connection, and RAG functionality)
 
     db = await get_db()
     result = await db["incidents"].insert_one(
@@ -78,6 +101,7 @@ async def persist_incident(
         }
     )
 
+<<<<<<< HEAD
     should_notify = notify if notify is not None else severity in ("CRITICAL", "HIGH")
     if should_notify:
         await db["notifications"].insert_one(
@@ -91,11 +115,18 @@ async def persist_incident(
                 "created_at": datetime.now(timezone.utc),
             }
         )
+=======
+    notified = False
+    if severity in ("CRITICAL", "HIGH"):
+        await _call_delivery_service(delivery_id, summary, severity, driver_id)
+        notified = True
+>>>>>>> 3cf97f20 (feat: add AI service configuration, database connection, and RAG functionality)
 
     return {
         "id": str(result.inserted_id),
         "severity": severity,
         "summary": summary,
+<<<<<<< HEAD
         "notified": should_notify,
         "created_at": datetime.now(timezone.utc).isoformat(),
     }
@@ -125,3 +156,8 @@ async def process_incident(
         await _call_delivery_service(delivery_id, summary, severity, driver_id)
 
     return await persist_incident(text, driver_id, severity, summary, delivery_id)
+=======
+        "notified": notified,
+        "created_at": datetime.now(timezone.utc).isoformat(),
+    }
+>>>>>>> 3cf97f20 (feat: add AI service configuration, database connection, and RAG functionality)
