@@ -209,6 +209,7 @@ import { navigateTo, useCookie, useRoute } from '#app';
 import {
     BarChart3,
     Bell,
+    Bot,
     Building2,
     Car,
     ChevronLeft,
