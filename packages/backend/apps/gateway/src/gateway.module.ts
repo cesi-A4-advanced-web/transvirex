@@ -12,6 +12,7 @@ import { JwtAuthGuard } from '../../../libs/guards/src/jwt-auth.guard';
 import { AuthController } from './controllers/auth.controller';
 import { DebugController } from './controllers/debug.controller';
 import { HealthController } from './controllers/health.controller';
+import { HubsController } from './controllers/hubs.controller';
 import { LoggingController } from './controllers/logging.controller';
 import { UsersController } from './controllers/users.controller';
 import { GatewayController } from './gateway.controller';
@@ -29,7 +30,15 @@ import { GatewayService } from './gateway.service';
         LoggingModule,
         ThrottlerModule.forRoot([{ ttl: 60000, limit: 5 }]),
     ],
-    controllers: [GatewayController, HealthController, AuthController, DebugController, LoggingController, UsersController],
+    controllers: [
+        GatewayController,
+        HealthController,
+        AuthController,
+        DebugController,
+        HubsController,
+        LoggingController,
+        UsersController,
+    ],
     providers: [
         GatewayService,
         {

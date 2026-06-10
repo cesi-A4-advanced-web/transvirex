@@ -73,6 +73,30 @@ export class GatewayService {
         }
     }
 
+    /** Proxy a PATCH request to a downstream microservice. */
+    private async proxyPatch(url: string, body: unknown, user?: { sub: string; email: string; role: string }) {
+        try {
+            const response = await fetch(url, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...this.buildUserHeaders(user),
+                },
+                body: JSON.stringify(body),
+                signal: AbortSignal.timeout(5000),
+            });
+            const data = await response.json();
+            if (!response.ok) throw new HttpException(data, response.status);
+            return data;
+        } catch (e) {
+            if (e instanceof HttpException) throw e;
+            throw new HttpException(
+                { status: 'error', message: 'Service unreachable' },
+                HttpStatus.SERVICE_UNAVAILABLE,
+            );
+        }
+    }
+
     /** Proxy a GET request to a downstream microservice. */
     private async proxyGet(url: string, user?: { sub: string; email: string; role: string }) {
         try {
@@ -132,6 +156,26 @@ export class GatewayService {
     /** Get the Driver profile for a user via the users service. */
     getDriver(id: string, user?: { sub: string; email: string; role: string }) {
         return this.proxyGet(`${this.serviceUrls.users}/users/${id}/driver`, user);
+    }
+
+    /** List all hubs via the delivery service. */
+    listHubs(user?: { sub: string; email: string; role: string }) {
+        return this.proxyGet(`${this.serviceUrls.delivery}/hubs`, user);
+    }
+
+    /** Create a hub via the delivery service. */
+    createHub(body: unknown, user?: { sub: string; email: string; role: string }) {
+        return this.proxyPost(`${this.serviceUrls.delivery}/hubs`, body, user);
+    }
+
+    /** Get hub detail with stats via the delivery service. */
+    getHub(id: string, user?: { sub: string; email: string; role: string }) {
+        return this.proxyGet(`${this.serviceUrls.delivery}/hubs/${id}`, user);
+    }
+
+    /** Update a hub via the delivery service. */
+    updateHub(id: string, body: unknown, user?: { sub: string; email: string; role: string }) {
+        return this.proxyPatch(`${this.serviceUrls.delivery}/hubs/${id}`, body, user);
     }
 
     /** Proxy health check to the authentication service. */
