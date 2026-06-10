@@ -1,5 +1,4 @@
 <script setup lang="ts">
-definePageMeta({ layout: 'debug' });
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';

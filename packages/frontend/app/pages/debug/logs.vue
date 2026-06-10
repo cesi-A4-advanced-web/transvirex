@@ -1,6 +1,4 @@
 <script setup lang="ts">
-definePageMeta({ layout: 'debug' });
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import {
@@ -479,6 +477,15 @@ function testError() {
                                                 <TableRow v-if="expandedRows.has(log._id)" class="bg-gray-50">
                                                     <TableCell></TableCell>
                                                     <TableCell colspan="3" class="p-4">
+                                                        <div v-if="log.metadata?.trace" class="space-y-1">
+                                                            <p class="text-xs font-semibold text-gray-500 uppercase">
+                                                                Stack Trace
+                                                            </p>
+                                                            <pre
+                                                                class="text-xs text-red-600 bg-red-50 border border-red-200 rounded p-3 overflow-auto max-h-40"
+                                                                >{{ log.metadata.trace }}</pre
+                                                            >
+                                                        </div>
                                                         <div v-if="hasMetadata(log)" class="space-y-1">
                                                             <p class="text-xs font-semibold text-gray-500 uppercase">
                                                                 Metadata

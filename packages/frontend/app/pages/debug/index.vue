@@ -11,7 +11,6 @@ import {
     Zap,
 } from '@lucide/vue';
 import { storeToRefs } from 'pinia';
-definePageMeta({ layout: 'debug' });
 
 useHead({ title: 'Debug Dashboard — Transvirex' });
 
