@@ -12,10 +12,10 @@
             <!-- Delivery selector -->
             <div class="flex-shrink-0 mb-3">
                 <div class="flex items-center gap-2 bg-blue-50 border border-blue-200 rounded-lg px-3 py-2">
-                    <span class="text-xs text-blue-600 font-medium">Livraison en cours :</span>
+                    <span class="text-xs text-blue-600 font-medium">Livraison (optionnel) :</span>
                     <input
                         v-model="currentDeliveryId"
-                        placeholder="ID de livraison (ex: abc-123)"
+                        placeholder="ID précis si connu — sinon l'assistant la retrouve"
                         class="flex-1 bg-transparent text-xs font-mono text-blue-800 outline-none placeholder:text-blue-400"
                     />
                 </div>

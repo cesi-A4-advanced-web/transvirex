@@ -35,4 +35,26 @@ export class DeliveryController {
     updateHub(@Param('id') id: string, @Body() body: any) {
         return this.deliveryService.updateHub(id, body);
     }
+
+    /** List the active deliveries of a driver, identified by their User id (JWT sub). */
+    @Get('drivers/:userId/deliveries')
+    listDriverDeliveries(@Param('userId') userId: string) {
+        return this.deliveryService.listDriverDeliveries(userId);
+    }
+
+    /** Create a DeliveryEvent (incident / status update) on a delivery. */
+    @Post('deliveries/:id/events')
+    createDeliveryEvent(
+        @Param('id') id: string,
+        @Body()
+        body: {
+            description?: string;
+            type?: string;
+            status?: string;
+            latitude?: number;
+            longitude?: number;
+        },
+    ) {
+        return this.deliveryService.createDeliveryEvent(id, body);
+    }
 }

@@ -1,13 +1,23 @@
+import logging
 from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 
 from .database import close_db
+from .mcp.host import host
 from .routes import chat, incidents, knowledge, process, notifications
+
+logger = logging.getLogger("uvicorn.error")
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    try:
+        await host.start()
+    except Exception:
+        logger.exception("MCP host failed to start — agent tools disabled")
     yield
+    await host.stop()
     await close_db()
 
 

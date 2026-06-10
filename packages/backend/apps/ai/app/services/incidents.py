@@ -49,26 +49,22 @@ async def _call_delivery_service(delivery_id: str, summary: str, severity: str, 
         pass
 
 
-async def process_incident(
+async def persist_incident(
     text: str,
     driver_id: str,
+    severity: str,
+    summary: str,
     delivery_id: str | None = None,
+    notify: bool | None = None,
 ) -> dict:
-    raw = await chat_completion(
-        [{"role": "user", "content": _ANALYSIS_PROMPT.format(text=text)}]
-    )
+    """Store an incident and, for serious ones, a dispatcher notification.
 
-    try:
-        start = raw.find("{")
-        end = raw.rfind("}") + 1
-        analysis = json.loads(raw[start:end])
-    except (ValueError, IndexError):
-        analysis = {}
-
-    severity = analysis.get("severity", "MEDIUM")
+    `severity`/`summary` are provided by the caller (the agent decides them).
+    When `notify` is None, notification is automatic for CRITICAL/HIGH.
+    """
     if severity not in _SEVERITY_LEVELS:
         severity = "MEDIUM"
-    summary = analysis.get("summary") or text[:300]
+    summary = summary or text[:300]
 
     db = await get_db()
     result = await db["incidents"].insert_one(
@@ -82,10 +78,8 @@ async def process_incident(
         }
     )
 
-    notified = False
-    if severity in ("CRITICAL", "HIGH"):
-        if delivery_id:
-            await _call_delivery_service(delivery_id, summary, severity, driver_id)
+    should_notify = notify if notify is not None else severity in ("CRITICAL", "HIGH")
+    if should_notify:
         await db["notifications"].insert_one(
             {
                 "incident_id": str(result.inserted_id),
@@ -97,12 +91,37 @@ async def process_incident(
                 "created_at": datetime.now(timezone.utc),
             }
         )
-        notified = True
 
     return {
         "id": str(result.inserted_id),
         "severity": severity,
         "summary": summary,
-        "notified": notified,
+        "notified": should_notify,
         "created_at": datetime.now(timezone.utc).isoformat(),
     }
+
+
+async def process_incident(
+    text: str,
+    driver_id: str,
+    delivery_id: str | None = None,
+) -> dict:
+    """Analyse an incident with the LLM then persist it (used by /incidents)."""
+    raw = await chat_completion(
+        [{"role": "user", "content": _ANALYSIS_PROMPT.format(text=text)}]
+    )
+
+    try:
+        start = raw.find("{")
+        end = raw.rfind("}") + 1
+        analysis = json.loads(raw[start:end])
+    except (ValueError, IndexError):
+        analysis = {}
+
+    severity = analysis.get("severity", "MEDIUM")
+    summary = analysis.get("summary") or text[:300]
+
+    if severity in ("CRITICAL", "HIGH") and delivery_id:
+        await _call_delivery_service(delivery_id, summary, severity, driver_id)
+
+    return await persist_incident(text, driver_id, severity, summary, delivery_id)
