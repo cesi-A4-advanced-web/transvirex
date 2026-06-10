@@ -201,6 +201,7 @@ import { navigateTo, useCookie, useRoute } from '#app';
 import {
     BarChart3,
     Bell,
+    Bot,
     Building2,
     Car,
     ChevronLeft,
@@ -480,6 +481,16 @@ const visibleGroups = computed(() => {
                         label: 'Mes livraisons',
                         href: `${base}/livraisons`,
                         icon: Truck,
+                    },
+                ],
+            },
+            {
+                label: 'Assistant',
+                items: [
+                    {
+                        label: 'Assistant IA',
+                        href: `${base}/assistant`,
+                        icon: Bot,
                     },
                 ],
             },
