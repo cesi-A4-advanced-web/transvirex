@@ -105,12 +105,70 @@
 
                 <!-- Actions droite -->
                 <div class="flex items-center gap-2">
-                    <button
-                        class="relative p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
-                    >
-                        <Bell class="w-5 h-5" />
-                        <span class="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full ring-2 ring-white" />
-                    </button>
+                    <div class="relative">
+                        <button
+                            @click="notifOpen = !notifOpen"
+                            class="relative p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                        >
+                            <Bell class="w-5 h-5" />
+                            <span
+                                v-if="unreadCount > 0"
+                                class="absolute top-1 right-1 min-w-[16px] h-4 px-0.5 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center ring-2 ring-white"
+                            >
+                                {{ unreadCount > 9 ? '9+' : unreadCount }}
+                            </span>
+                            <span v-else class="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full ring-2 ring-white" />
+                        </button>
+                        <!-- Notification panel -->
+                        <div
+                            v-if="notifOpen"
+                            class="absolute right-0 top-10 w-80 bg-white border border-gray-200 rounded-xl shadow-lg z-50 overflow-hidden"
+                        >
+                            <div class="flex items-center justify-between px-4 py-3 border-b border-gray-100">
+                                <span class="font-semibold text-sm text-gray-800">Incidents signalés</span>
+                                <button
+                                    v-if="unreadCount > 0"
+                                    @click="markAllRead"
+                                    class="text-xs text-blue-600 hover:underline"
+                                >
+                                    Tout marquer lu
+                                </button>
+                            </div>
+                            <div class="max-h-72 overflow-y-auto divide-y divide-gray-50">
+                                <div
+                                    v-if="notifications.length === 0"
+                                    class="px-4 py-6 text-center text-sm text-muted-foreground"
+                                >
+                                    Aucun incident signalé
+                                </div>
+                                <div
+                                    v-for="n in notifications"
+                                    :key="n.id"
+                                    @click="markRead(n.id)"
+                                    class="px-4 py-3 cursor-pointer hover:bg-gray-50 transition-colors"
+                                    :class="!n.read ? 'bg-orange-50/60' : ''"
+                                >
+                                    <div class="flex items-start gap-2">
+                                        <span
+                                            class="flex-shrink-0 text-[10px] font-bold px-1.5 py-0.5 rounded uppercase"
+                                            :class="n.severity === 'CRITICAL'
+                                                ? 'bg-red-100 text-red-700'
+                                                : 'bg-orange-100 text-orange-700'"
+                                        >
+                                            {{ n.severity }}
+                                        </span>
+                                        <div class="flex-1 min-w-0">
+                                            <p class="text-xs text-gray-800 leading-snug">{{ n.summary }}</p>
+                                            <p class="text-[10px] text-gray-400 mt-0.5 font-mono">
+                                                Livraison {{ n.delivery_id.slice(0, 8) }}
+                                            </p>
+                                        </div>
+                                        <span v-if="!n.read" class="w-2 h-2 rounded-full bg-orange-400 flex-shrink-0 mt-1" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                     <div class="flex items-center gap-2 pl-3 border-l border-gray-200 ml-1">
                         <div
                             class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
@@ -143,6 +201,7 @@ import { navigateTo, useCookie, useRoute } from '#app';
 import {
     BarChart3,
     Bell,
+    Bot,
     Building2,
     Car,
     ChevronLeft,
@@ -158,6 +217,7 @@ import {
     UserCog,
     Users,
 } from '@lucide/vue';
+import { useNotifications } from '@/composables/useNotifications';
 import { $fetch } from 'ofetch';
 
 /** Possible user roles for navigation and display. */
