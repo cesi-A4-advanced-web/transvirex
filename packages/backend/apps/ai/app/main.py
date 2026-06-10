@@ -64,6 +64,8 @@ app = FastAPI(
 app.include_router(chat.router, prefix="/ai")
 app.include_router(incidents.router, prefix="/ai")
 app.include_router(knowledge.router, prefix="/ai")
+app.include_router(process.router, prefix="/ai")
+app.include_router(notifications.router, prefix="/ai")
 
 # Mount MCP SSE server — accessible at /mcp/sse
 app.mount("/mcp", mcp.get_asgi_app())
