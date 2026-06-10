@@ -70,7 +70,7 @@ async def persist_incident(
 async def process_incident(
     text: str,
     driver_id: str,
-    delivery_id: str,
+    delivery_id: str | None = None,
 ) -> dict:
     raw = await chat_completion(
         [{"role": "user", "content": _ANALYSIS_PROMPT.format(text=text)}]
@@ -118,12 +118,13 @@ async def process_incident(
 =======
     notified = False
     if severity in ("CRITICAL", "HIGH"):
-        await _call_delivery_service(delivery_id, summary, severity, driver_id)
+        if delivery_id:
+            await _call_delivery_service(delivery_id, summary, severity, driver_id)
         await db["notifications"].insert_one(
             {
                 "incident_id": str(result.inserted_id),
                 "driver_id": driver_id,
-                "delivery_id": delivery_id,
+                "delivery_id": delivery_id or "",
                 "summary": summary,
                 "severity": severity,
                 "read": False,
