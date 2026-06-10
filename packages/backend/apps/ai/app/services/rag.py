@@ -58,6 +58,12 @@ async def _keyword_search(query: str, top_k: int = 5) -> list[dict]:
     return [{"content": d["content"], "metadata": d.get("metadata", {})} for d in docs]
 
 
+async def search_knowledge(query: str, top_k: int = 5) -> list[str]:
+    """Return the most relevant knowledge-base snippets for a query (tool helper)."""
+    docs = await _keyword_search(query, top_k)
+    return [d["content"] for d in docs]
+
+
 async def rag_chat(question: str, history: list[dict] | None = None) -> str:
     context_docs = await _keyword_search(question)
     context = "\n\n---\n\n".join(d["content"] for d in context_docs) if context_docs else ""

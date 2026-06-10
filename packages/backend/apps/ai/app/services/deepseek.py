@@ -28,3 +28,17 @@ async def chat_completion(
         messages=all_messages,
     )
     return response.choices[0].message.content or ""
+
+
+async def chat_with_tools(messages: list[dict], tools: list[dict]):
+    """Single completion turn with tool-calling enabled.
+
+    Returns the raw assistant message (which may carry `.tool_calls`).
+    """
+    response = await get_client().chat.completions.create(
+        model=settings.deepseek_chat_model,
+        messages=messages,
+        tools=tools,
+        tool_choice="auto",
+    )
+    return response.choices[0].message
