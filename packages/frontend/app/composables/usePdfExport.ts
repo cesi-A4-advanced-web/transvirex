@@ -1,8 +1,8 @@
 // Dynamic PDF export — jsPDF loaded client-side only on demand
 
 // ── Brand palette ──────────────────────────────────────────────────────────
-/** Primary brand color RGB (deep blue #1a3f7a). */
-const P = [26, 63, 122] as [number, number, number];
+/** Primary brand color RGB (indigo #6366f1). */
+const P = [99, 102, 241] as [number, number, number];
 /** Accent color RGB (amber #f59e0b). */
 const A = [245, 158, 11] as [number, number, number];
 /** White RGB. */
@@ -15,10 +15,10 @@ const Mt = [100, 116, 139] as [number, number, number];
 const Lx = [241, 245, 249] as [number, number, number];
 /** Border color RGB (#e2e8f0). */
 const Bx = [226, 232, 240] as [number, number, number];
-/** Light blue for dark backgrounds RGB. */
-const Bl = [176, 201, 237] as [number, number, number];
-/** Darker primary blue RGB. */
-const PD = [18, 44, 88] as [number, number, number];
+/** Light brand color for dark backgrounds RGB (primary-light #a5b4fc). */
+const Bl = [165, 180, 252] as [number, number, number];
+/** Darker primary color RGB (primary-dark #4338ca). */
+const PD = [67, 56, 202] as [number, number, number];
 
 /** A4 page width in mm. */
 const PW = 210;
@@ -317,7 +317,7 @@ export async function exportFacturePdf(f: FactureData) {
     const y = 47;
 
     // Bill-to block
-    infoBlock(doc, 14, y, 86, 44, 'Facturer à', [
+    infoBlock(doc, 14, y, 86, 45, 'Facturer à', [
         f.client,
         '45 Rue du Commerce',
         '75015 Paris, France',
@@ -330,7 +330,7 @@ export async function exportFacturePdf(f: FactureData) {
         108,
         y,
         88,
-        44,
+        45,
         'Détails du document',
         [f.ref, `Statut : ${f.status}`, `Priorité : ${f.priority}`, `Échéance : ${f.due}`, `Service : ${f.service}`],
         true,
@@ -339,10 +339,16 @@ export async function exportFacturePdf(f: FactureData) {
     // Items table
     autoTable(doc, {
         ...baseTable,
-        startY: y + 51,
+        startY: y + 52,
         head: [['Description', 'Qté', 'Prix unitaire HT', 'TVA', 'Total TTC']],
         body: [
-            [`${f.service}\nPrestation Transvirex — réf. ${f.ref}`, '1', `€ ${ht}`, '20 %', f.amount],
+            [
+                `${f.service}\nPrestation Transvirex — réf. ${f.ref}`,
+                '1',
+                `€ ${ht}`,
+                '20 %',
+                f.amount?.replace(/\s/g, ' '),
+            ],
             ['Frais de traitement & manutention', '1', '€ 0,00', '—', '€ 0,00'],
         ],
         columnStyles: {
@@ -383,7 +389,7 @@ export async function exportFacturePdf(f: FactureData) {
 
     // Note
     const noteY = tableEnd + 46;
-    doc.setFillColor(255, 251, 235);
+    doc.setFillColor(255, 237, 213);
     doc.roundedRect(14, noteY, PW - 28, 14, 2, 2, 'F');
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(7.5);
@@ -548,7 +554,7 @@ export async function exportBonCommandePdf(b: BonCommandeData) {
     doc.setTextColor(...Bl);
     doc.text('Responsable logistique', 14 + sigW + 13, sigY + 15);
     doc.text(`Émis le : ${today}`, 14 + sigW + 13, sigY + 21);
-    doc.setDrawColor(...[80, 110, 160]);
+    doc.setDrawColor(...PD);
     doc.line(14 + sigW + 13, sigY + 32, 14 + sigW * 2 + 3, sigY + 32);
     doc.setFontSize(7);
     doc.setTextColor(...Bl);
@@ -632,7 +638,7 @@ export async function exportOrdreMissionPdf(m: MissionData) {
             3: { cellWidth: 34 },
             4: { halign: 'center' as const, cellWidth: 14 },
             5: { halign: 'center' as const, cellWidth: 13 },
-            6: { cellWidth: 28, fontSize: 7.5, textColor: [150, 80, 0] as any },
+            6: { cellWidth: 28, fontSize: 7.5, textColor: A },
             7: { cellWidth: 17 },
         },
         didDrawCell: (data: any) => {
@@ -649,14 +655,14 @@ export async function exportOrdreMissionPdf(m: MissionData) {
     const tableEnd = (doc as any).lastAutoTable.finalY + 8;
 
     // Instructions block
-    doc.setFillColor(255, 251, 235);
+    doc.setFillColor(...[255, 237, 213]);
     doc.roundedRect(14, tableEnd, PW - 28, 26, 3, 3, 'F');
     doc.setDrawColor(...A);
     doc.setLineWidth(0.8);
     doc.line(14, tableEnd, 14, tableEnd + 26);
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(8);
-    doc.setTextColor(180, 100, 0);
+    doc.setTextColor(...[194, 65, 12]);
     doc.text('CONSIGNES OBLIGATOIRES', 19, tableEnd + 7);
     const instructions = [
         '• Scanner chaque colis avant chargement et à chaque livraison — signaler toute anomalie immédiatement',
@@ -701,7 +707,7 @@ export async function exportOrdreMissionPdf(m: MissionData) {
     doc.setTextColor(...Bl);
     doc.text('Responsable dispatch :', 14 + sW + 13, sigY + 14);
     doc.text('Heure de départ autorisée : ____h____', 14 + sW + 13, sigY + 20);
-    doc.setDrawColor([80, 110, 160] as any);
+    doc.setDrawColor(...Bl);
     doc.line(14 + sW + 13, sigY + 28, 14 + sW * 2 + 3, sigY + 28);
 
     footer(doc);
