@@ -3,6 +3,7 @@ import json
 
 from .mcp.host import host
 from .services.deepseek import chat_with_tools
+from .services.rag import rag_chat
 
 _MAX_ITERATIONS = 6
 
@@ -28,6 +29,11 @@ Utilise toujours ce driver_id dans les appels d'outils."""
 
 async def run_agent(text: str, driver_id: str, delivery_id: str | None = None) -> dict:
     tools = await host.list_openai_tools()
+    if not tools:
+        # MCP host unavailable: degrade to a plain knowledge-grounded answer.
+        answer = await rag_chat(text)
+        return {"type": "chat", "answer": answer, "incident": None}
+
     system = _SYSTEM_PROMPT.format(
         driver_id=driver_id, delivery_id=delivery_id or "(aucun — à déterminer)"
     )
