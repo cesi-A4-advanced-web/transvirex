@@ -36,4 +36,3 @@ export class UsersController {
         return this.gatewayService.getDriver(id, (req as any).user);
     }
 }
-
