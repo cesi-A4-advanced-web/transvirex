@@ -32,7 +32,7 @@ export class BillingController {
     @ApiTags('Invoices')
     @Get('invoices')
     @ApiBearerAuth('JWT-auth')
-    @Roles('business_manager')
+    @Roles('business_manager', 'dispatcher')
     @ApiOperation({
         summary: 'List invoices',
         description: 'Returns a paginated list of invoices with optional filters.',
@@ -69,7 +69,7 @@ export class BillingController {
     @ApiTags('Invoices')
     @Get('invoices/:id')
     @ApiBearerAuth('JWT-auth')
-    @Roles('business_manager')
+    @Roles('business_manager', 'dispatcher')
     @ApiOperation({
         summary: 'Get invoice by ID',
         description:

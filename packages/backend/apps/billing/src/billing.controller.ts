@@ -62,6 +62,11 @@ export class BillingController {
         return this.billingService.findById(id);
     }
 
+    @Get('customers')
+    listCustomers(@Query('hub_id') hub_id?: string) {
+        return this.billingService.listCustomers(hub_id);
+    }
+
     @Patch('invoices/:id')
     update(@Param('id') id: string, @Body() body: UpdateInvoiceDto) {
         return this.billingService.update(id, body);
