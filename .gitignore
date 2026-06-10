@@ -83,6 +83,10 @@ web_modules/
 .env.production.local
 .env.local
 
+# Cursor
+.cursorignore
+issue-prompt.txt
+
 # parcel-bundler cache (https://parceljs.org/)
 .cache
 .parcel-cache
@@ -329,4 +333,4 @@ CLAUDE.md
 
 .pnpm-store/
 # This project uses pnpm !
-package-lock.json 
+package-lock.json

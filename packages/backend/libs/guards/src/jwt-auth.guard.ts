@@ -52,7 +52,8 @@ export class JwtAuthGuard implements CanActivate {
         ]);
 
         if (requiredRoles && requiredRoles.length > 0) {
-            if (!requiredRoles.includes(payload.role)) {
+            const isAdmin = payload.role === 'admin';
+            if (!isAdmin && !requiredRoles.includes(payload.role)) {
                 throw new ForbiddenException(`Accès refusé — rôle requis : ${requiredRoles.join(' ou ')}`);
             }
         }
