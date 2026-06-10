@@ -14,17 +14,8 @@ import { Public } from '../decorators/public.decorator';
 import { LoginDto } from '../dto/login.dto';
 import { GatewayService } from '../gateway.service';
 
-/** Parse a TTL string like '2m', '7h', '7d', or '900' (seconds) into milliseconds. */
-function parseTtlMs(value: string): number {
-    const n = parseInt(value, 10);
-    if (value.endsWith('d')) return n * 86400 * 1000;
-    if (value.endsWith('h')) return n * 3600 * 1000;
-    if (value.endsWith('m')) return n * 60 * 1000;
-    return n * 1000;
-}
-
-const ACCESS_TOKEN_TTL = parseTtlMs(process.env.ACCESS_TOKEN_TTL || '180s');
-const REFRESH_TOKEN_TTL = parseTtlMs(process.env.REFRESH_TOKEN_TTL || '604800s');
+const ACCESS_TOKEN_TTL = parseInt(process.env.ACCESS_TOKEN_TTL || '900', 10) * 1000;
+const REFRESH_TOKEN_TTL = parseInt(process.env.REFRESH_TOKEN_TTL || '604800', 10) * 1000;
 
 const accessTokenCookieOptions = (maxAge: number) => ({
     httpOnly: false,

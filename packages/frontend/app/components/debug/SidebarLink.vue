@@ -7,7 +7,7 @@ const props = defineProps<{
 }>();
 
 const route = useRoute();
-const isActive = computed(() => route.path === props.href || route.path.startsWith(props.href + '/'));
+const isActive = computed(() => route.path === props.href);
 </script>
 
 <template>

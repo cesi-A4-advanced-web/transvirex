@@ -27,6 +27,7 @@ services:
             - REDIS_DB=${REDIS_DB:-0}
             - JWT_SECRET=${JWT_SECRET}
             - ACCESS_TOKEN_TTL=${ACCESS_TOKEN_TTL:-180s}
+            - REFRESH_TOKEN_TTL=${REFRESH_TOKEN_TTL:-604800s}
         volumes:
             # - ./:/app/apps/authentication
             - /app/node_modules

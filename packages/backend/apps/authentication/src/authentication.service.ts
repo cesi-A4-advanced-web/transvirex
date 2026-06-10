@@ -6,7 +6,7 @@ import { randomUUID } from 'crypto';
 import type { Redis } from 'ioredis';
 
 /** TTL in seconds for refresh tokens (defaults to 7 days). */
-const REFRESH_TTL = parseInt(process.env.JWT_REFRESH_TTL || '604800');
+const REFRESH_TTL = parseInt(process.env.REFRESH_TOKEN_TTL || '604800', 10);
 
 /** Service handling user authentication, token generation, refresh, and logout. */
 @Injectable()

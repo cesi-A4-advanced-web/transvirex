@@ -29,7 +29,7 @@ export default defineNuxtConfig({
     /** Proxy all /api/** requests to the backend gateway service. */
     routeRules: {
         '/api/**': {
-            proxy: 'http://gateway-service:3000/api/**',
+            proxy: `http://${process.env.API_HOST || 'gateway-service'}:${process.env.API_PORT || '3000'}/api/**`,
         },
     },
     nitro: {
