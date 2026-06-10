@@ -28,7 +28,7 @@ export class BillingController {
         return { status: 'ok', service: 'billing' };
     }
 
-    @Get('invoices')
+    @Get('billing')
     findAll(
         @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
         @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number,
@@ -47,17 +47,17 @@ export class BillingController {
         });
     }
 
-    @Post('invoices')
+    @Post('billing')
     create(@Body() body: CreateInvoiceDto) {
         return this.billingService.create(body);
     }
 
-    @Patch('invoices/:id/status')
+    @Patch('billing/:id/status')
     transitionStatus(@Param('id') id: string, @Body() body: UpdateInvoiceStatusDto) {
         return this.billingService.transitionStatus(id, body);
     }
 
-    @Get('invoices/:id')
+    @Get('billing/:id')
     findById(@Param('id') id: string) {
         return this.billingService.findById(id);
     }
@@ -67,12 +67,12 @@ export class BillingController {
         return this.billingService.listCustomers(hub_id);
     }
 
-    @Patch('invoices/:id')
+    @Patch('billing/:id')
     update(@Param('id') id: string, @Body() body: UpdateInvoiceDto) {
         return this.billingService.update(id, body);
     }
 
-    @Delete('invoices/:id')
+    @Delete('billing/:id')
     remove(@Param('id') id: string) {
         return this.billingService.remove(id);
     }
@@ -82,23 +82,23 @@ export class BillingController {
         return { status: 'ok', service: 'billing' };
     }
 
-    @Post('invoices/:id/parcels')
+    @Post('billing/:id/parcels')
     addParcel(@Param('id') id: string, @Body() body: { weight: number; reference?: string }) {
         return this.billingService.addParcel(id, body);
     }
 
-    @Get('invoices/:id/parcels')
+    @Get('billing/:id/parcels')
     listParcels(@Param('id') id: string) {
         return this.billingService.listParcels(id);
     }
 
-    @Delete('invoices/:id/parcels/:parcelId')
+    @Delete('billing/:id/parcels/:parcelId')
     deleteParcel(@Param('id') id: string, @Param('parcelId') parcelId: string) {
         return this.billingService.deleteParcel(id, parcelId);
     }
 
     @ApiTags('Billing')
-    @Patch('invoices/:id/confirm')
+    @Patch('billing/:id/confirm')
     @ApiBearerAuth('JWT-auth')
     @Roles('admin', 'business_manager')
     @ApiOperation({ summary: 'Confirm an invoice and emit delivery.created' })
