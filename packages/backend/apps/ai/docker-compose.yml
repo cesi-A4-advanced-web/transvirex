@@ -27,6 +27,6 @@ services:
                   ignore:
                       - __pycache__
                       - .venv
-                      - "*.pyc"
+                      - '*.pyc'
                   action: sync+restart
                   target: /app

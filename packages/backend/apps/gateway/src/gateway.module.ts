@@ -45,12 +45,10 @@ import { GatewayService } from './gateway.service';
         DeliveriesController,
         AiController,
         DebugController,
-        DeliveriesController,
         HubsController,
         LoggingController,
         UsersController,
         VehiclesController,
-        HubsController,
         InvoicesController,
     ],
     providers: [
