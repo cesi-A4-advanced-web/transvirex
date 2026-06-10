@@ -322,5 +322,31 @@ export class DeliveryService {
         await this.prisma.delivery.delete({ where: { id } });
         return { success: true, id };
     }
+
+    async getHubCapacity(hubId: string) {
+        const hub = await this.prisma.hub.findUnique({
+            where: { id: hubId },
+            select: { id: true, capacity_parcels_day: true },
+        });
+        if (!hub) throw new NotFoundException('Hub introuvable');
+
+        const capacity = hub.capacity_parcels_day ?? 0;
+
+        const currentLoad = await this.prisma.delivery.count({
+            where: {
+                status: { in: ['planned', 'delivering'] },
+                invoice: { hub_id: hubId },
+            },
+        });
+
+        const percentage = capacity > 0 ? Math.round((currentLoad / capacity) * 1000) / 10 : 0;
+
+        return {
+            capacity_parcels_day: capacity,
+            current_load: currentLoad,
+            percentage,
+            alert: percentage > 80,
+        };
+    }
 }
 

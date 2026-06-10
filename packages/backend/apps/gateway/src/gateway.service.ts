@@ -50,10 +50,7 @@ export class GatewayService {
     }
 
     /** Append optional query parameters to a URL. */
-    private appendQuery(
-        base: string,
-        params: Record<string, string | number | undefined>,
-    ): string {
+    private appendQuery(base: string, params: Record<string, string | number | undefined>): string {
         const search = new URLSearchParams();
         for (const [key, value] of Object.entries(params)) {
             if (value !== undefined && value !== '') {
@@ -228,6 +225,45 @@ export class GatewayService {
         return this.proxyPatch(`${this.serviceUrls.delivery}/deliveries/${id}/status`, body, user);
     }
 
+    // ─── Vehicles ───────────────────────────────────────────────────────────
+
+    listVehicles(hub_id?: string, user?: { sub: string; email: string; role: string }) {
+        const query = hub_id ? `?hub_id=${encodeURIComponent(hub_id)}` : '';
+        return this.proxyGet(`${this.serviceUrls.stock}/vehicles${query}`, user);
+    }
+
+    createVehicle(body: unknown, user?: { sub: string; email: string; role: string }) {
+        return this.proxyPost(`${this.serviceUrls.stock}/vehicles`, body, user);
+    }
+
+    updateVehicle(id: string, body: unknown, user?: { sub: string; email: string; role: string }) {
+        return this.proxyPatch(`${this.serviceUrls.stock}/vehicles/${id}`, body, user);
+    }
+
+    deleteVehicle(id: string, user?: { sub: string; email: string; role: string }) {
+        return this.proxyDelete(`${this.serviceUrls.stock}/vehicles/${id}`, user);
+    }
+
+    // ─── Hub Capacity ───────────────────────────────────────────────────────
+
+    getHubCapacity(id: string, user?: { sub: string; email: string; role: string }) {
+        return this.proxyGet(`${this.serviceUrls.delivery}/hubs/${id}/capacity`, user);
+    }
+
+    // ─── Invoice Parcels ────────────────────────────────────────────────────
+
+    addParcel(invoiceId: string, body: unknown, user?: { sub: string; email: string; role: string }) {
+        return this.proxyPost(`${this.serviceUrls.billing}/invoices/${invoiceId}/parcels`, body, user);
+    }
+
+    listParcels(invoiceId: string, user?: { sub: string; email: string; role: string }) {
+        return this.proxyGet(`${this.serviceUrls.billing}/invoices/${invoiceId}/parcels`, user);
+    }
+
+    deleteParcel(invoiceId: string, parcelId: string, user?: { sub: string; email: string; role: string }) {
+        return this.proxyDelete(`${this.serviceUrls.billing}/invoices/${invoiceId}/parcels/${parcelId}`, user);
+    }
+
     /** Proxy health check to the authentication service. */
     getAuthHealth() {
         return this.fetchHealth('auth', this.serviceUrls.auth);
@@ -267,33 +303,18 @@ export class GatewayService {
     }
 
     /** Create an invoice via the billing service. */
-    createInvoice(
-        body: unknown,
-        user?: { sub: string; email: string; role: string },
-    ) {
+    createInvoice(body: unknown, user?: { sub: string; email: string; role: string }) {
         return this.proxyPost(`${this.serviceUrls.billing}/invoices`, body, user);
     }
 
     /** Update an invoice via the billing service. */
-    updateInvoice(
-        id: string,
-        body: unknown,
-        user?: { sub: string; email: string; role: string },
-    ) {
+    updateInvoice(id: string, body: unknown, user?: { sub: string; email: string; role: string }) {
         return this.proxyPatch(`${this.serviceUrls.billing}/invoices/${id}`, body, user);
     }
 
     /** Transition invoice status via the billing service. */
-    updateInvoiceStatus(
-        id: string,
-        body: unknown,
-        user?: { sub: string; email: string; role: string },
-    ) {
-        return this.proxyPatch(
-            `${this.serviceUrls.billing}/invoices/${id}/status`,
-            body,
-            user,
-        );
+    updateInvoiceStatus(id: string, body: unknown, user?: { sub: string; email: string; role: string }) {
+        return this.proxyPatch(`${this.serviceUrls.billing}/invoices/${id}/status`, body, user);
     }
 
     /** List deliveries via the delivery service. */
@@ -325,19 +346,12 @@ export class GatewayService {
     }
 
     /** Create a delivery via the delivery service. */
-    createDelivery(
-        body: unknown,
-        user?: { sub: string; email: string; role: string },
-    ) {
+    createDelivery(body: unknown, user?: { sub: string; email: string; role: string }) {
         return this.proxyPost(`${this.serviceUrls.delivery}/deliveries`, body, user);
     }
 
     /** Update a delivery via the delivery service. */
-    updateDelivery(
-        id: string,
-        body: unknown,
-        user?: { sub: string; email: string; role: string },
-    ) {
+    updateDelivery(id: string, body: unknown, user?: { sub: string; email: string; role: string }) {
         return this.proxyPatch(`${this.serviceUrls.delivery}/deliveries/${id}`, body, user);
     }
 
@@ -378,11 +392,7 @@ export class GatewayService {
     }
 
     /** Update a user via the users service. */
-    updateUser(
-        id: string,
-        body: unknown,
-        user?: { sub: string; email: string; role: string },
-    ) {
+    updateUser(id: string, body: unknown, user?: { sub: string; email: string; role: string }) {
         return this.proxyPatch(`${this.serviceUrls.users}/users/${id}`, body, user);
     }
 

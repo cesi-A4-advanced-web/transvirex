@@ -182,5 +182,10 @@ export class DeliveryController {
     removeDelivery(@Param('id') id: string) {
         return this.deliveryService.removeDelivery(id);
     }
+
+    @Get('hubs/:id/capacity')
+    getHubCapacity(@Param('id') id: string) {
+        return this.deliveryService.getHubCapacity(id);
+    }
 }
 
