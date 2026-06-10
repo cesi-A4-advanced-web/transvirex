@@ -1,9 +1,11 @@
 import {
+    Body,
     Controller,
     DefaultValuePipe,
     Get,
     Param,
     ParseIntPipe,
+    Post,
     Query,
 } from '@nestjs/common';
 import { ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
@@ -37,5 +39,14 @@ export class BillingController {
     @ApiResponse({ status: 404, description: 'Invoice not found' })
     getBilling(@Param('id') id: string) {
         return this.gatewayService.getBilling(id);
+    }
+
+    @ApiTags('Billing')
+    @Public()
+    @Post('billing')
+    @ApiOperation({ summary: 'Create an invoice' })
+    @ApiResponse({ status: 201, description: 'Invoice created' })
+    createBilling(@Body() body: Record<string, unknown>) {
+        return this.gatewayService.createBilling(body);
     }
 }

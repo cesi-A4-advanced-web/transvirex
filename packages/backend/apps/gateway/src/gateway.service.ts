@@ -205,6 +205,14 @@ export class GatewayService {
         return this.proxyGet(`${this.serviceUrls.billing}/billing/${id}`, user);
     }
 
+    /** Create an invoice via the billing service. */
+    createBilling(
+        body: unknown,
+        user?: { sub: string; email: string; role: string },
+    ) {
+        return this.proxyPost(`${this.serviceUrls.billing}/billing`, body, user);
+    }
+
     /** Proxy health check to the stock service. */
     getStockHealth() {
         return this.fetchHealth('stock', this.serviceUrls.stock);

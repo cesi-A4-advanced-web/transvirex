@@ -12,7 +12,11 @@ describe('BillingController', () => {
             providers: [
                 {
                     provide: BillingService,
-                    useValue: { findById: jest.fn(), findAll: jest.fn() },
+                    useValue: {
+                        findById: jest.fn(),
+                        findAll: jest.fn(),
+                        create: jest.fn(),
+                    },
                 },
             ],
         }).compile();
@@ -32,6 +36,30 @@ describe('BillingController', () => {
                 billingController.findById('invoice-id'),
             ).resolves.toEqual(invoice);
             expect(billingService.findById).toHaveBeenCalledWith('invoice-id');
+        });
+    });
+
+    describe('create', () => {
+        it('should create an invoice', async () => {
+            const body = {
+                customer_id: 'customer-id',
+                hub_id: 'hub-id',
+                pickup_address_id: 'pickup-id',
+                delivery_address_id: 'delivery-id',
+                business_manager_id: 'manager-id',
+                reference: 'INV-999',
+                priority: 'standard',
+                due_date: '2026-12-31T00:00:00.000Z',
+            };
+            const invoice = { id: 'invoice-id', ...body };
+            jest.spyOn(billingService, 'create').mockResolvedValue(
+                invoice as never,
+            );
+
+            await expect(billingController.create(body as never)).resolves.toEqual(
+                invoice,
+            );
+            expect(billingService.create).toHaveBeenCalledWith(body);
         });
     });
 

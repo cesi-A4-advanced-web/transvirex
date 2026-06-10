@@ -1,5 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '@app/database';
+import type { CreateInvoiceDto } from './dto/create-invoice.dto';
 
 /** Service handling billing-related business logic. */
 @Injectable()
@@ -57,5 +58,40 @@ export class BillingService {
             limit,
             total,
         };
+    }
+
+    /** Create a new invoice */
+    async create(dto: CreateInvoiceDto) {
+        return this.prisma.invoice.create({
+            data: {
+                customer_id: dto.customer_id,
+                hub_id: dto.hub_id,
+                pickup_address_id: dto.pickup_address_id,
+                delivery_address_id: dto.delivery_address_id,
+                business_manager_id: dto.business_manager_id,
+                reference: dto.reference,
+                priority: dto.priority,
+                due_date: new Date(dto.due_date),
+                service_type: dto.service_type,
+                payment_date: dto.payment_date
+                    ? new Date(dto.payment_date)
+                    : null,
+                amount: dto.amount ?? 0,
+                status: dto.status,
+            },
+            include: {
+                customer: true,
+                hub: true,
+                business_manager: {
+                    select: {
+                        id: true,
+                        reference: true,
+                        firstname: true,
+                        lastname: true,
+                        email: true,
+                    },
+                },
+            },
+        });
     }
 }

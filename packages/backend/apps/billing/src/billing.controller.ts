@@ -1,13 +1,16 @@
 import {
+    Body,
     Controller,
     DefaultValuePipe,
     Get,
     Param,
     ParseIntPipe,
+    Post,
     Query,
 } from '@nestjs/common';
 import { MessagePattern } from '@nestjs/microservices';
 import { BillingService } from './billing.service';
+import type { CreateInvoiceDto } from './dto/create-invoice.dto';
 
 /** HTTP and RabbitMQ controller for billing operations. */
 @Controller()
@@ -31,6 +34,11 @@ export class BillingController {
     @Get('billing/:id')
     findById(@Param('id') id: string) {
         return this.billingService.findById(id);
+    }
+
+    @Post('billing')
+    create(@Body() body: CreateInvoiceDto) {
+        return this.billingService.create(body);
     }
 
     /** RabbitMQ health-check handler. */
