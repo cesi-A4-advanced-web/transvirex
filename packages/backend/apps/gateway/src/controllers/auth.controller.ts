@@ -2,7 +2,7 @@ import { Body, Controller, Get, Post, Req, Res, UseGuards } from '@nestjs/common
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Throttle, ThrottlerGuard } from '@nestjs/throttler';
 import type { Request, Response } from 'express';
-import { Public } from '../decorators/public.decorator';
+import { Public } from '../../../../libs/guards/src/public.decorator';
 import { LoginDto } from '../dto/login.dto';
 import { GatewayService } from '../gateway.service';
 

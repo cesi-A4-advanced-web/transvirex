@@ -1,7 +1,7 @@
+import { BlockInProduction } from '@app/guards';
 import { Body, Controller, Delete, ForbiddenException, Get, Param, Post, Query } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { BlockInProduction } from '@app/guards';
-import { Public } from '../decorators/public.decorator';
+import { Public } from '../../../../libs/guards/src/public.decorator';
 import { GatewayService } from '../gateway.service';
 
 @Controller()

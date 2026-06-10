@@ -1,12 +1,15 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '@app/database';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 
 /** Service handling user-related business logic. */
 @Injectable()
 export class UsersService {
     constructor(private readonly prisma: PrismaService) {}
 
-    /** Generate the next driver reference (DRV-XXX) based on the last existing reference. */
+    /**
+     * Generate the next driver reference (DRV-XXX) based on the last existing reference.
+     * @returns A new unique driver reference string.
+     */
     private async generateDriverReference(): Promise<string> {
         const lastDriver = await this.prisma.driver.findFirst({
             orderBy: { reference: 'desc' },
@@ -20,7 +23,12 @@ export class UsersService {
         return `DRV-${String(nextNum).padStart(3, '0')}`;
     }
 
-    /** Create a Driver profile for a user. */
+    /**
+     * Create a Driver profile for a user.
+     * @param userId The ID of the user to create the driver profile for.
+     * @param dto An object containing optional vehicle_id and rating for the driver profile.
+     * @returns The created Driver profile with related user and vehicle data.
+     */
     async createDriver(userId: string, dto: { vehicle_id?: string; rating?: number }) {
         const user = await this.prisma.user.findUnique({ where: { id: userId } });
         if (!user) throw new NotFoundException('Utilisateur introuvable');
@@ -42,7 +50,11 @@ export class UsersService {
         });
     }
 
-    /** Get the Driver profile for a user. */
+    /**
+     * Get the Driver profile for a user.
+     * @param userId The ID of the user whose driver profile to retrieve.
+     * @returns The Driver profile with related user, vehicle, and deliveries data.
+     */
     async getDriver(userId: string) {
         const user = await this.prisma.user.findUnique({ where: { id: userId } });
         if (!user) throw new NotFoundException('Utilisateur introuvable');

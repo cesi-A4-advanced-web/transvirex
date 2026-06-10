@@ -2,8 +2,8 @@ import { CanActivate, ExecutionContext, ForbiddenException, Injectable, Unauthor
 import { Reflector } from '@nestjs/core';
 import { JwtService } from '@nestjs/jwt';
 import type { Request } from 'express';
-import { IS_PUBLIC_KEY } from '../decorators/public.decorator';
-import { ROLES_KEY, type UserRole } from '../decorators/roles.decorator';
+import { IS_PUBLIC_KEY } from './public.decorator';
+import { ROLES_KEY, type UserRole } from './roles.decorator';
 
 /** Shape of the JWT payload after verification. */
 interface JwtPayload {
