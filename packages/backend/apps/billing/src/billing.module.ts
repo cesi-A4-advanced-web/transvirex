@@ -23,7 +23,12 @@ import { BillingService } from './billing.service';
                         `amqp://${process.env.RABBITMQ_USER}:${process.env.RABBITMQ_PASSWORD}@${process.env.RABBITMQ_HOST || 'rabbitmq'}:${process.env.RABBITMQ_PORT || 5672}`,
                     ],
                     queue: 'billing_queue',
-                    queueOptions: { durable: true },
+                    queueOptions: {
+                        durable: true,
+                        arguments: {
+                            'x-dead-letter-exchange': 'dlx',
+                        },
+                    },
                 },
             },
         ]),

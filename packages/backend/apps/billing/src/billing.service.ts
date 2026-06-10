@@ -367,6 +367,35 @@ export class BillingService {
         });
     }
 
+    /** List customers with optional hub filter. */
+    async listCustomers(hub_id?: string) {
+        const where: Prisma.CustomerWhereInput = {};
+        if (hub_id) where.hub_id = hub_id;
+
+        const customers = await this.prisma.customer.findMany({
+            where,
+            include: {
+                hub: { select: { id: true, reference: true, name: true } },
+                _count: { select: { invoices: true } },
+            },
+            orderBy: { reference: 'asc' },
+        });
+
+        return customers.map((c) => ({
+            id: c.id,
+            reference: c.reference,
+            customer_name: c.customer_name,
+            customer_type: c.customer_type,
+            contact_firstname: c.contact_firstname,
+            contact_lastname: c.contact_lastname,
+            phone_number: c.phone_number,
+            email: c.email,
+            status: c.status,
+            hub: c.hub,
+            active_invoices: c._count.invoices,
+        }));
+    }
+
     /** Delete an invoice and related data. */
     async remove(id: string) {
         const existing = await this.prisma.invoice.findUnique({ where: { id } });
