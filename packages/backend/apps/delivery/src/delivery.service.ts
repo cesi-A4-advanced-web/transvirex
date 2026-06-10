@@ -47,6 +47,9 @@ const ALLOWED_TRANSITIONS: Record<string, string[]> = {
     delayed: ['delivering', 'delivered'],
 };
 
+/** Delivery statuses considered "in progress" for a driver's current tour. */
+const ACTIVE_DELIVERY_STATUSES = ['planned', 'delivering', 'delayed', 'blocked'] as const;
+
 @Injectable()
 export class DeliveryService {
     constructor(
@@ -123,6 +126,81 @@ export class DeliveryService {
                 invoices_id: invoiceId,
                 reference,
                 status: 'planned',
+            },
+        });
+    }
+
+    /**
+     * List the active deliveries of a driver, identified by their **User id**
+     * (the JWT `sub`). Resolves User -> Driver -> deliveries.
+     */
+    async listDriverDeliveries(userId: string) {
+        const driver = await this.prisma.driver.findUnique({ where: { user_id: userId } });
+        if (!driver) return { deliveries: [] };
+
+        const deliveries = await this.prisma.delivery.findMany({
+            where: {
+                driver_id: driver.id,
+                status: { in: ACTIVE_DELIVERY_STATUSES as unknown as any },
+            },
+            include: {
+                invoice: {
+                    include: {
+                        customer: { select: { customer_name: true } },
+                        delivery_address: { select: { address: true, city: true, postal_code: true } },
+                    },
+                },
+            },
+            orderBy: { reference: 'asc' },
+        });
+
+        return {
+            deliveries: deliveries.map((d) => ({
+                id: d.id,
+                reference: d.reference,
+                status: d.status,
+                notes: d.notes,
+                customer: d.invoice?.customer?.customer_name ?? null,
+                address: d.invoice?.delivery_address
+                    ? [
+                          d.invoice.delivery_address.address,
+                          d.invoice.delivery_address.postal_code,
+                          d.invoice.delivery_address.city,
+                      ]
+                          .filter(Boolean)
+                          .join(', ')
+                    : null,
+            })),
+        };
+    }
+
+    /** Create a DeliveryEvent (incident, status update, note...) on a delivery. */
+    async createDeliveryEvent(
+        deliveryId: string,
+        data: {
+            description?: string;
+            type?: string;
+            status?: string;
+            latitude?: number;
+            longitude?: number;
+        },
+    ) {
+        const delivery = await this.prisma.delivery.findUnique({ where: { id: deliveryId } });
+        if (!delivery) throw new NotFoundException('Livraison non trouvée');
+
+        const eventType = (data.type ?? 'note') as any;
+        const eventStatus = (data.status ?? 'information') as any;
+        if (!data.description) throw new BadRequestException('description requise');
+
+        return this.prisma.deliveryEvent.create({
+            data: {
+                delivery_id: deliveryId,
+                description: data.description,
+                type: eventType,
+                status: eventStatus,
+                latitude: data.latitude ?? null,
+                longitude: data.longitude ?? null,
+                created_at: new Date(),
             },
         });
     }
@@ -349,4 +427,3 @@ export class DeliveryService {
         };
     }
 }
-
