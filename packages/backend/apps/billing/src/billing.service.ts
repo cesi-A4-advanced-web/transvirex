@@ -1,14 +1,11 @@
-import {
-    BadRequestException,
-    Injectable,
-    NotFoundException,
-} from '@nestjs/common';
 import { PrismaService } from '@app/database';
 import type { InvoiceStatus, Prisma } from '@generated/prisma';
+import { BadRequestException, Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { ClientProxy } from '@nestjs/microservices';
 import type { CreateInvoiceDto } from './dto/create-invoice.dto';
 import type { InvoiceFiltersDto } from './dto/invoice-filters.dto';
-import type { UpdateInvoiceDto } from './dto/update-invoice.dto';
 import type { UpdateInvoiceStatusDto } from './dto/update-invoice-status.dto';
+import type { UpdateInvoiceDto } from './dto/update-invoice.dto';
 
 const invoiceInclude = {
     customer: true,
@@ -52,10 +49,79 @@ const STATUS_TRANSITIONS: Record<InvoiceStatus, InvoiceStatus | null> = {
     invoice: null,
 };
 
-/** Service handling billing-related business logic. */
+/** Service handling billing-related business logic — invoice confirmation and RabbitMQ event consumption. */
 @Injectable()
 export class BillingService {
-    constructor(private readonly prisma: PrismaService) {}
+    private readonly logger = new Logger(BillingService.name);
+
+    constructor(
+        private readonly prisma: PrismaService,
+        @Inject('RMQ_CLIENT') private readonly rmqClient: ClientProxy,
+    ) {}
+
+    /** Confirm an invoice (set status to "invoice") and emit a delivery.created event so the delivery service creates a Delivery record. */
+    async confirmInvoice(invoiceId: string) {
+        const invoice = await this.prisma.invoice.findUnique({
+            where: { id: invoiceId },
+        });
+        if (!invoice) {
+            throw new Error('Facture non trouvée');
+        }
+
+        await this.prisma.invoice.update({
+            where: { id: invoiceId },
+            data: { status: 'invoice' },
+        });
+
+        const deliveryRef = `LIV-${invoice.reference}`;
+        this.rmqClient.emit('delivery.created', {
+            invoiceId,
+            reference: deliveryRef,
+        });
+
+        this.logger.log(`Invoice ${invoice.reference} confirmed, delivery.created emitted`);
+        return { success: true, reference: deliveryRef };
+    }
+
+    /**
+     * Handle a delivery.status_changed event from RabbitMQ.
+     * When a delivery reaches "delivered", confirm the linked invoice to mark it for billing.
+     */
+    async handleDeliveryDelivered(data: {
+        deliveryId: string;
+        previousStatus: string;
+        newStatus: string;
+        timestamp: string;
+    }) {
+        this.logger.log(
+            `Delivery ${data.deliveryId} changed from ${data.previousStatus} to ${data.newStatus} at ${data.timestamp}`,
+        );
+
+        if (data.newStatus !== 'delivered') return;
+
+        const delivery = await this.prisma.delivery.findUnique({
+            where: { id: data.deliveryId },
+            include: { invoice: true },
+        });
+
+        if (!delivery) {
+            this.logger.warn(`Delivery ${data.deliveryId} not found — cannot invoice`);
+            return;
+        }
+
+        const invoice = delivery.invoice;
+        if (invoice.status === 'invoice') {
+            this.logger.log(`Invoice ${invoice.reference} already confirmed — skipping`);
+            return;
+        }
+
+        await this.prisma.invoice.update({
+            where: { id: invoice.id },
+            data: { status: 'invoice' },
+        });
+
+        this.logger.log(`Invoice ${invoice.reference} confirmed for delivery ${data.deliveryId}`);
+    }
 
     private getPricePerKg(): number {
         return Number(process.env.INVOICE_PRICE_PER_KG ?? 10);
@@ -142,9 +208,7 @@ export class BillingService {
                 priority: dto.priority,
                 due_date: new Date(dto.due_date),
                 service_type: dto.service_type,
-                payment_date: dto.payment_date
-                    ? new Date(dto.payment_date)
-                    : null,
+                payment_date: dto.payment_date ? new Date(dto.payment_date) : null,
                 amount: 0,
                 status: 'quotation',
             },
@@ -187,9 +251,7 @@ export class BillingService {
         if (dto.due_date !== undefined) updateData.due_date = new Date(dto.due_date);
         if (dto.service_type !== undefined) updateData.service_type = dto.service_type;
         if (dto.payment_date !== undefined) {
-            updateData.payment_date = dto.payment_date
-                ? new Date(dto.payment_date)
-                : null;
+            updateData.payment_date = dto.payment_date ? new Date(dto.payment_date) : null;
         }
 
         await this.prisma.invoice.update({
@@ -215,9 +277,7 @@ export class BillingService {
         const currentStatus = existing.status ?? 'quotation';
         const allowedNext = STATUS_TRANSITIONS[currentStatus];
         if (!allowedNext || allowedNext !== dto.status) {
-            throw new BadRequestException(
-                `Invalid status transition from ${currentStatus} to ${dto.status}`,
-            );
+            throw new BadRequestException(`Invalid status transition from ${currentStatus} to ${dto.status}`);
         }
 
         const amount = await this.calculateAmountFromParcels(id);

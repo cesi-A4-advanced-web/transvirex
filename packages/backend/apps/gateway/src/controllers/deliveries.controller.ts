@@ -12,17 +12,12 @@ import {
     Query,
     Req,
 } from '@nestjs/common';
-import {
-    ApiBearerAuth,
-    ApiOperation,
-    ApiParam,
-    ApiQuery,
-    ApiResponse,
-    ApiTags,
-} from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import type { Request } from 'express';
 import { CreateDeliveryDto, DeliveryStatusDto } from '../dto/create-delivery.dto';
+import { UpdateDeliveryStatusDto } from '../dto/update-delivery-status.dto';
 import { UpdateDeliveryDto } from '../dto/update-delivery.dto';
+import { UpdatePositionDto } from '../dto/update-position.dto';
 import { GatewayService } from '../gateway.service';
 
 @Controller()
@@ -35,8 +30,7 @@ export class DeliveriesController {
     @Roles('admin', 'dispatcher', 'business_manager', 'driver')
     @ApiOperation({
         summary: 'List deliveries',
-        description:
-            'Returns a paginated list of deliveries. Drivers only see their own deliveries.',
+        description: 'Returns a paginated list of deliveries. Drivers only see their own deliveries.',
     })
     @ApiQuery({ name: 'page', required: false, type: Number, example: 1 })
     @ApiQuery({ name: 'limit', required: false, type: Number, example: 10 })
@@ -73,8 +67,7 @@ export class DeliveriesController {
     @Roles('admin', 'dispatcher', 'business_manager', 'driver')
     @ApiOperation({
         summary: 'Get delivery by ID',
-        description:
-            'Returns delivery details with linked invoice, driver, and delivery events.',
+        description: 'Returns delivery details with linked invoice, driver, and delivery events.',
     })
     @ApiParam({ name: 'id', description: 'Delivery UUID' })
     @ApiResponse({ status: 200, description: 'Delivery detail' })
@@ -109,11 +102,7 @@ export class DeliveriesController {
     @ApiParam({ name: 'id', description: 'Delivery UUID' })
     @ApiResponse({ status: 200, description: 'Delivery updated' })
     @ApiResponse({ status: 404, description: 'Delivery not found' })
-    updateDelivery(
-        @Param('id') id: string,
-        @Body() body: UpdateDeliveryDto,
-        @Req() req: Request,
-    ) {
+    updateDelivery(@Param('id') id: string, @Body() body: UpdateDeliveryDto, @Req() req: Request) {
         return this.gatewayService.updateDelivery(id, body, (req as any).user);
     }
 
@@ -132,3 +121,46 @@ export class DeliveriesController {
         return this.gatewayService.deleteDelivery(id, (req as any).user);
     }
 }
+
+/** Gateway controller that proxies delivery-related requests to the delivery microservice — position tracking and status updates. */
+@Controller()
+export class DeliveriesController {
+    constructor(private readonly gatewayService: GatewayService) {}
+
+    /** Proxy a GPS position update from the authenticated driver to the delivery microservice. */
+    @ApiTags('Deliveries')
+    @Patch('deliveries/position')
+    @ApiBearerAuth('JWT-auth')
+    @Roles('driver')
+    @ApiOperation({ summary: 'Update driver live GPS position' })
+    @ApiResponse({ status: 200, description: 'Position updated' })
+    updatePosition(@Body() body: UpdatePositionDto, @Req() req: Request) {
+        return this.gatewayService.updatePosition(body, (req as any).user);
+    }
+
+    /** Proxy a driver position lookup for dispatchers to the delivery microservice. */
+    @ApiTags('Deliveries')
+    @Get('drivers/:id/position')
+    @ApiBearerAuth('JWT-auth')
+    @Roles('admin', 'dispatcher')
+    @ApiOperation({ summary: 'Get driver current GPS position' })
+    @ApiParam({ name: 'id', description: 'Driver UUID' })
+    @ApiResponse({ status: 200, description: 'Driver position or expired status' })
+    getDriverPosition(@Param('id') id: string, @Req() req: Request) {
+        return this.gatewayService.getDriverPosition(id, (req as any).user);
+    }
+
+    /** Proxy a delivery status update to the delivery microservice with transition validation and event creation. */
+    @ApiTags('Deliveries')
+    @Patch('deliveries/:id/status')
+    @ApiBearerAuth('JWT-auth')
+    @Roles('admin', 'dispatcher', 'driver')
+    @ApiOperation({ summary: 'Update delivery status with transition validation' })
+    @ApiParam({ name: 'id', description: 'Delivery UUID' })
+    @ApiResponse({ status: 200, description: 'Delivery status updated' })
+    @ApiResponse({ status: 400, description: 'Invalid status transition' })
+    updateStatus(@Param('id') id: string, @Body() body: UpdateDeliveryStatusDto, @Req() req: Request) {
+        return this.gatewayService.updateDeliveryStatus(id, body, (req as any).user);
+    }
+}
+

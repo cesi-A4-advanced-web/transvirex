@@ -39,14 +39,10 @@ import { GatewayController } from './gateway.controller';
 
 import { GatewayService } from './gateway.service';
 
-
-
 /** Root module for the API gateway microservice. */
 
 @Module({
-
     imports: [
-
         GuardsModule,
 
         DatabaseModule,
@@ -62,11 +58,9 @@ import { GatewayService } from './gateway.service';
         LoggingModule,
 
         ThrottlerModule.forRoot([{ ttl: 60000, limit: 5 }]),
-
     ],
 
     controllers: [
-
         GatewayController,
 
         HealthController,
@@ -78,30 +72,23 @@ import { GatewayService } from './gateway.service';
         DeliveriesController,
 
         DebugController,
+        DeliveriesController,
 
         HubsController,
 
         LoggingController,
 
         UsersController,
-
     ],
 
     providers: [
-
         GatewayService,
 
         {
-
             provide: APP_GUARD,
 
             useClass: JwtAuthGuard,
-
         },
-
     ],
-
 })
-
 export class GatewayModule {}
-

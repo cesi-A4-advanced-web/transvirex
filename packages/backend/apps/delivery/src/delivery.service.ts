@@ -1,10 +1,8 @@
-import {
-    ForbiddenException,
-    Injectable,
-    NotFoundException,
-} from '@nestjs/common';
 import { PrismaService } from '@app/database';
+import { RedisService } from '@app/redis';
 import type { Prisma } from '@generated/prisma';
+import { BadRequestException, ForbiddenException, Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { ClientProxy } from '@nestjs/microservices';
 import type { CreateDeliveryDto } from './dto/create-delivery.dto';
 import type { DeliveryFiltersDto, DeliveryRequestUser } from './dto/delivery-filters.dto';
 import type { UpdateDeliveryDto } from './dto/update-delivery.dto';
@@ -32,9 +30,102 @@ const deliveryDetailInclude = {
     delivery_events: { orderBy: { created_at: 'asc' as const } },
 } as const;
 
+/** Shape of a driver position object persisted in Redis. */
+interface DriverPosition {
+    lat: number;
+    lng: number;
+    updatedAt: string;
+}
+
+/** Map of allowed delivery status transitions. Key = current status, value = valid next statuses. */
+const ALLOWED_TRANSITIONS: Record<string, string[]> = {
+    planned: ['delivering', 'cancelled', 'blocked'],
+    delivering: ['delivered', 'cancelled', 'blocked', 'delayed'],
+    delivered: [],
+    cancelled: [],
+    blocked: ['delivering'],
+    delayed: ['delivering', 'delivered'],
+};
+
 @Injectable()
 export class DeliveryService {
-    constructor(private readonly prisma: PrismaService) {}
+    constructor(
+        private readonly prisma: PrismaService,
+        private readonly redis: RedisService,
+        @Inject('RMQ_CLIENT') private readonly rmqClient: ClientProxy,
+    ) {}
+
+    /** Store the driver's live GPS position in Redis with a 5-minute TTL. */
+    async updatePosition(driverId: string, lat: number, lng: number) {
+        const key = `driver:position:${driverId}`;
+        const value = JSON.stringify({ lat, lng, updatedAt: new Date().toISOString() });
+        await this.redis.set(key, value, 300);
+        return { lat, lng, updatedAt: new Date().toISOString() };
+    }
+
+    /** Retrieve the current cached GPS position of a driver. Returns null if the key expired. */
+    async getDriverPosition(driverId: string): Promise<DriverPosition | null> {
+        const key = `driver:position:${driverId}`;
+        const raw = await this.redis.get(key);
+        if (!raw) return null;
+        return JSON.parse(raw) as DriverPosition;
+    }
+
+    /**
+     * Advance a delivery to a new status.
+     * - Validates the transition against ALLOWED_TRANSITIONS
+     * - Persists the new status in PostgreSQL
+     * - Creates a DeliveryEvent audit trail entry
+     * - Emits delivery.status_changed on RabbitMQ when status reaches "delivered"
+     */
+    async updateDeliveryStatus(id: string, status: string, note?: string) {
+        const delivery = await this.prisma.delivery.findUnique({ where: { id } });
+        if (!delivery) throw new NotFoundException('Livraison non trouvée');
+
+        const currentStatus = delivery.status ?? 'planned';
+        const allowed = ALLOWED_TRANSITIONS[currentStatus];
+
+        if (!allowed || !allowed.includes(status)) {
+            throw new BadRequestException(`Transition invalide : ${currentStatus} → ${status}`);
+        }
+
+        const updated = await this.prisma.delivery.update({
+            where: { id },
+            data: { status: status as any, notes: note ?? undefined },
+        });
+
+        await this.prisma.deliveryEvent.create({
+            data: {
+                delivery_id: id,
+                description: note ?? `Statut passé à ${status}`,
+                type: 'info',
+                status: 'information',
+                created_at: new Date(),
+            },
+        });
+
+        if (status === 'delivered') {
+            this.rmqClient.emit('delivery.status_changed', {
+                deliveryId: id,
+                previousStatus: currentStatus,
+                newStatus: status,
+                timestamp: new Date().toISOString(),
+            });
+        }
+
+        return updated;
+    }
+
+    /** Create a Delivery record with "planned" status when billing confirms an invoice. */
+    async createFromInvoice(invoiceId: string, reference: string) {
+        return this.prisma.delivery.create({
+            data: {
+                invoices_id: invoiceId,
+                reference,
+                status: 'planned',
+            },
+        });
+    }
 
     async listHubs() {
         return this.prisma.hub.findMany({
@@ -125,10 +216,7 @@ export class DeliveryService {
         return driver?.id;
     }
 
-    private buildDeliveryWhere(
-        filters?: DeliveryFiltersDto,
-        driverId?: string,
-    ): Prisma.DeliveryWhereInput {
+    private buildDeliveryWhere(filters?: DeliveryFiltersDto, driverId?: string): Prisma.DeliveryWhereInput {
         const where: Prisma.DeliveryWhereInput = {};
         if (filters?.status) where.status = filters.status;
         if (filters?.driver_id) where.driver_id = filters.driver_id;
@@ -152,10 +240,7 @@ export class DeliveryService {
         return where;
     }
 
-    private async assertDriverAccess(
-        delivery: { driver_id: string | null },
-        user?: DeliveryRequestUser,
-    ) {
+    private async assertDriverAccess(delivery: { driver_id: string | null }, user?: DeliveryRequestUser) {
         if (user?.role !== 'driver' || !user.id) return;
         const driverId = await this.resolveDriverId(user);
         if (!driverId || delivery.driver_id !== driverId) {
@@ -163,12 +248,7 @@ export class DeliveryService {
         }
     }
 
-    async findAllDeliveries(
-        page: number,
-        limit: number,
-        filters?: DeliveryFiltersDto,
-        user?: DeliveryRequestUser,
-    ) {
+    async findAllDeliveries(page: number, limit: number, filters?: DeliveryFiltersDto, user?: DeliveryRequestUser) {
         const driverId = await this.resolveDriverId(user);
         if (user?.role === 'driver' && !driverId) {
             return { data: [], page, limit, total: 0 };
@@ -243,3 +323,4 @@ export class DeliveryService {
         return { success: true, id };
     }
 }
+
