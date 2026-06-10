@@ -191,6 +191,7 @@ services:
         depends_on:
             - frontend
             - gateway-service
+            - ai-service
             - rabbitmq
         healthcheck:
             test: ['CMD', 'nginx', '-t']
