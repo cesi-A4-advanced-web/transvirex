@@ -1,0 +1,32 @@
+services:
+    ai-service:
+        build:
+            context: .
+            dockerfile: Dockerfile
+            target: development
+        image: transvirex-ai-service
+        container_name: transvirex-ai
+        environment:
+            - DEEPSEEK_API_KEY=${DEEPSEEK_API_KEY}
+            - DEEPSEEK_BASE_URL=${DEEPSEEK_BASE_URL:-https://api.deepseek.com}
+            - DEEPSEEK_CHAT_MODEL=${DEEPSEEK_CHAT_MODEL:-deepseek-chat}
+            - DEEPSEEK_EMBEDDING_MODEL=${DEEPSEEK_EMBEDDING_MODEL:-deepseek-embedding}
+            - MONGODB_HOST=${MONGODB_HOST:-mongodb}
+            - MONGODB_PORT=${MONGODB_PORT:-27017}
+            - MONGODB_USER=${MONGODB_USER:-mongo_user}
+            - MONGODB_PASSWORD=${MONGODB_PASSWORD:-mongo_password}
+            - MONGODB_DB=${MONGODB_DB:-transvirex}
+            - DELIVERY_SERVICE_URL=${DELIVERY_SERVICE_URL:-http://transvirex-delivery:3000}
+            - PORT=5000
+        restart: unless-stopped
+        networks:
+            - transvirex-network
+        develop:
+            watch:
+                - path: ./
+                  ignore:
+                      - __pycache__
+                      - .venv
+                      - "*.pyc"
+                  action: sync+restart
+                  target: /app

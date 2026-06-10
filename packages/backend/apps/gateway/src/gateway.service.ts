@@ -15,6 +15,7 @@ export class GatewayService {
         delivery: process.env.DELIVERY_SERVICE_URL || 'http://transvirex-delivery:3000',
         stock: process.env.STOCK_SERVICE_URL || 'http://transvirex-stock:3000',
         users: process.env.USERS_SERVICE_URL || 'http://transvirex-users:3000',
+        ai: process.env.AI_SERVICE_URL || 'http://transvirex-ai:5000',
     };
 
     constructor(
@@ -336,6 +337,45 @@ export class GatewayService {
             pageSize,
             totalPages: Math.ceil(totalCount / pageSize),
         };
+    }
+
+    /** Proxy a POST to the AI service with an extended 30-second timeout for LLM calls. */
+    async aiPost(path: string, body: unknown) {
+        try {
+            const response = await fetch(`${this.serviceUrls.ai}/ai/${path}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body),
+                signal: AbortSignal.timeout(30000),
+            });
+            const data = await response.json();
+            if (!response.ok) throw new HttpException(data, response.status);
+            return data;
+        } catch (e) {
+            if (e instanceof HttpException) throw e;
+            throw new HttpException(
+                { status: 'error', message: 'AI service unreachable' },
+                HttpStatus.SERVICE_UNAVAILABLE,
+            );
+        }
+    }
+
+    /** Proxy a GET to the AI service. */
+    async aiGet(path: string) {
+        try {
+            const response = await fetch(`${this.serviceUrls.ai}/ai/${path}`, {
+                signal: AbortSignal.timeout(30000),
+            });
+            const data = await response.json();
+            if (!response.ok) throw new HttpException(data, response.status);
+            return data;
+        } catch (e) {
+            if (e instanceof HttpException) throw e;
+            throw new HttpException(
+                { status: 'error', message: 'AI service unreachable' },
+                HttpStatus.SERVICE_UNAVAILABLE,
+            );
+        }
     }
 
     /** Delete all documents from a log collection. */
