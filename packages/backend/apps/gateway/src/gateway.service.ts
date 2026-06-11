@@ -5,6 +5,16 @@ import { RabbitMQService } from '@app/rabbitmq';
 import { RedisService } from '@app/redis';
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 
+/** French labels for delivery statuses, used in driver notifications. */
+const DELIVERY_STATUS_LABELS: Record<string, string> = {
+    planned: 'Planifiée',
+    delivering: 'En cours',
+    delivered: 'Livrée',
+    cancelled: 'Annulée',
+    blocked: 'Bloquée',
+    delayed: 'Retardée',
+};
+
 /** Service aggregating health checks, auth proxy, and debug operations for the gateway. */
 @Injectable()
 export class GatewayService {
@@ -48,6 +58,35 @@ export class GatewayService {
             'X-User-Email': user.email ?? '',
             'X-User-Role': user.role ?? '',
         };
+    }
+
+    /**
+     * Create a driver-facing notification in the shared MongoDB `notifications`
+     * collection (read back by the AI service's /ai/notifications). Best-effort:
+     * never fails the originating request.
+     */
+    private async createDriverNotification(
+        recipientUserId: string | null | undefined,
+        summary: string,
+        deliveryId: string,
+        type: 'assignment' | 'status',
+    ): Promise<void> {
+        if (!recipientUserId) return;
+        try {
+            const db = await this.mongoDBService.getDb();
+            await db.collection('notifications').insertOne({
+                audience: 'driver',
+                recipient_id: recipientUserId,
+                type,
+                delivery_id: deliveryId,
+                summary,
+                severity: 'INFO',
+                read: false,
+                created_at: new Date(),
+            });
+        } catch {
+            // Notifications are best-effort — swallow errors.
+        }
     }
 
     /** Append optional query parameters to a URL. */
@@ -221,9 +260,27 @@ export class GatewayService {
         return this.proxyGet(`${this.serviceUrls.delivery}/drivers/${id}/position`, user);
     }
 
-    /** Update delivery status via the delivery service. */
-    updateDeliveryStatus(id: string, body: unknown, user?: { sub: string; email: string; role: string }) {
-        return this.proxyPatch(`${this.serviceUrls.delivery}/deliveries/${id}/status`, body, user);
+    /** Update delivery status via the delivery service, then notify the driver when changed by someone else. */
+    async updateDeliveryStatus(id: string, body: unknown, user?: { sub: string; email: string; role: string }) {
+        const result = await this.proxyPatch(`${this.serviceUrls.delivery}/deliveries/${id}/status`, body, user);
+        // Notify the assigned driver only when the change was made by a dispatcher/admin.
+        if (user?.role !== 'driver') {
+            const status = (body as { status?: string })?.status ?? '';
+            const delivery = await this.prisma.delivery.findUnique({
+                where: { id },
+                select: { reference: true, driver: { select: { user_id: true } } },
+            });
+            if (delivery?.driver?.user_id) {
+                const label = DELIVERY_STATUS_LABELS[status] ?? status;
+                await this.createDriverNotification(
+                    delivery.driver.user_id,
+                    `Statut mis à jour : ${delivery.reference} → ${label}`,
+                    id,
+                    'status',
+                );
+            }
+        }
+        return result;
     }
 
     // ─── Vehicles ───────────────────────────────────────────────────────────
@@ -370,9 +427,24 @@ export class GatewayService {
         return this.proxyPost(`${this.serviceUrls.delivery}/deliveries`, body, user);
     }
 
-    /** Update a delivery via the delivery service. */
-    updateDelivery(id: string, body: unknown, user?: { sub: string; email: string; role: string }) {
-        return this.proxyPatch(`${this.serviceUrls.delivery}/deliveries/${id}`, body, user);
+    /** Update a delivery via the delivery service, then notify the driver if (re)assigned. */
+    async updateDelivery(id: string, body: unknown, user?: { sub: string; email: string; role: string }) {
+        const result = await this.proxyPatch(`${this.serviceUrls.delivery}/deliveries/${id}`, body, user);
+        const driverId = (body as { driver_id?: string })?.driver_id;
+        if (driverId) {
+            const driver = await this.prisma.driver.findUnique({
+                where: { id: driverId },
+                select: { user_id: true },
+            });
+            const reference = (result as { reference?: string })?.reference ?? '';
+            await this.createDriverNotification(
+                driver?.user_id,
+                `Nouvelle livraison assignée : ${reference}`,
+                id,
+                'assignment',
+            );
+        }
+        return result;
     }
 
     /** Delete a delivery via the delivery service. */

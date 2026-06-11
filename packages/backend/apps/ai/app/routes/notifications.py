@@ -6,9 +6,25 @@ router = APIRouter(tags=["notifications"])
 
 
 @router.get("/notifications")
-async def get_notifications(unread_only: bool = False):
+async def get_notifications(
+    unread_only: bool = False,
+    audience: str | None = None,
+    recipient_id: str | None = None,
+):
     db = await get_db()
-    query = {"read": False} if unread_only else {}
+
+    # Audience filter: drivers see their own notifications; dispatchers see the
+    # incident notifications (legacy docs without an `audience` field count as
+    # dispatcher ones).
+    base: dict = {}
+    if audience == "driver":
+        base["audience"] = "driver"
+        if recipient_id:
+            base["recipient_id"] = recipient_id
+    elif audience == "dispatcher":
+        base["audience"] = {"$ne": "driver"}
+
+    query = {**base, "read": False} if unread_only else dict(base)
     docs = (
         await db["notifications"]
         .find(query)
@@ -22,7 +38,7 @@ async def get_notifications(unread_only: bool = False):
         notifications.append(d)
     return {
         "notifications": notifications,
-        "unread_count": await db["notifications"].count_documents({"read": False}),
+        "unread_count": await db["notifications"].count_documents({**base, "read": False}),
     }
 
 

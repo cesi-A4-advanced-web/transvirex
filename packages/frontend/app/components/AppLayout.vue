@@ -112,11 +112,11 @@
                             class="absolute right-0 top-10 w-80 bg-background border border-border rounded-xl shadow-lg z-50 overflow-hidden"
                         >
                             <div class="flex items-center justify-between px-4 py-3 border-b border-border">
-                                <span class="font-semibold text-sm">Incidents signalés</span>
+                                <span class="font-semibold text-sm">Notifications</span>
                                 <button v-if="unreadCount > 0" @click="markAllRead" class="text-xs text-primary hover:underline">Tout marquer lu</button>
                             </div>
                             <div class="max-h-72 overflow-y-auto divide-y divide-border">
-                                <div v-if="notifications.length === 0" class="px-4 py-6 text-center text-sm text-muted-foreground">Aucun incident signalé</div>
+                                <div v-if="notifications.length === 0" class="px-4 py-6 text-center text-sm text-muted-foreground">Aucune notification</div>
                                 <div
                                     v-for="n in notifications" :key="n.id"
                                     @click="markRead(n.id)"
@@ -125,7 +125,7 @@
                                 >
                                     <div class="flex items-start gap-2">
                                         <span class="flex-shrink-0 text-[10px] font-bold px-1.5 py-0.5 rounded uppercase"
-                                            :class="n.severity === 'CRITICAL' ? 'bg-red-100 text-red-700' : 'bg-orange-100 text-orange-700'">
+                                            :class="n.severity === 'CRITICAL' ? 'bg-red-100 text-red-700' : n.severity === 'INFO' ? 'bg-blue-100 text-blue-700' : 'bg-orange-100 text-orange-700'">
                                             {{ n.severity }}
                                         </span>
                                         <div class="flex-1 min-w-0">
@@ -208,7 +208,7 @@ onMounted(() => {
     // rafraîchir silencieusement un access token expiré). On ne redirige pas ici
     // sur l'absence du cookie access_token : le refresh_token httpOnly peut encore
     // être valide, et rediriger ici provoquait des boucles déco/reco.
-    if (userRole.value === 'dispatcher') startPolling();
+    if (userRole.value === 'dispatcher' || userRole.value === 'driver') startPolling();
 });
 
 /**
