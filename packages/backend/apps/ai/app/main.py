@@ -3,9 +3,10 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 
+from .data.knowledge_base import KNOWLEDGE_DOCS
 from .database import close_db
-from .mcp.host import host
 from .routes import chat, incidents, knowledge, process, notifications
+from .services.rag import seed_knowledge
 
 logger = logging.getLogger("uvicorn.error")
 
@@ -13,11 +14,11 @@ logger = logging.getLogger("uvicorn.error")
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     try:
-        await host.start()
+        seeded = await seed_knowledge(KNOWLEDGE_DOCS)
+        logger.info("Knowledge base seeded: %d documents upserted", seeded)
     except Exception:
-        logger.exception("MCP host failed to start — agent tools disabled")
+        logger.exception("Knowledge base seed failed (continuing without seed)")
     yield
-    await host.stop()
     await close_db()
 
 
