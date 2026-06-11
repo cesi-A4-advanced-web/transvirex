@@ -68,9 +68,10 @@ export class DeliveriesController {
         summary: "Get the authenticated driver's today dashboard",
         description: "Returns the driver's info (reference, rating) and today's deliveries. Scoped to the caller via the JWT.",
     })
+    @ApiQuery({ name: 'scope', required: false, enum: ['today', 'all'], description: 'today (default) or all' })
     @ApiResponse({ status: 200, description: 'Driver dashboard: { driver, deliveries }' })
-    getMyDashboard(@Req() req: Request) {
-        return this.gatewayService.getMyDriverDashboard((req as any).user);
+    getMyDashboard(@Query('scope') scope: string | undefined, @Req() req: Request) {
+        return this.gatewayService.getMyDriverDashboard((req as any).user, scope);
     }
 
     @ApiTags('Deliveries')

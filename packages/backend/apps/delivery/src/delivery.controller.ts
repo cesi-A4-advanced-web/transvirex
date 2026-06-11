@@ -147,10 +147,10 @@ export class DeliveryController {
         return this.deliveryService.listDriverDeliveries(userId);
     }
 
-    /** Build the driver's "today" dashboard (driver info + today's deliveries), identified by their User id (JWT sub). */
+    /** Build the driver's dashboard (driver info + deliveries), identified by their User id (JWT sub). Scope: "today" (default) or "all". */
     @Get('drivers/:userId/dashboard')
-    getDriverDashboard(@Param('userId') userId: string) {
-        return this.deliveryService.getDriverDashboard(userId);
+    getDriverDashboard(@Param('userId') userId: string, @Query('scope') scope?: string) {
+        return this.deliveryService.getDriverDashboard(userId, scope === 'all' ? 'all' : 'today');
     }
 
     /** Create a DeliveryEvent (incident / status update) on a delivery. */

@@ -612,10 +612,14 @@ export async function exportOrdreMissionPdf(m: MissionData) {
     kpiBox(doc, 14 + kW + 4, y + 52, kW, m.deliveries[0]?.time ?? '—', 'Heure de départ', true);
     kpiBox(doc, 14 + (kW + 4) * 2, y + 52, kW, m.deliveries.at(-1)?.time ?? '—', 'Heure fin prévue', false);
 
-    // Deliveries table
+    // Deliveries table — paginates automatically. Reserve space top/bottom for
+    // the header & footer, and re-draw the header on every page after the first.
+    const MARGIN_TOP = 44;
+    const MARGIN_BOTTOM = 22;
     autoTable(doc, {
         ...baseTable,
         startY: y + 78,
+        margin: { top: MARGIN_TOP, bottom: MARGIN_BOTTOM, left: 14, right: 14 },
         head: [['#', 'Référence', 'Adresse & Ville', 'Destinataire', 'Heure', 'Colis', 'Observations', 'Signature']],
         body: m.deliveries.map((d) => [
             String(d.stop),
@@ -650,20 +654,32 @@ export async function exportOrdreMissionPdf(m: MissionData) {
                 data.doc.rect(x + 2, cy + height - 6, width - 4, 4);
             }
         },
+        didDrawPage: (data: any) => {
+            // Page 1 already has its header; redraw it on the following pages.
+            if (data.pageNumber > 1) header(doc, 'ORDRE DE MISSION', m.ref);
+        },
     });
 
-    const tableEnd = (doc as any).lastAutoTable.finalY + 8;
+    // Place the instructions + signatures on the current page, or push them to a
+    // fresh page if there isn't enough room left (keeps everything on-page).
+    const BLOCKS_HEIGHT = 26 + 12 + 30; // consignes + gap + signatures
+    let blockY = (doc as any).lastAutoTable.finalY + 8;
+    if (blockY + BLOCKS_HEIGHT > PH - MARGIN_BOTTOM) {
+        doc.addPage();
+        header(doc, 'ORDRE DE MISSION', m.ref);
+        blockY = MARGIN_TOP;
+    }
 
     // Instructions block
     doc.setFillColor(...[255, 237, 213]);
-    doc.roundedRect(14, tableEnd, PW - 28, 26, 3, 3, 'F');
+    doc.roundedRect(14, blockY, PW - 28, 26, 3, 3, 'F');
     doc.setDrawColor(...A);
     doc.setLineWidth(0.8);
-    doc.line(14, tableEnd, 14, tableEnd + 26);
+    doc.line(14, blockY, 14, blockY + 26);
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(8);
     doc.setTextColor(...[194, 65, 12]);
-    doc.text('CONSIGNES OBLIGATOIRES', 19, tableEnd + 7);
+    doc.text('CONSIGNES OBLIGATOIRES', 19, blockY + 7);
     const instructions = [
         '• Scanner chaque colis avant chargement et à chaque livraison — signaler toute anomalie immédiatement',
         "• En cas d'absence : déposer un avis de passage + photo + appeler le dispatcher au 01 23 45 67 89",
@@ -674,11 +690,11 @@ export async function exportOrdreMissionPdf(m: MissionData) {
         doc.setFont('helvetica', 'normal');
         doc.setFontSize(7.5);
         doc.setTextColor(...Tx);
-        doc.text(line, 19, tableEnd + 13 + i * 4.5);
+        doc.text(line, 19, blockY + 13 + i * 4.5);
     });
 
     // Signature area
-    const sigY = tableEnd + 38;
+    const sigY = blockY + 38;
     const sW = (PW - 28 - 8) / 2;
 
     doc.setFillColor(...Lx);
@@ -710,7 +726,13 @@ export async function exportOrdreMissionPdf(m: MissionData) {
     doc.setDrawColor(...Bl);
     doc.line(14 + sW + 13, sigY + 28, 14 + sW * 2 + 3, sigY + 28);
 
-    footer(doc);
+    // Footer on every page (drawn last so the "Page X / Y" total is correct).
+    const pageCount = doc.getNumberOfPages();
+    for (let p = 1; p <= pageCount; p++) {
+        doc.setPage(p);
+        footer(doc);
+    }
+
     doc.save(`${m.ref}_ordre-de-mission.pdf`);
 }
 

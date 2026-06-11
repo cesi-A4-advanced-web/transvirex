@@ -347,9 +347,12 @@ export class GatewayService {
         );
     }
 
-    /** Get the authenticated driver's "today" dashboard via the delivery service. Scoped to the JWT sub. */
-    getMyDriverDashboard(user?: { sub: string; email: string; role: string }) {
-        return this.proxyGet(`${this.serviceUrls.delivery}/drivers/${user?.sub}/dashboard`, user);
+    /** Get the authenticated driver's dashboard via the delivery service. Scoped to the JWT sub. Scope: "today" (default) or "all". */
+    getMyDriverDashboard(user?: { sub: string; email: string; role: string }, scope?: string) {
+        return this.proxyGet(
+            this.appendQuery(`${this.serviceUrls.delivery}/drivers/${user?.sub}/dashboard`, { scope }),
+            user,
+        );
     }
 
     /** Get a delivery by ID via the delivery service. */

@@ -184,7 +184,7 @@ export class DeliveryService {
      * customer name, delivery address, due date and parcel count. Read-only — stays
      * within the delivery domain on the shared PostgreSQL database (no RabbitMQ).
      */
-    async getDriverDashboard(userId: string) {
+    async getDriverDashboard(userId: string, scope: 'today' | 'all' = 'today') {
         const driver = await this.prisma.driver.findUnique({
             where: { user_id: userId },
             select: { reference: true, rating: true, id: true },
@@ -193,16 +193,17 @@ export class DeliveryService {
             return { driver: null, deliveries: [] };
         }
 
-        const startOfDay = new Date();
-        startOfDay.setHours(0, 0, 0, 0);
-        const endOfDay = new Date(startOfDay);
-        endOfDay.setDate(endOfDay.getDate() + 1);
+        const where: Prisma.DeliveryWhereInput = { driver_id: driver.id };
+        if (scope === 'today') {
+            const startOfDay = new Date();
+            startOfDay.setHours(0, 0, 0, 0);
+            const endOfDay = new Date(startOfDay);
+            endOfDay.setDate(endOfDay.getDate() + 1);
+            where.invoice = { due_date: { gte: startOfDay, lt: endOfDay } };
+        }
 
         const deliveries = await this.prisma.delivery.findMany({
-            where: {
-                driver_id: driver.id,
-                invoice: { due_date: { gte: startOfDay, lt: endOfDay } },
-            },
+            where,
             include: {
                 invoice: {
                     include: {
