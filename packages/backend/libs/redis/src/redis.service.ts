@@ -45,6 +45,11 @@ export class RedisService implements OnModuleDestroy {
         return this.client.del(...keys);
     }
 
+    /** Find all keys matching a pattern. */
+    async keys(pattern: string): Promise<string[]> {
+        return this.client.keys(pattern);
+    }
+
     /** Parse and execute a Redis command string, returning tabular results. */
     async executeCommand(command: string): Promise<{ columns: string[]; rows: any[]; rowCount: number }> {
         const trimmed = command.trim();

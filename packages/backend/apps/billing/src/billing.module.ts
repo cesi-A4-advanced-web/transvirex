@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { DatabaseModule } from '@app/database';
 import { LoggingModule } from '@app/logging';
+import { CacheConfigModule, RedisModule } from '@app/redis';
 import { BillingController } from './billing.controller';
 import { BillingService } from './billing.service';
 
@@ -12,6 +13,8 @@ import { BillingService } from './billing.service';
  */
 @Module({
     imports: [
+        RedisModule,
+        CacheConfigModule,
         DatabaseModule,
         LoggingModule,
         ClientsModule.register([

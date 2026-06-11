@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { DatabaseModule } from '@app/database';
 import { LoggingModule } from '@app/logging';
-import { RedisModule } from '@app/redis';
+import { CacheConfigModule, RedisModule } from '@app/redis';
 import { DeliveryController } from './delivery.controller';
 import { DeliveryService } from './delivery.service';
 
@@ -14,6 +14,7 @@ import { DeliveryService } from './delivery.service';
  */
 @Module({
     imports: [
+        CacheConfigModule,
         DatabaseModule,
         LoggingModule,
         RedisModule,

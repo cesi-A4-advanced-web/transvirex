@@ -3,11 +3,13 @@ import { GuardsModule } from '@app/guards';
 import { LoggingModule } from '@app/logging';
 import { MongoDBModule } from '@app/mongodb';
 import { RabbitMQModule } from '@app/rabbitmq';
-import { RedisModule } from '@app/redis';
+import { CacheConfigModule, RedisModule } from '@app/redis';
 import { Module } from '@nestjs/common';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtModule } from '@nestjs/jwt';
 import { ThrottlerModule } from '@nestjs/throttler';
+import { ThrottlerStorageRedisService } from '@nest-lab/throttler-storage-redis';
+import Redis from 'ioredis';
 import { JwtAuthGuard } from '../../../libs/guards/src/jwt-auth.guard';
 import { SseModule } from './sse/sse.module';
 import { AiController } from './controllers/ai.controller';
@@ -30,12 +32,23 @@ import { GatewayService } from './gateway.service';
     imports: [
         GuardsModule,
         DatabaseModule,
+        CacheConfigModule,
         RedisModule,
         RabbitMQModule,
         MongoDBModule,
         JwtModule.register({}),
         LoggingModule,
-        ThrottlerModule.forRoot([{ ttl: 60000, limit: 5 }]),
+        ThrottlerModule.forRoot({
+            throttlers: [{ ttl: 60000, limit: 5 }],
+            storage: new ThrottlerStorageRedisService(
+                new Redis({
+                    host: process.env.REDIS_HOST || 'redis',
+                    port: Number(process.env.REDIS_PORT) || 6379,
+                    password: process.env.REDIS_PASSWORD || undefined,
+                    db: Number(process.env.REDIS_DB) || 0,
+                }),
+            ),
+        }),
         SseModule,
     ],
     controllers: [
