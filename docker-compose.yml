@@ -42,6 +42,13 @@ services:
         extends:
             file: ./packages/backend/apps/billing/docker-compose.yml
             service: billing-service
+    ai-service:
+        extends:
+            file: ./packages/backend/apps/ai/docker-compose.yml
+            service: ai-service
+        depends_on:
+            mongodb:
+                condition: service_healthy
 
     # ===================================
     # 🌱 Database Seed (run once, then stops)
@@ -184,6 +191,7 @@ services:
         depends_on:
             - frontend
             - gateway-service
+            - ai-service
             - rabbitmq
         healthcheck:
             test: ['CMD', 'nginx', '-t']

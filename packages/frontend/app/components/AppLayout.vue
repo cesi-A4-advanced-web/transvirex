@@ -98,12 +98,46 @@
                     <span class="font-semibold text-foreground">{{ pageTitle }}</span>
                 </div>
                 <div class="flex items-center gap-3">
-                    <Button variant="ghost" size="icon" class="relative">
-                        <Bell class="w-5 h-5" />
-                        <span
-                            class="absolute top-1.5 right-1.5 w-2 h-2 bg-destructive rounded-full ring-2 ring-background"
-                        />
-                    </Button>
+                    <div class="relative">
+                        <Button variant="ghost" size="icon" class="relative" @click="notifOpen = !notifOpen">
+                            <Bell class="w-5 h-5" />
+                            <span
+                                v-if="unreadCount > 0"
+                                class="absolute top-1 right-1 min-w-[16px] h-4 px-0.5 bg-destructive text-white text-[10px] font-bold rounded-full flex items-center justify-center ring-2 ring-background"
+                            >{{ unreadCount > 9 ? '9+' : unreadCount }}</span>
+                            <span v-else class="absolute top-1.5 right-1.5 w-2 h-2 bg-destructive rounded-full ring-2 ring-background" />
+                        </Button>
+                        <div
+                            v-if="notifOpen"
+                            class="absolute right-0 top-10 w-80 bg-background border border-border rounded-xl shadow-lg z-50 overflow-hidden"
+                        >
+                            <div class="flex items-center justify-between px-4 py-3 border-b border-border">
+                                <span class="font-semibold text-sm">Incidents signalés</span>
+                                <button v-if="unreadCount > 0" @click="markAllRead" class="text-xs text-primary hover:underline">Tout marquer lu</button>
+                            </div>
+                            <div class="max-h-72 overflow-y-auto divide-y divide-border">
+                                <div v-if="notifications.length === 0" class="px-4 py-6 text-center text-sm text-muted-foreground">Aucun incident signalé</div>
+                                <div
+                                    v-for="n in notifications" :key="n.id"
+                                    @click="markRead(n.id)"
+                                    class="px-4 py-3 cursor-pointer hover:bg-muted/50 transition-colors"
+                                    :class="!n.read ? 'bg-orange-50/60' : ''"
+                                >
+                                    <div class="flex items-start gap-2">
+                                        <span class="flex-shrink-0 text-[10px] font-bold px-1.5 py-0.5 rounded uppercase"
+                                            :class="n.severity === 'CRITICAL' ? 'bg-red-100 text-red-700' : 'bg-orange-100 text-orange-700'">
+                                            {{ n.severity }}
+                                        </span>
+                                        <div class="flex-1 min-w-0">
+                                            <p class="text-xs text-foreground leading-snug">{{ n.summary }}</p>
+                                            <p v-if="n.delivery_id" class="text-[10px] text-muted-foreground mt-0.5 font-mono">Livraison {{ n.delivery_id.slice(0, 8) }}</p>
+                                        </div>
+                                        <span v-if="!n.read" class="w-2 h-2 rounded-full bg-orange-400 flex-shrink-0 mt-1" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                     <Separator orientation="vertical" class="h-6" />
                     <div class="flex items-center gap-2">
                         <div
@@ -139,6 +173,7 @@ import { Separator } from '@/components/ui/separator';
 import {
     BarChart3,
     Bell,
+    Bot,
     Building2,
     Car,
     ChevronLeft,
@@ -155,6 +190,7 @@ import {
     Users,
 } from '@lucide/vue';
 import { $fetch } from 'ofetch';
+import { useNotifications } from '@/composables/useNotifications';
 
 /** Possible user roles for navigation and display. */
 type Role = 'admin' | 'dispatcher' | 'driver' | 'business_manager';
@@ -162,8 +198,15 @@ type Role = 'admin' | 'dispatcher' | 'driver' | 'business_manager';
 const route = useRoute();
 /** Whether the sidebar is collapsed. */
 const collapsed = ref(false);
+const notifOpen = ref(false);
 const accessToken = useCookie('access_token');
 const refreshToken = useCookie('refresh_token');
+
+const { notifications, unreadCount, markRead, markAllRead, startPolling } = useNotifications();
+onMounted(() => {
+    if (!accessToken.value) return navigateTo('/');
+    if (userRole.value === 'dispatcher') startPolling();
+});
 
 /**
  * Parse a JWT token and return its decoded payload.
@@ -406,6 +449,16 @@ const visibleGroups = computed(() => {
                 ],
             },
             {
+                label: 'Assistant',
+                items: [
+                    {
+                        label: 'Assistant IA',
+                        href: `${base}/assistant`,
+                        icon: Bot,
+                    },
+                ],
+            },
+            {
                 label: 'Mon profil',
                 items: [
                     {
@@ -436,10 +489,6 @@ const pageTitle = computed(() => {
         if (match) return match.label;
     }
     return 'Dashboard';
-});
-
-onMounted(() => {
-    if (!accessToken.value) navigateTo('/');
 });
 
 /**

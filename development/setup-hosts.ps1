@@ -9,7 +9,8 @@ $entries = @(
     "127.0.0.1   www.transvirex.local",
     "127.0.0.1   rabbitmq.transvirex.local",
     "127.0.0.1   pgadmin.transvirex.local",
-    "127.0.0.1   redis.transvirex.local"
+    "127.0.0.1   redis.transvirex.local",
+    "127.0.0.1   ai.transvirex.local"
 )
 
 if (-not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
@@ -45,3 +46,4 @@ Write-Host "  http://transvirex.local"
 Write-Host "  http://pgadmin.transvirex.local"
 Write-Host "  http://rabbitmq.transvirex.local"
 Write-Host "  http://redis.transvirex.local"
+Write-Host "  http://ai.transvirex.local"

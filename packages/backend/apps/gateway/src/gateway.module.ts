@@ -9,6 +9,7 @@ import { APP_GUARD } from '@nestjs/core';
 import { JwtModule } from '@nestjs/jwt';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { JwtAuthGuard } from '../../../libs/guards/src/jwt-auth.guard';
+import { AiController } from './controllers/ai.controller';
 import { AuthController } from './controllers/auth.controller';
 import { BillingController } from './controllers/billing.controller';
 import { CustomersController } from './controllers/customers.controller';
@@ -39,9 +40,7 @@ import { GatewayService } from './gateway.service';
         GatewayController,
         HealthController,
         AuthController,
-        BillingController,
-        CustomersController,
-        DeliveriesController,
+        AiController,
         DebugController,
         DeliveriesController,
         HubsController,
