@@ -60,6 +60,20 @@ export class DeliveriesController {
     }
 
     @ApiTags('Deliveries')
+    @Get('drivers/:id/deliveries')
+    @ApiBearerAuth('JWT-auth')
+    @Roles('admin', 'dispatcher', 'business_manager', 'driver')
+    @ApiOperation({
+        summary: 'List a driver active deliveries',
+        description: 'Returns the active deliveries assigned to a driver, identified by their User id.',
+    })
+    @ApiParam({ name: 'id', description: 'Driver User UUID' })
+    @ApiResponse({ status: 200, description: 'Driver deliveries: { deliveries }' })
+    getDriverDeliveries(@Param('id') id: string, @Req() req: Request) {
+        return this.gatewayService.getDriverDeliveries(id, (req as any).user);
+    }
+
+    @ApiTags('Deliveries')
     @Get('deliveries/:id')
     @ApiBearerAuth('JWT-auth')
     @Roles('admin', 'dispatcher', 'business_manager', 'driver')

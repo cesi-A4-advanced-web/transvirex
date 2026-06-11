@@ -270,6 +270,11 @@ export class GatewayService {
         return this.proxyGet(`${this.serviceUrls.delivery}/drivers/${id}/position`, user);
     }
 
+    /** List the active deliveries of a driver (by User id) via the delivery service. */
+    getDriverDeliveries(id: string, user?: { sub: string; email: string; role: string }) {
+        return this.proxyGet(`${this.serviceUrls.delivery}/drivers/${id}/deliveries`, user);
+    }
+
     /** Update delivery status via the delivery service, then notify the driver when changed by someone else. */
     async updateDeliveryStatus(id: string, body: unknown, user?: { sub: string; email: string; role: string }) {
         const result = await this.proxyPatch(`${this.serviceUrls.delivery}/deliveries/${id}/status`, body, user);
