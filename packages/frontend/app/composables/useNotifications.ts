@@ -2,11 +2,13 @@ import { $fetch } from 'ofetch';
 
 export interface AiNotification {
     id: string;
-    incident_id: string;
-    driver_id: string;
+    incident_id?: string;
+    driver_id?: string;
     delivery_id: string;
     summary: string;
-    severity: 'CRITICAL' | 'HIGH';
+    severity: 'CRITICAL' | 'HIGH' | 'INFO';
+    /** 'incident' (dispatcher) or 'assignment' | 'status' (driver). */
+    type?: string;
     read: boolean;
     created_at: string;
 }
@@ -20,6 +22,7 @@ export function useNotifications() {
         try {
             const data = await $fetch<{ notifications: AiNotification[]; unread_count: number }>(
                 '/api/ai/notifications',
+                { credentials: 'include' },
             );
             notifications.value = data.notifications;
             unreadCount.value = data.unread_count;
@@ -29,7 +32,7 @@ export function useNotifications() {
     }
 
     async function markRead(id: string) {
-        await $fetch(`/api/ai/notifications/${id}/read`, { method: 'POST' });
+        await $fetch(`/api/ai/notifications/${id}/read`, { method: 'POST', credentials: 'include' });
         const n = notifications.value.find((n) => n.id === id);
         if (n) {
             n.read = true;
