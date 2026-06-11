@@ -225,7 +225,7 @@ function testError() {
                                                 <TableHead>Message</TableHead>
                                             </TableRow>
                                         </TableHeader>
-                                        <TableBody>
+                                        <TableBody class="overflow-x-hidden">
                                             <template v-for="log in logs.backendLogs" :key="log._id">
                                                 <TableRow
                                                     class="cursor-pointer"
@@ -477,13 +477,13 @@ function testError() {
                                                 <TableRow v-if="expandedRows.has(log._id)" class="bg-gray-50">
                                                     <TableCell></TableCell>
                                                     <TableCell colspan="3" class="p-4">
-                                                        <div v-if="log.metadata?.trace" class="space-y-1">
+                                                        <div v-if="log.metadata?.stack" class="space-y-1 mb-4">
                                                             <p class="text-xs font-semibold text-gray-500 uppercase">
                                                                 Stack Trace
                                                             </p>
                                                             <pre
                                                                 class="text-xs text-red-600 bg-red-50 border border-red-200 rounded p-3 overflow-auto max-h-40"
-                                                                >{{ log.metadata.trace }}</pre
+                                                                >{{ log.metadata.stack }}</pre
                                                             >
                                                         </div>
                                                         <div v-if="hasMetadata(log)" class="space-y-1">
