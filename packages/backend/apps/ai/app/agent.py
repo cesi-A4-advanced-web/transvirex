@@ -30,17 +30,41 @@ Contexte de la session :
 Utilise toujours ce driver_id dans les appels d'outils."""
 
 
-async def run_agent(text: str, driver_id: str, delivery_id: str | None = None) -> dict:
+async def run_agent(
+    text: str,
+    driver_id: str,
+    delivery_id: str | None = None,
+    history: list[dict] | None = None,
+) -> dict:
     try:
         async with mcp_session() as session:
-            return await _run_loop(session, text, driver_id, delivery_id)
+            return await _run_loop(session, text, driver_id, delivery_id, history)
     except Exception:
         logger.exception("Agent run failed — falling back to plain chat")
         answer = await rag_chat(text)
         return {"type": "chat", "answer": answer, "incident": None}
 
 
-async def _run_loop(session, text: str, driver_id: str, delivery_id: str | None) -> dict:
+def _sanitize_history(history: list[dict] | None) -> list[dict]:
+    """Keep only the last user/assistant turns with non-empty text content."""
+    if not history:
+        return []
+    cleaned: list[dict] = []
+    for item in history[-10:]:
+        role = item.get("role")
+        content = item.get("content")
+        if role in ("user", "assistant") and isinstance(content, str) and content.strip():
+            cleaned.append({"role": role, "content": content})
+    return cleaned
+
+
+async def _run_loop(
+    session,
+    text: str,
+    driver_id: str,
+    delivery_id: str | None,
+    history: list[dict] | None = None,
+) -> dict:
     tools_result = await session.list_tools()
     tools = to_openai_tools(tools_result.tools)
 
@@ -49,6 +73,7 @@ async def _run_loop(session, text: str, driver_id: str, delivery_id: str | None)
     )
     messages: list[dict] = [
         {"role": "system", "content": system},
+        *_sanitize_history(history),
         {"role": "user", "content": text},
     ]
 
