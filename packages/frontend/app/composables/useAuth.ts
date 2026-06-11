@@ -1,3 +1,4 @@
+import { useCookie } from '#app';
 import { $fetch } from 'ofetch';
 
 /** Authenticated user information returned by the auth API. */
@@ -84,8 +85,13 @@ export const useAuth = () => {
         await $fetch('/api/auth/logout', {
             method: 'POST',
             credentials: 'include',
-        });
+        }).catch(() => {});
+
+        useCookie('access_token').value = null;
+        useCookie('refresh_token').value = null;
+
         user.value = null;
+
         await navigateTo('/');
     }
 

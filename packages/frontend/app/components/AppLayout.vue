@@ -75,7 +75,7 @@
                 </div>
                 <Button
                     variant="ghost"
-                    @click="logout"
+                    @click="handleLogout"
                     class="w-full text-primary-light hover:text-white hover:bg-white/10"
                     :class="collapsed ? 'justify-center px-0' : 'justify-start'"
                 >
@@ -104,8 +104,12 @@
                             <span
                                 v-if="unreadCount > 0"
                                 class="absolute top-1 right-1 min-w-[16px] h-4 px-0.5 bg-destructive text-white text-[10px] font-bold rounded-full flex items-center justify-center ring-2 ring-background"
-                            >{{ unreadCount > 9 ? '9+' : unreadCount }}</span>
-                            <span v-else class="absolute top-1.5 right-1.5 w-2 h-2 bg-destructive rounded-full ring-2 ring-background" />
+                                >{{ unreadCount > 9 ? '9+' : unreadCount }}</span
+                            >
+                            <span
+                                v-else
+                                class="absolute top-1.5 right-1.5 w-2 h-2 bg-destructive rounded-full ring-2 ring-background"
+                            />
                         </Button>
                         <div
                             v-if="notifOpen"
@@ -113,26 +117,52 @@
                         >
                             <div class="flex items-center justify-between px-4 py-3 border-b border-border">
                                 <span class="font-semibold text-sm">Incidents signalés</span>
-                                <button v-if="unreadCount > 0" @click="markAllRead" class="text-xs text-primary hover:underline">Tout marquer lu</button>
+                                <button
+                                    v-if="unreadCount > 0"
+                                    @click="markAllRead"
+                                    class="text-xs text-primary hover:underline"
+                                >
+                                    Tout marquer lu
+                                </button>
                             </div>
                             <div class="max-h-72 overflow-y-auto divide-y divide-border">
-                                <div v-if="notifications.length === 0" class="px-4 py-6 text-center text-sm text-muted-foreground">Aucun incident signalé</div>
                                 <div
-                                    v-for="n in notifications" :key="n.id"
+                                    v-if="notifications.length === 0"
+                                    class="px-4 py-6 text-center text-sm text-muted-foreground"
+                                >
+                                    Aucun incident signalé
+                                </div>
+                                <div
+                                    v-for="n in notifications"
+                                    :key="n.id"
                                     @click="markRead(n.id)"
                                     class="px-4 py-3 cursor-pointer hover:bg-muted/50 transition-colors"
                                     :class="!n.read ? 'bg-orange-50/60' : ''"
                                 >
                                     <div class="flex items-start gap-2">
-                                        <span class="flex-shrink-0 text-[10px] font-bold px-1.5 py-0.5 rounded uppercase"
-                                            :class="n.severity === 'CRITICAL' ? 'bg-red-100 text-red-700' : 'bg-orange-100 text-orange-700'">
+                                        <span
+                                            class="flex-shrink-0 text-[10px] font-bold px-1.5 py-0.5 rounded uppercase"
+                                            :class="
+                                                n.severity === 'CRITICAL'
+                                                    ? 'bg-red-100 text-red-700'
+                                                    : 'bg-orange-100 text-orange-700'
+                                            "
+                                        >
                                             {{ n.severity }}
                                         </span>
                                         <div class="flex-1 min-w-0">
                                             <p class="text-xs text-foreground leading-snug">{{ n.summary }}</p>
-                                            <p v-if="n.delivery_id" class="text-[10px] text-muted-foreground mt-0.5 font-mono">Livraison {{ n.delivery_id.slice(0, 8) }}</p>
+                                            <p
+                                                v-if="n.delivery_id"
+                                                class="text-[10px] text-muted-foreground mt-0.5 font-mono"
+                                            >
+                                                Livraison {{ n.delivery_id.slice(0, 8) }}
+                                            </p>
                                         </div>
-                                        <span v-if="!n.read" class="w-2 h-2 rounded-full bg-orange-400 flex-shrink-0 mt-1" />
+                                        <span
+                                            v-if="!n.read"
+                                            class="w-2 h-2 rounded-full bg-orange-400 flex-shrink-0 mt-1"
+                                        />
                                     </div>
                                 </div>
                             </div>
@@ -170,6 +200,7 @@ import { navigateTo, useCookie, useRoute } from '#app';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
+import { useNotifications } from '@/composables/useNotifications';
 import {
     BarChart3,
     Bell,
@@ -189,8 +220,6 @@ import {
     UserCog,
     Users,
 } from '@lucide/vue';
-import { $fetch } from 'ofetch';
-import { useNotifications } from '@/composables/useNotifications';
 
 /** Possible user roles for navigation and display. */
 type Role = 'admin' | 'dispatcher' | 'driver' | 'business_manager';
@@ -213,7 +242,8 @@ onMounted(() => {
  */
 function parseJwt(token: string): Record<string, unknown> | null {
     try {
-        const b64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+        const b64 = token.split('.')[1]?.replace(/-/g, '+').replace(/_/g, '/');
+        if (!b64) return null;
         return JSON.parse(atob(b64));
     } catch {
         return null;
@@ -494,19 +524,11 @@ const pageTitle = computed(() => {
 /**
  * Log the user out, clear auth cookies, and redirect to the home page.
  */
-async function logout() {
-    try {
-        if (refreshToken.value) {
-            await $fetch('/api/auth/logout', {
-                method: 'POST',
-                body: { refresh_token: refreshToken.value },
-            });
-        }
-    } finally {
-        accessToken.value = null;
-        refreshToken.value = null;
-        navigateTo('/');
-    }
+const { logout } = useAuth();
+
+async function handleLogout() {
+    await logout();
+    await navigateTo('/');
 }
 </script>
 

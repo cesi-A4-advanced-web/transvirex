@@ -32,6 +32,14 @@ export class JwtAuthGuard implements CanActivate {
         const token = request.cookies?.access_token as string | undefined;
 
         if (!token) {
+            // Remove access token cookie if it exists but is empty or invalid
+            if (request.cookies?.access_token) {
+                request.res?.clearCookie('access_token', {
+                    httpOnly: true,
+                    secure: process.env.NODE_ENV === 'production',
+                    sameSite: 'strict',
+                });
+            }
             throw new UnauthorizedException('Access token manquant');
         }
 
@@ -41,6 +49,14 @@ export class JwtAuthGuard implements CanActivate {
                 secret: process.env.JWT_SECRET,
             });
         } catch {
+            // Remove access token cookie if it exists but is empty or invalid
+            if (request.cookies?.access_token) {
+                request.res?.clearCookie('access_token', {
+                    httpOnly: true,
+                    secure: process.env.NODE_ENV === 'production',
+                    sameSite: 'strict',
+                });
+            }
             throw new UnauthorizedException('Access token invalide ou expiré');
         }
 
@@ -54,6 +70,14 @@ export class JwtAuthGuard implements CanActivate {
         if (requiredRoles && requiredRoles.length > 0) {
             const isAdmin = payload.role === 'admin';
             if (!isAdmin && !requiredRoles.includes(payload.role)) {
+                // Remove access token cookie if user is authenticated but does not have required role
+                if (request.cookies?.access_token) {
+                    request.res?.clearCookie('access_token', {
+                        httpOnly: true,
+                        secure: process.env.NODE_ENV === 'production',
+                        sameSite: 'strict',
+                    });
+                }
                 throw new ForbiddenException(`Accès refusé — rôle requis : ${requiredRoles.join(' ou ')}`);
             }
         }
