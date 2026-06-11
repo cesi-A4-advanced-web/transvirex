@@ -34,10 +34,17 @@ export default defineNuxtRouteMiddleware(async (to) => {
     // uniquement côté client.
     if (import.meta.server) return;
 
-    const { user, fetchMe } = useAuth();
+    const { user, fetchMe, isLoggingOut } = useAuth();
 
-    // Tenter une reconnexion silencieuse si pas de session en mémoire
-    if (!user.value) await fetchMe();
+    // Pendant une déconnexion en cours, on ne tente PAS de reconnexion silencieuse
+    // (le refresh_token httpOnly est peut-être encore présent et ré-authentifierait
+    // l'utilisateur alors qu'il veut se déconnecter).
+    if (!user.value && !isLoggingOut.value) await fetchMe();
+
+    // Nettoyer le flag de déconnexion une fois arrivé sur la page de login
+    if (to.path === '/' && isLoggingOut.value) {
+        isLoggingOut.value = false;
+    }
 
     // Page de login : rediriger vers le dashboard si déjà connecté
     if (to.path === '/') {

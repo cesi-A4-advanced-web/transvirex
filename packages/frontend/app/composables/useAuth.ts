@@ -22,6 +22,9 @@ export const useAuth = () => {
     /** Reactive current user state, or null if not authenticated. */
     const user = useState<AuthUser | null>('auth:user', () => null);
 
+    /** Flag set during logout to prevent the middleware from re-authenticating. */
+    const isLoggingOut = useState<boolean>('auth:loggingOut', () => false);
+
     // On SSR the browser cookies are not automatically forwarded — capture them
     // synchronously here (while the Nuxt request context is still available) so
     // they can be passed to every outgoing fetch.
@@ -79,9 +82,11 @@ export const useAuth = () => {
 
     /**
      * Log the user out and clear the session.
-     * Redirects to the home page after logout.
+     * The caller is responsible for navigating to the login page.
      */
     async function logout() {
+        isLoggingOut.value = true;
+
         await $fetch('/api/auth/logout', {
             method: 'POST',
             credentials: 'include',
@@ -91,8 +96,6 @@ export const useAuth = () => {
         useCookie('refresh_token').value = null;
 
         user.value = null;
-
-        await navigateTo('/');
     }
 
     /** Whether a user is currently authenticated. */
@@ -100,5 +103,5 @@ export const useAuth = () => {
     /** Current user role, or null if not authenticated. */
     const role = computed(() => user.value?.role ?? null);
 
-    return { user, isAuthenticated, role, login, logout, fetchMe };
+    return { user, isAuthenticated, role, login, logout, fetchMe, isLoggingOut };
 };

@@ -1,20 +1,50 @@
 import { $fetch } from 'ofetch';
+import { navigateTo } from '#app';
+
+let _authRetryInProgress = false;
+
+/**
+ * Wrapper around $fetch that intercepts 401 responses and attempts a silent
+ * token refresh before failing. If the refresh also fails, the user is
+ * automatically logged out and redirected to the login page.
+ */
+async function authFetch<T>(url: string, opts?: Record<string, any>): Promise<T> {
+    try {
+        return await $fetch<T>(url, { ...opts, credentials: 'include' });
+    } catch (err: any) {
+        if ((err?.status === 401 || err?.statusCode === 401) && !_authRetryInProgress) {
+            _authRetryInProgress = true;
+            try {
+                const { fetchMe, logout } = useAuth();
+                const ok = await fetchMe();
+                if (ok) {
+                    return $fetch<T>(url, { ...opts, credentials: 'include' });
+                }
+                await logout();
+                await navigateTo('/');
+            } finally {
+                _authRetryInProgress = false;
+            }
+        }
+        throw err;
+    }
+}
 
 export function useApi() {
     async function get<T>(url: string, params?: Record<string, any>): Promise<T> {
-        return $fetch<T>(`/api${url}`, { params, credentials: 'include' });
+        return authFetch<T>(`/api${url}`, { params });
     }
 
     async function post<T>(url: string, body?: any): Promise<T> {
-        return $fetch<T>(`/api${url}`, { method: 'POST', body, credentials: 'include' });
+        return authFetch<T>(`/api${url}`, { method: 'POST', body });
     }
 
     async function patch<T>(url: string, body?: any): Promise<T> {
-        return $fetch<T>(`/api${url}`, { method: 'PATCH', body, credentials: 'include' });
+        return authFetch<T>(`/api${url}`, { method: 'PATCH', body });
     }
 
     async function del<T>(url: string): Promise<T> {
-        return $fetch<T>(`/api${url}`, { method: 'DELETE', credentials: 'include' });
+        return authFetch<T>(`/api${url}`, { method: 'DELETE' });
     }
 
     return { get, post, patch, del };
