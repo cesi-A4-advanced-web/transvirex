@@ -6,10 +6,21 @@
             :class="collapsed ? 'w-16' : 'w-64'"
         >
             <div class="flex items-center justify-between px-4 py-5 border-b border-white/10">
-                <div v-if="!collapsed">
+                <!-- <div v-if="!collapsed">
                     <p class="text-xl font-bold text-white leading-none whitespace-nowrap">Transvirex</p>
                     <p class="text-xs text-primary-light mt-0.5 whitespace-nowrap">Moving Intelligence</p>
-                </div>
+                </div> -->
+                <NuxtImg
+                    src="/logo-color.svg"
+                    alt="Transvirex Logo"
+                    width="150"
+                    :class="[
+                        {
+                            'w-0': collapsed,
+                        },
+                        'block h-20',
+                    ]"
+                />
                 <Button
                     variant="ghost"
                     size="icon-sm"
@@ -117,10 +128,21 @@
                         >
                             <div class="flex items-center justify-between px-4 py-3 border-b border-border">
                                 <span class="font-semibold text-sm">Notifications</span>
-                                <button v-if="unreadCount > 0" @click="markAllRead" class="text-xs text-primary hover:underline">Tout marquer lu</button>
+                                <button
+                                    v-if="unreadCount > 0"
+                                    @click="markAllRead"
+                                    class="text-xs text-primary hover:underline"
+                                >
+                                    Tout marquer lu
+                                </button>
                             </div>
                             <div class="max-h-72 overflow-y-auto divide-y divide-border">
-                                <div v-if="notifications.length === 0" class="px-4 py-6 text-center text-sm text-muted-foreground">Aucune notification</div>
+                                <div
+                                    v-if="notifications.length === 0"
+                                    class="px-4 py-6 text-center text-sm text-muted-foreground"
+                                >
+                                    Aucune notification
+                                </div>
                                 <div
                                     v-for="n in notifications"
                                     :key="n.id"
