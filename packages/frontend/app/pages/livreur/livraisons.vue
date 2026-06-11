@@ -8,7 +8,7 @@
                 </div>
                 <Button
                     class="bg-primary-dark hover:bg-primary text-white gap-2 shrink-0"
-                    :disabled="generatingPdf"
+                    :disabled="generatingPdf || deliveries.length === 0"
                     @click="downloadMission"
                 >
                     <Loader2 v-if="generatingPdf" class="w-4 h-4 animate-spin" />
@@ -32,43 +32,50 @@
                 </Button>
             </div>
 
-            <Card>
-                <CardContent class="p-0">
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>Référence</TableHead>
-                                <TableHead>Client</TableHead>
-                                <TableHead>Destination</TableHead>
-                                <TableHead>Colis</TableHead>
-                                <TableHead>Statut</TableHead>
-                                <TableHead>Heure</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            <TableRow v-for="d in filtered" :key="d.ref">
-                                <TableCell class="font-mono text-xs text-muted-foreground">{{ d.ref }}</TableCell>
-                                <TableCell class="font-medium">{{ d.client }}</TableCell>
-                                <TableCell>{{ d.destination }}</TableCell>
-                                <TableCell class="text-muted-foreground">{{ d.parcels }} colis</TableCell>
-                                <TableCell>
-                                    <Badge :class="statusClass(d.status)">
-                                        <span
-                                            v-if="d.status === 'En cours'"
-                                            class="w-1.5 h-1.5 rounded-full bg-blue-500 mr-1.5 animate-pulse inline-block"
-                                        ></span>
-                                        {{ d.status }}
-                                    </Badge>
-                                </TableCell>
-                                <TableCell class="text-muted-foreground font-mono text-xs">{{ d.time }}</TableCell>
-                            </TableRow>
-                        </TableBody>
-                    </Table>
-                    <div class="px-4 py-3 border-t text-xs text-muted-foreground">
-                        {{ filtered.length }} livraison(s)
-                    </div>
-                </CardContent>
-            </Card>
+            <div v-if="loading" class="flex items-center justify-center py-12">
+                <Loader2 class="w-6 h-6 animate-spin text-muted-foreground" />
+            </div>
+
+            <template v-else>
+                <Card>
+                    <CardContent class="p-0">
+                        <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead>Référence</TableHead>
+                                    <TableHead>Client</TableHead>
+                                    <TableHead>Destination</TableHead>
+                                    <TableHead>Statut</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                <TableRow v-for="d in filtered" :key="d.id">
+                                    <TableCell class="font-mono text-xs text-muted-foreground">{{ d.reference }}</TableCell>
+                                    <TableCell class="font-medium">{{ d.client }}</TableCell>
+                                    <TableCell>{{ d.destination }}</TableCell>
+                                    <TableCell>
+                                        <Badge :class="statusClass(d.status)">
+                                            <span
+                                                v-if="d.status === 'delivering'"
+                                                class="w-1.5 h-1.5 rounded-full bg-blue-500 mr-1.5 animate-pulse inline-block"
+                                            ></span>
+                                            {{ d.statusLabel }}
+                                        </Badge>
+                                    </TableCell>
+                                </TableRow>
+                                <TableRow v-if="filtered.length === 0">
+                                    <TableCell colspan="4" class="text-center text-muted-foreground py-6">
+                                        Aucune livraison trouvée
+                                    </TableCell>
+                                </TableRow>
+                            </TableBody>
+                        </Table>
+                        <div class="px-4 py-3 border-t text-xs text-muted-foreground">
+                            {{ filtered.length }} livraison(s)
+                        </div>
+                    </CardContent>
+                </Card>
+            </template>
         </div>
     </AppLayout>
 </template>
@@ -81,11 +88,13 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { exportOrdreMissionPdf, type MissionData } from '@/composables/usePdfExport';
 import { FileDown, Loader2 } from '@lucide/vue';
+import { useApi, type ApiDelivery } from '@/composables/useApi';
 
 definePageMeta({ layout: false });
 useHead({ title: 'Mes livraisons — Livreur' });
 
-/** Decode a JWT payload without validation. */
+const { get } = useApi();
+
 function parseJwt(token: string) {
     try {
         return JSON.parse(atob(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
@@ -94,21 +103,21 @@ function parseJwt(token: string) {
     }
 }
 const accessToken = useCookie('access_token');
-/** Decoded JWT payload from the access token. */
 const payload = computed(() => (accessToken.value ? parseJwt(accessToken.value) : null));
-/** Full driver name extracted from the JWT. */
+const userId = computed(() => (payload.value?.sub as string) || '');
 const driverName = computed(() => {
     const f = (payload.value?.firstname as string) ?? '';
     const l = (payload.value?.lastname as string) ?? '';
     return `${f} ${l}`.trim() || 'Pierre Martin';
 });
 
-/** Currently selected tab. */
+const loading = ref(true);
+const deliveries = ref<ApiDelivery[]>([]);
+const driverProfile = ref<{ reference: string; rating: number | null; vehicle: { type: string | null; license_plate: string | null } | null } | null>(null);
+
 const activeTab = ref('all');
-/** Whether the PDF generation is in progress. */
 const generatingPdf = ref(false);
 
-/** Tab definitions for filtering deliveries. */
 const tabs = [
     { label: 'Toutes', value: 'all' },
     { label: 'En cours', value: 'ongoing' },
@@ -116,127 +125,105 @@ const tabs = [
     { label: 'Planifiées', value: 'planned' },
 ];
 
-/** Static list of deliveries for the demo table. */
-const deliveries = [
-    {
-        ref: '#LIV-0088',
-        client: 'Société Durand',
-        destination: 'Paris 8e',
-        parcels: 1,
-        status: 'Livré',
-        time: '09:15',
-        address: '12 Rue de Rivoli',
-        city: 'Paris 1er',
-    },
-    {
-        ref: '#LIV-0082',
-        client: 'SARL Martin',
-        destination: 'Lyon Part-Dieu',
-        parcels: 3,
-        status: 'Livré',
-        time: '08:00',
-        address: '45 Av. Daumesnil',
-        city: 'Paris 12e',
-    },
-    {
-        ref: '#LIV-0095',
-        client: 'Logistics Plus',
-        destination: 'Lille Centre',
-        parcels: 2,
-        status: 'En cours',
-        time: '10:30',
-        address: '23 Rue du Temple',
-        city: 'Paris 3e',
-    },
-    {
-        ref: '#LIV-0100',
-        client: 'Express Cargo',
-        destination: 'Bordeaux Gare',
-        parcels: 1,
-        status: 'Planifié',
-        time: '14:00',
-        address: '67 Av. Parmentier',
-        city: 'Paris 11e',
-    },
-    {
-        ref: '#LIV-0101',
-        client: 'Nord Fret',
-        destination: 'Nantes Ouest',
-        parcels: 2,
-        status: 'Planifié',
-        time: '15:30',
-        address: '5 Rue Oberkampf',
-        city: 'Paris 11e',
-    },
-    {
-        ref: '#LIV-0079',
-        client: 'TGV Express',
-        destination: 'Marseille 13e',
-        parcels: 4,
-        status: 'Livré',
-        time: '07:00',
-        address: '33 Bd Voltaire',
-        city: 'Paris 11e',
-    },
-];
+async function fetchData() {
+    loading.value = true;
+    try {
+        const [delRes, profileRes] = await Promise.all([
+            get<{ data: ApiDelivery[]; total: number }>('/deliveries', { limit: 200 }),
+            userId.value ? get<typeof driverProfile.value>(`/users/${userId.value}/driver`).catch(() => null) : Promise.resolve(null),
+        ]);
+        deliveries.value = delRes.data;
+        driverProfile.value = profileRes;
+    } catch (e) {
+        console.error('Failed to load deliveries', e);
+    } finally {
+        loading.value = false;
+    }
+}
 
-/** Deliveries filtered by active tab. */
-const filtered = computed(() =>
-    deliveries.filter(
-        (d) =>
-            activeTab.value === 'all' ||
-            (activeTab.value === 'ongoing' && d.status === 'En cours') ||
-            (activeTab.value === 'done' && d.status === 'Livré') ||
-            (activeTab.value === 'planned' && d.status === 'Planifié'),
-    ),
+function statusLabel(status: string) {
+    const labels: Record<string, string> = {
+        planned: 'Planifiée',
+        delivering: 'En cours',
+        delivered: 'Livrée',
+        cancelled: 'Annulée',
+        blocked: 'Bloquée',
+        delayed: 'Retardée',
+    };
+    return labels[status] ?? status;
+}
+
+const mappedDeliveries = computed(() =>
+    deliveries.value.map((d) => ({
+        id: d.id,
+        reference: d.reference,
+        client: d.invoice?.customer?.customer_name ?? '—',
+        destination: d.invoice?.customer?.customer_name ?? '—',
+        status: d.status,
+        statusLabel: statusLabel(d.status),
+    }))
 );
 
-/** Generate and download the daily mission order PDF. */
+const filtered = computed(() =>
+    mappedDeliveries.value.filter((d) => {
+        if (activeTab.value === 'all') return true;
+        if (activeTab.value === 'ongoing') return d.status === 'delivering';
+        if (activeTab.value === 'done') return d.status === 'delivered';
+        if (activeTab.value === 'planned') return d.status === 'planned';
+        return true;
+    })
+);
+
 async function downloadMission() {
     generatingPdf.value = true;
-    const today = new Date().toLocaleDateString('fr-FR', {
-        weekday: 'long',
-        day: 'numeric',
-        month: 'long',
-        year: 'numeric',
-    });
-    const ref = `OM-${new Date().toISOString().slice(0, 10).replace(/-/g, '')}-001`;
-    const mission: MissionData = {
-        ref,
-        driverName: driverName.value,
-        driverId: 'DRV-001',
-        vehicle: 'Renault Master',
-        plate: 'AA-123-BB',
-        hub: 'Paris Centre',
-        date: today,
-        deliveries: deliveries.map((d, i) => ({
-            stop: i + 1,
-            ref: d.ref,
-            address: d.address,
-            city: d.city,
-            client: d.client,
-            time: d.time,
-            parcels: d.parcels,
-        })),
-    };
     try {
+        const today = new Date().toLocaleDateString('fr-FR', {
+            weekday: 'long',
+            day: 'numeric',
+            month: 'long',
+            year: 'numeric',
+        });
+        const ref = `OM-${new Date().toISOString().slice(0, 10).replace(/-/g, '')}-001`;
+        const hubName = deliveries.value[0]?.invoice?.hub?.name ?? 'Hub principal';
+        const vehicleType = driverProfile.value?.vehicle?.type ?? 'Véhicule';
+        const plate = driverProfile.value?.vehicle?.license_plate ?? '—';
+        const driverRef = driverProfile.value?.reference ?? '—';
+        const mission: MissionData = {
+            ref,
+            driverName: driverName.value,
+            driverId: driverRef,
+            vehicle: vehicleType,
+            plate,
+            hub: hubName,
+            date: today,
+            deliveries: deliveries.value.map((d, i) => ({
+                stop: i + 1,
+                ref: d.reference,
+                address: '',
+                city: '',
+                client: d.invoice?.customer?.customer_name ?? '—',
+                time: '',
+                parcels: 1,
+            })),
+        };
         await exportOrdreMissionPdf(mission);
     } finally {
         generatingPdf.value = false;
     }
 }
 
-/** Return Tailwind badge classes for a delivery status. */
 function statusClass(s: string) {
     return (
-        (
-            {
-                Livré: 'bg-green-100 text-green-700 border-green-100 hover:bg-green-100',
-                'En cours': 'bg-blue-100 text-blue-700 border-blue-100 hover:bg-blue-100',
-                Planifié: 'bg-muted text-muted-foreground border-border hover:bg-muted',
-            } as Record<string, string>
-        )[s] ?? ''
-    );
+        {
+            delivered: 'bg-green-100 text-green-700 border-green-100 hover:bg-green-100',
+            delivering: 'bg-blue-100 text-blue-700 border-blue-100 hover:bg-blue-100',
+            planned: 'bg-muted text-muted-foreground border-border hover:bg-muted',
+            cancelled: 'bg-gray-100 text-gray-500 border-gray-100 hover:bg-gray-100',
+            blocked: 'bg-red-100 text-red-700 border-red-100 hover:bg-red-100',
+            delayed: 'bg-orange-100 text-orange-700 border-orange-100 hover:bg-orange-100',
+        } as Record<string, string>
+    )[s] ?? '';
 }
-</script>
 
+onMounted(fetchData);
+</script>
