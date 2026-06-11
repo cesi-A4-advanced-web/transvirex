@@ -153,6 +153,12 @@ export class DeliveryController {
         return this.deliveryService.getDriverDashboard(userId, scope === 'all' ? 'all' : 'today');
     }
 
+    /** Build the driver's profile (personal info, hub, vehicle, stats), identified by their User id (JWT sub). */
+    @Get('drivers/:userId/profile')
+    getDriverProfile(@Param('userId') userId: string) {
+        return this.deliveryService.getDriverProfile(userId);
+    }
+
     /** Create a DeliveryEvent (incident / status update) on a delivery. */
     @Post('deliveries/:id/events')
     createDeliveryEvent(

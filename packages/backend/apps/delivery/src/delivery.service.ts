@@ -233,6 +233,58 @@ export class DeliveryService {
         };
     }
 
+    /**
+     * Build the driver's profile, identified by their **User id** (JWT `sub`):
+     * personal info + hub, assigned vehicle, and lifetime delivery stats.
+     * Read-only — stays within the shared PostgreSQL database (no RabbitMQ).
+     */
+    async getDriverProfile(userId: string) {
+        const user = await this.prisma.user.findUnique({
+            where: { id: userId },
+            select: {
+                firstname: true,
+                lastname: true,
+                email: true,
+                phone_number: true,
+                hub: { select: { name: true } },
+            },
+        });
+        if (!user) throw new NotFoundException('Utilisateur non trouvé');
+
+        const driver = await this.prisma.driver.findUnique({
+            where: { user_id: userId },
+            include: {
+                vehicle: { select: { reference: true, type: true, license_plate: true } },
+            },
+        });
+
+        let stats = { total: 0, delivered: 0, success_rate: 0 };
+        if (driver) {
+            const [total, delivered] = await Promise.all([
+                this.prisma.delivery.count({ where: { driver_id: driver.id } }),
+                this.prisma.delivery.count({ where: { driver_id: driver.id, status: 'delivered' } }),
+            ]);
+            stats = {
+                total,
+                delivered,
+                success_rate: total > 0 ? Math.round((delivered / total) * 1000) / 10 : 0,
+            };
+        }
+
+        return {
+            user: {
+                firstname: user.firstname,
+                lastname: user.lastname,
+                email: user.email,
+                phone_number: user.phone_number,
+            },
+            hub: { name: user.hub?.name ?? null },
+            driver: driver ? { reference: driver.reference, rating: driver.rating } : null,
+            vehicle: driver?.vehicle ?? null,
+            stats,
+        };
+    }
+
     /** Create a DeliveryEvent (incident, status update, note...) on a delivery. */
     async createDeliveryEvent(
         deliveryId: string,

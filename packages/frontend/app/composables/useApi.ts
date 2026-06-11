@@ -136,3 +136,16 @@ export interface ApiDriverDashboard {
     driver: { reference: string; rating: number | null } | null;
     deliveries: ApiDriverDashboardDelivery[];
 }
+
+export interface ApiDriverProfile {
+    user: {
+        firstname: string | null;
+        lastname: string | null;
+        email: string | null;
+        phone_number: string | null;
+    };
+    hub: { name: string | null };
+    driver: { reference: string; rating: number | null } | null;
+    vehicle: { reference: string; type: string | null; license_plate: string | null } | null;
+    stats: { total: number; delivered: number; success_rate: number };
+}

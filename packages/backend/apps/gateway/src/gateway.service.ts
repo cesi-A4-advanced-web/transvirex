@@ -355,6 +355,11 @@ export class GatewayService {
         );
     }
 
+    /** Get the authenticated driver's profile (info, vehicle, stats) via the delivery service. Scoped to the JWT sub. */
+    getMyDriverProfile(user?: { sub: string; email: string; role: string }) {
+        return this.proxyGet(`${this.serviceUrls.delivery}/drivers/${user?.sub}/profile`, user);
+    }
+
     /** Get a delivery by ID via the delivery service. */
     getDelivery(id: string, user?: { sub: string; email: string; role: string }) {
         return this.proxyGet(`${this.serviceUrls.delivery}/deliveries/${id}`, user);

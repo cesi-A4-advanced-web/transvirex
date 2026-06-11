@@ -75,6 +75,19 @@ export class DeliveriesController {
     }
 
     @ApiTags('Deliveries')
+    @Get('drivers/me/profile')
+    @ApiBearerAuth('JWT-auth')
+    @Roles('driver')
+    @ApiOperation({
+        summary: "Get the authenticated driver's profile",
+        description: "Returns the driver's personal info, hub, assigned vehicle and lifetime stats. Scoped to the caller via the JWT.",
+    })
+    @ApiResponse({ status: 200, description: 'Driver profile: { user, hub, driver, vehicle, stats }' })
+    getMyProfile(@Req() req: Request) {
+        return this.gatewayService.getMyDriverProfile((req as any).user);
+    }
+
+    @ApiTags('Deliveries')
     @Get('deliveries/:id')
     @ApiBearerAuth('JWT-auth')
     @Roles('admin', 'dispatcher', 'business_manager', 'driver')
