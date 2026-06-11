@@ -1,7 +1,7 @@
 <template>
     <AppLayout>
         <div class="space-y-4">
-            <div class="flex items-center justify-between gap-4">
+            <div class="flex items-start sm:items-center justify-between gap-4 flex-col sm:flex-row">
                 <div>
                     <h1 class="text-2xl font-bold tracking-tight">Mes livraisons</h1>
                     <p class="text-muted-foreground text-sm mt-1">Historique et suivi de vos missions</p>
@@ -54,7 +54,7 @@
 
             <template v-else>
                 <Card>
-                    <CardContent class="p-0">
+                    <CardContent class="p-0 overflow-x-auto">
                         <Table>
                             <TableHeader>
                                 <TableRow>

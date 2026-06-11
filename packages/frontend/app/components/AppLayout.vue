@@ -1,9 +1,20 @@
 <template>
     <div class="flex h-screen bg-muted overflow-hidden">
+        <!-- Mobile backdrop -->
+        <div
+            v-if="mobileSidebarOpen"
+            class="fixed inset-0 z-30 bg-black/40 backdrop-blur-sm lg:hidden"
+            @click="mobileSidebarOpen = false"
+        />
+
         <!-- Sidebar -->
         <aside
-            class="flex flex-col flex-shrink-0 bg-primary-dark shadow-xl transition-all duration-300"
-            :class="collapsed ? 'w-16' : 'w-64'"
+            class="flex flex-col flex-shrink-0 bg-primary-dark shadow-xl transition-all duration-300 z-40"
+            :class="[
+                collapsed ? 'w-16' : 'w-64',
+                'fixed inset-y-0 left-0 lg:static lg:inset-auto',
+                mobileSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0',
+            ]"
         >
             <div class="flex items-center justify-between px-4 py-5 border-b border-white/10">
                 <!-- <div v-if="!collapsed">
@@ -21,16 +32,26 @@
                         'block h-20',
                     ]"
                 />
-                <Button
-                    variant="ghost"
-                    size="icon-sm"
-                    @click="collapsed = !collapsed"
-                    class="text-primary-light hover:text-white hover:bg-white/10 flex-shrink-0"
-                    :class="collapsed ? 'mx-auto' : ''"
-                >
-                    <ChevronLeft v-if="!collapsed" class="w-4 h-4" />
-                    <Menu v-else class="w-4 h-4" />
-                </Button>
+                <div class="flex items-center gap-1">
+                    <Button
+                        variant="ghost"
+                        size="icon-sm"
+                        @click="mobileSidebarOpen = false"
+                        class="text-primary-light hover:text-white hover:bg-white/10 flex-shrink-0 lg:hidden"
+                    >
+                        <X class="w-4 h-4" />
+                    </Button>
+                    <Button
+                        variant="ghost"
+                        size="icon-sm"
+                        @click="collapsed = !collapsed"
+                        class="text-primary-light hover:text-white hover:bg-white/10 flex-shrink-0 max-lg:hidden"
+                        :class="collapsed ? 'mx-auto' : ''"
+                    >
+                        <ChevronLeft v-if="!collapsed" class="w-4 h-4" />
+                        <Menu v-else class="w-4 h-4" />
+                    </Button>
+                </div>
             </div>
 
             <ScrollArea class="flex-1 py-3 px-2">
@@ -46,6 +67,7 @@
                         v-for="item in group.items"
                         :key="item.href"
                         :to="item.href"
+                        @click="closeMobileSidebar"
                         class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors"
                         :class="[
                             isActive(item.href)
@@ -97,16 +119,24 @@
         </aside>
 
         <!-- Main -->
-        <div class="flex-1 flex flex-col overflow-hidden">
+        <div class="flex-1 flex flex-col overflow-hidden min-w-0">
             <header
-                class="h-14 bg-background border-b border-border flex items-center justify-between px-6 flex-shrink-0 z-10"
+                class="h-14 bg-background border-b border-border flex items-center justify-between px-4 md:px-6 flex-shrink-0 z-10"
             >
-                <div class="flex items-center gap-2 text-sm">
-                    <span class="text-muted-foreground font-medium">Transvirex</span>
-                    <ChevronRight class="w-3.5 h-3.5 text-muted-foreground/50" />
-                    <span class="text-muted-foreground capitalize">{{ roleLabel }}</span>
-                    <ChevronRight class="w-3.5 h-3.5 text-muted-foreground/50" />
-                    <span class="font-semibold text-foreground">{{ pageTitle }}</span>
+                <div class="flex items-center gap-2 text-sm min-w-0">
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        @click="mobileSidebarOpen = true"
+                        class="lg:hidden text-muted-foreground hover:text-foreground -ml-1"
+                    >
+                        <Menu class="w-5 h-5" />
+                    </Button>
+                    <span class="text-muted-foreground font-medium max-sm:hidden">Transvirex</span>
+                    <ChevronRight class="w-3.5 h-3.5 text-muted-foreground/50 max-sm:hidden" />
+                    <span class="text-muted-foreground capitalize max-sm:hidden">{{ roleLabel }}</span>
+                    <ChevronRight class="w-3.5 h-3.5 text-muted-foreground/50 max-sm:hidden" />
+                    <span class="font-semibold text-foreground truncate">{{ pageTitle }}</span>
                 </div>
                 <div class="flex items-center gap-3">
                     <div class="relative">
@@ -124,7 +154,7 @@
                         </Button>
                         <div
                             v-if="notifOpen"
-                            class="absolute right-0 top-10 w-80 bg-background border border-border rounded-xl shadow-lg z-50 overflow-hidden"
+                            class="fixed right-4 left-4 sm:absolute sm:left-auto top-14 sm:top-10 sm:w-80 bg-background border border-border rounded-xl shadow-lg z-50 overflow-hidden"
                         >
                             <div class="flex items-center justify-between px-4 py-3 border-b border-border">
                                 <span class="font-semibold text-sm">Notifications</span>
@@ -201,7 +231,7 @@
                 </div>
             </header>
 
-            <main class="flex-1 overflow-y-auto p-6">
+            <main class="flex-1 overflow-y-auto p-4 md:p-6">
                 <slot />
             </main>
         </div>
@@ -232,26 +262,30 @@ import {
     Truck,
     UserCog,
     Users,
+    X,
 } from '@lucide/vue';
 
 /** Possible user roles for navigation and display. */
 type Role = 'admin' | 'dispatcher' | 'driver' | 'business_manager';
 
 const route = useRoute();
-/** Whether the sidebar is collapsed. */
+/** Whether the sidebar is collapsed (desktop only). */
 const collapsed = ref(false);
+/** Whether the mobile sidebar drawer is open. */
+const mobileSidebarOpen = ref(false);
 const notifOpen = ref(false);
 const accessToken = useCookie('access_token');
 const refreshToken = useCookie('refresh_token');
 
 const { notifications, unreadCount, markRead, markAllRead, startPolling } = useNotifications();
 onMounted(() => {
-    // L'auth et la redirection sont gérées par le middleware global (qui peut
-    // rafraîchir silencieusement un access token expiré). On ne redirige pas ici
-    // sur l'absence du cookie access_token : le refresh_token httpOnly peut encore
-    // être valide, et rediriger ici provoquait des boucles déco/reco.
     if (userRole.value === 'dispatcher' || userRole.value === 'driver') startPolling();
 });
+
+/** Close the mobile sidebar drawer when navigating. */
+function closeMobileSidebar() {
+    mobileSidebarOpen.value = false;
+}
 
 /**
  * Parse a JWT token and return its decoded payload.
@@ -547,4 +581,3 @@ async function handleLogout() {
     await navigateTo('/');
 }
 </script>
-

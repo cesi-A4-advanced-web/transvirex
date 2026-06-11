@@ -63,7 +63,7 @@
 
                     <Card>
                         <CardHeader><CardTitle class="text-base">Performance par hub</CardTitle></CardHeader>
-                        <CardContent class="p-0">
+                        <CardContent class="p-0 overflow-x-auto">
                             <div v-if="hubPerf.length === 0" class="text-sm text-muted-foreground text-center py-4">
                                 Aucune donnée disponible
                             </div>

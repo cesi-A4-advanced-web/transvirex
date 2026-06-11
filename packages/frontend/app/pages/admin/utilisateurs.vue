@@ -38,7 +38,7 @@
             </div>
 
             <Card v-else>
-                <CardContent class="p-0">
+                <CardContent class="p-0 overflow-x-auto">
                     <Table>
                         <TableHeader>
                             <TableRow>

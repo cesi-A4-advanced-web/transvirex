@@ -28,7 +28,7 @@
                     <Card v-for="kpi in kpis" :key="kpi.label">
                         <CardHeader class="pb-2">
                             <CardDescription>{{ kpi.label }}</CardDescription>
-                            <CardTitle class="text-3xl">{{ kpi.value }}</CardTitle>
+                            <CardTitle class="text-2xl md:text-3xl">{{ kpi.value }}</CardTitle>
                         </CardHeader>
                         <CardContent>
                             <div
@@ -51,11 +51,11 @@
                         </CardHeader>
                         <CardContent>
                             <ClientOnly>
-                                <div class="h-64">
+                                <div class="h-48 md:h-64">
                                     <Bar :data="barData" :options="barOptions" />
                                 </div>
                                 <template #fallback>
-                                    <div class="h-64 bg-muted/30 rounded-lg animate-pulse" />
+                                    <div class="h-48 md:h-64 bg-muted/30 rounded-lg animate-pulse" />
                                 </template>
                             </ClientOnly>
                         </CardContent>
@@ -68,11 +68,11 @@
                         </CardHeader>
                         <CardContent class="flex flex-col items-center">
                             <ClientOnly>
-                                <div class="h-52 w-52">
+                                <div class="h-40 w-40 md:h-52 md:w-52">
                                     <Doughnut :data="doughnutData" :options="doughnutOptions" />
                                 </div>
                                 <template #fallback>
-                                    <div class="h-52 w-52 rounded-full bg-muted/30 animate-pulse" />
+                                    <div class="h-40 w-40 md:h-52 md:w-52 rounded-full bg-muted/30 animate-pulse" />
                                 </template>
                             </ClientOnly>
                             <div class="mt-4 grid grid-cols-2 gap-x-6 gap-y-1.5 text-xs w-full">
@@ -105,11 +105,11 @@
                         </CardHeader>
                         <CardContent>
                             <ClientOnly>
-                                <div class="h-56">
+                                <div class="h-40 md:h-56">
                                     <Line :data="lineData" :options="lineOptions" />
                                 </div>
                                 <template #fallback>
-                                    <div class="h-56 bg-muted/30 rounded-lg animate-pulse" />
+                                    <div class="h-40 md:h-56 bg-muted/30 rounded-lg animate-pulse" />
                                 </template>
                             </ClientOnly>
                         </CardContent>
@@ -122,11 +122,11 @@
                         </CardHeader>
                         <CardContent>
                             <ClientOnly>
-                                <div class="h-56">
+                                <div class="h-40 md:h-56">
                                     <Line :data="projectionData" :options="projectionOptions" />
                                 </div>
                                 <template #fallback>
-                                    <div class="h-56 bg-muted/30 rounded-lg animate-pulse" />
+                                    <div class="h-40 md:h-56 bg-muted/30 rounded-lg animate-pulse" />
                                 </template>
                             </ClientOnly>
                         </CardContent>
@@ -138,7 +138,7 @@
                         <CardTitle class="text-base">Livraisons récentes</CardTitle>
                         <NuxtLink to="/admin/livraisons" class="text-xs text-primary hover:underline">Voir tout →</NuxtLink>
                     </CardHeader>
-                    <CardContent class="p-0">
+                    <CardContent class="p-0 overflow-x-auto">
                         <Table>
                             <TableHeader>
                                 <TableRow>

@@ -1,6 +1,6 @@
 <template>
     <AppLayout>
-        <div class="flex flex-col h-[calc(100vh-3.5rem-3rem)] -mx-6 px-10">
+        <div class="flex flex-col h-[calc(100vh-5.5rem)] md:h-[calc(100vh-3.5rem-3rem)] -mx-4 px-4 md:-mx-6 md:px-10">
             <!-- Header -->
             <div class="mb-4 flex-shrink-0">
                 <h2 class="text-2xl font-bold tracking-tight">Assistant IA</h2>

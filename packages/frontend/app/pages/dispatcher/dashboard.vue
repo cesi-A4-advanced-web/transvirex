@@ -15,7 +15,7 @@
                     <Card v-for="kpi in kpis" :key="kpi.label">
                         <CardHeader class="pb-2">
                             <CardDescription>{{ kpi.label }}</CardDescription>
-                            <CardTitle class="text-3xl">{{ kpi.value }}</CardTitle>
+                            <CardTitle class="text-2xl md:text-3xl">{{ kpi.value }}</CardTitle>
                         </CardHeader>
                         <CardContent>
                             <p class="text-xs" :class="kpi.urgentColor ?? 'text-muted-foreground'">
@@ -47,7 +47,7 @@
                             <NuxtLink to="/dispatcher/livraisons" class="text-xs text-primary hover-underline"
                                 >Voir tout →</NuxtLink>
                         </CardHeader>
-                        <CardContent class="p-0">
+                        <CardContent class="p-0 overflow-x-auto">
                             <Table>
                                 <TableHeader>
                                     <TableRow>
