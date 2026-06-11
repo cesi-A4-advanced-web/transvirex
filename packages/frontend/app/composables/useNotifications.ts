@@ -13,10 +13,24 @@ export interface AiNotification {
     created_at: string;
 }
 
+export interface MissionAlert {
+    id: string;
+    type: 'assigned' | 'unassigned' | 'status_changed';
+    deliveryRef: string;
+    message: string;
+    timestamp: string;
+}
+
 export function useNotifications() {
     const notifications = ref<AiNotification[]>([]);
     const unreadCount = ref(0);
+    const missionAlerts = ref<MissionAlert[]>([]);
+    const missionUnreadCount = ref(0);
     let intervalId: ReturnType<typeof setInterval> | null = null;
+    let driverDeliveryCache = new Set<string>();
+    let missionPollingId: ReturnType<typeof setInterval> | null = null;
+
+    // ── AI Incident Notifications ────────────────────────────────────────────
 
     async function fetchNotifications() {
         try {
@@ -52,9 +66,75 @@ export function useNotifications() {
 
     function stopPolling() {
         if (intervalId !== null) clearInterval(intervalId);
+        if (missionPollingId !== null) clearInterval(missionPollingId);
+    }
+
+    // ── Driver Mission Notifications ─────────────────────────────────────────
+
+    async function fetchMissionNotifications(userId: string) {
+        try {
+            const data = await $fetch<{ deliveries: Array<{ id: string; reference: string; status: string }> }>(
+                `/api/drivers/${userId}/deliveries`,
+            );
+            const currentSet = new Set(data.deliveries.map((d) => d.id));
+            if (driverDeliveryCache.size > 0) {
+                const newDeliveries = data.deliveries.filter((d) => !driverDeliveryCache.has(d.id));
+                for (const d of newDeliveries) {
+                    missionAlerts.value.unshift({
+                        id: d.id,
+                        type: 'assigned',
+                        deliveryRef: d.reference,
+                        message: `Nouvelle mission assignée : ${d.reference}`,
+                        timestamp: new Date().toISOString(),
+                    });
+                }
+                const removedIds = [...driverDeliveryCache].filter((id) => !currentSet.has(id));
+                for (const id of removedIds) {
+                    const ref = data.deliveries.find((d) => d.id === id)?.reference || id;
+                    missionAlerts.value.unshift({
+                        id,
+                        type: 'unassigned',
+                        deliveryRef: ref,
+                        message: `Mission ${ref} retirée`,
+                        timestamp: new Date().toISOString(),
+                    });
+                }
+                if (newDeliveries.length > 0 || removedIds.length > 0) {
+                    missionUnreadCount.value = missionAlerts.value.filter((a) => !a.id.startsWith('read_')).length;
+                }
+            }
+            driverDeliveryCache = currentSet;
+            missionAlerts.value = missionAlerts.value.slice(0, 20);
+        } catch {
+            // fail silently
+        }
+    }
+
+    function startDriverPolling(userId: string, intervalMs = 30000) {
+        if (!userId) return;
+        fetchMissionNotifications(userId);
+        missionPollingId = setInterval(() => fetchMissionNotifications(userId), intervalMs);
+    }
+
+    function clearMissionAlerts() {
+        missionAlerts.value = [];
+        missionUnreadCount.value = 0;
     }
 
     onUnmounted(stopPolling);
 
-    return { notifications, unreadCount, fetchNotifications, markRead, markAllRead, startPolling, stopPolling };
+    return {
+        notifications,
+        unreadCount,
+        missionAlerts,
+        missionUnreadCount,
+        fetchNotifications,
+        markRead,
+        markAllRead,
+        startPolling,
+        stopPolling,
+        fetchMissionNotifications,
+        startDriverPolling,
+        clearMissionAlerts,
+    };
 }

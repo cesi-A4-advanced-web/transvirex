@@ -123,7 +123,7 @@
                                             size="sm"
                                             class="bg-green-600 hover:bg-green-700 text-white"
                                             :disabled="statusLoading"
-                                            @click="markDelivered(currentDelivery.id)"
+                                            @click="openCompleteDialog(currentDelivery.id)"
                                         >✓ Livré</Button>
                                         <Button
                                             size="sm"
@@ -133,6 +133,40 @@
                                         >Problème</Button>
                                     </div>
                                 </template>
+                            </CardContent>
+                        </Card>
+
+                        <Card v-if="pendingDeliveries.length > 0">
+                            <CardHeader class="flex-row items-center gap-2 space-y-0 pb-3">
+                                <div class="w-2 h-2 rounded-full bg-amber-500" />
+                                <CardTitle class="text-base">En attente ({{ pendingDeliveries.length }})</CardTitle>
+                            </CardHeader>
+                            <CardContent class="space-y-3">
+                                <div
+                                    v-for="d in pendingDeliveries"
+                                    :key="d.id"
+                                    class="rounded-lg border border-amber-200 bg-amber-50/50 p-3 space-y-2"
+                                >
+                                    <div>
+                                        <p class="text-sm font-semibold">{{ d.address || 'Adresse non renseignée' }}</p>
+                                        <p class="text-xs text-muted-foreground">{{ d.customer || 'Client non renseigné' }} · {{ d.reference }}</p>
+                                    </div>
+                                    <div class="grid grid-cols-2 gap-2">
+                                        <Button
+                                            size="sm"
+                                            class="bg-green-600 hover:bg-green-700 text-white"
+                                            :disabled="statusLoading"
+                                            @click="acceptDelivery(d.id)"
+                                        >✓ Accepter</Button>
+                                        <Button
+                                            size="sm"
+                                            variant="outline"
+                                            class="border-red-200 text-red-600 hover:bg-red-50"
+                                            :disabled="statusLoading"
+                                            @click="declineDelivery(d.id)"
+                                        >✕ Refuser</Button>
+                                    </div>
+                                </div>
                             </CardContent>
                         </Card>
 
@@ -168,17 +202,74 @@
         <Dialog :open="!!problemDeliveryId" @update:open="problemDeliveryId = null">
             <DialogContent class="sm:max-w-sm">
                 <DialogHeader>
-                    <DialogTitle>Signaler un problème</DialogTitle>
-                    <DialogDescription>Décrivez le problème rencontré</DialogDescription>
+                    <DialogTitle>Signaler un incident</DialogTitle>
+                    <DialogDescription>Choisissez le type d'incident et décrivez-le</DialogDescription>
                 </DialogHeader>
-                <div class="py-2">
-                    <Textarea v-model="problemNote" placeholder="Ex: Client absent, colis endommagé..." rows="3" />
+                <div class="space-y-3 py-2">
+                    <div>
+                        <label class="text-sm font-medium text-muted-foreground">Type d'incident</label>
+                        <select
+                            v-model="incidentType"
+                            class="w-full mt-1 rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-blue-400"
+                        >
+                            <option value="" disabled>Sélectionnez un type</option>
+                            <option value="retard">Retard</option>
+                            <option value="casse">Colis endommagé / Casse</option>
+                            <option value="adresse_erronée">Adresse erronée</option>
+                            <option value="client_absent">Client absent</option>
+                            <option value="autre">Autre</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-sm font-medium text-muted-foreground">Description</label>
+                        <Textarea v-model="problemNote" placeholder="Ex: Client absent, colis endommagé..." rows="3" class="mt-1" />
+                    </div>
+                    <div>
+                        <label class="text-sm font-medium text-muted-foreground">Photo (optionnelle)</label>
+                        <input
+                            type="file"
+                            accept="image/*"
+                            @change="photoFile = ($event.target as HTMLInputElement).files?.[0] || null"
+                            class="mt-1 block w-full text-sm text-muted-foreground file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-muted file:text-sm file:font-medium hover:file:bg-muted/80"
+                        />
+                    </div>
                 </div>
                 <DialogFooter>
-                    <Button variant="outline" @click="problemDeliveryId = null">Annuler</Button>
-                    <Button :disabled="!problemNote.trim() || statusLoading" @click="reportProblem">
+                    <Button variant="outline" @click="problemDeliveryId = null; incidentType = ''; photoFile = null">Annuler</Button>
+                    <Button :disabled="!problemNote.trim() || !incidentType || statusLoading" @click="reportProblem">
                         <Loader2 v-if="statusLoading" class="w-4 h-4 mr-2 animate-spin" />
                         Signaler
+                    </Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
+
+        <Dialog :open="!!showCompleteDialog" @update:open="showCompleteDialog = null">
+            <DialogContent class="sm:max-w-sm">
+                <DialogHeader>
+                    <DialogTitle>Confirmer la livraison</DialogTitle>
+                    <DialogDescription>Ajoutez un commentaire ou une photo (optionnel)</DialogDescription>
+                </DialogHeader>
+                <div class="space-y-3 py-2">
+                    <div>
+                        <label class="text-sm font-medium text-muted-foreground">Commentaire (optionnel)</label>
+                        <Textarea v-model="commentForDelivery" placeholder="Ex: Colis remis en main propre..." rows="2" class="mt-1" />
+                    </div>
+                    <div>
+                        <label class="text-sm font-medium text-muted-foreground">Photo (optionnelle)</label>
+                        <input
+                            type="file"
+                            accept="image/*"
+                            @change="photoFile = ($event.target as HTMLInputElement).files?.[0] || null"
+                            class="mt-1 block w-full text-sm text-muted-foreground file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-muted file:text-sm file:font-medium hover:file:bg-muted/80"
+                        />
+                    </div>
+                </div>
+                <DialogFooter>
+                    <Button variant="outline" @click="showCompleteDialog = null; commentForDelivery = ''; photoFile = null">Annuler</Button>
+                    <Button class="bg-green-600 hover:bg-green-700 text-white" :disabled="statusLoading" @click="markDeliveredWithComment(showCompleteDialog!)">
+                        <Loader2 v-if="statusLoading" class="w-4 h-4 mr-2 animate-spin" />
+                        ✓ Confirmer livraison
                     </Button>
                 </DialogFooter>
             </DialogContent>
@@ -199,7 +290,7 @@ import { useApi, type ApiDelivery } from '@/composables/useApi';
 definePageMeta({ layout: false });
 useHead({ title: 'Dashboard Livreur — Transvirex' });
 
-const { get, patch } = useApi();
+const { get, patch, post } = useApi();
 
 const accessToken = useCookie('access_token');
 function parseJwt(token: string) {
@@ -229,6 +320,10 @@ const driverProfile = ref<{ reference: string; rating: number | null; vehicle: {
 
 const problemDeliveryId = ref<string | null>(null);
 const problemNote = ref('');
+const incidentType = ref('');
+const commentForDelivery = ref('');
+const showCompleteDialog = ref<string | null>(null);
+const photoFile = ref<File | null>(null);
 
 async function fetchData() {
     loading.value = true;
@@ -288,6 +383,10 @@ const currentDelivery = computed(() => {
     };
 });
 
+const pendingDeliveries = computed(() =>
+    activeDeliveriesData.value.filter((d) => d.status === 'planned')
+);
+
 function statusLabel(status: string) {
     const labels: Record<string, string> = {
         planned: 'Planifié',
@@ -326,16 +425,10 @@ function statusBadgeClass(s: string) {
     )[s] ?? '';
 }
 
-async function markDelivered(id: string) {
-    statusLoading.value = true;
-    try {
-        await patch(`/deliveries/${id}/status`, { status: 'delivered' });
-        await fetchData();
-    } catch (e) {
-        console.error('Failed to update status', e);
-    } finally {
-        statusLoading.value = false;
-    }
+function openCompleteDialog(id: string) {
+    showCompleteDialog.value = id;
+    commentForDelivery.value = '';
+    photoFile.value = null;
 }
 
 function openProblemDialog(id: string) {
@@ -347,15 +440,72 @@ async function reportProblem() {
     if (!problemDeliveryId.value || !problemNote.value.trim()) return;
     statusLoading.value = true;
     try {
+        const typeLabel = incidentType.value || 'autre';
         await patch(`/deliveries/${problemDeliveryId.value}/status`, {
             status: 'blocked',
-            note: problemNote.value.trim(),
+            note: `[${typeLabel}] ${problemNote.value.trim()}`,
         });
+        if (photoFile.value) {
+            await post(`/deliveries/${problemDeliveryId.value}/events`, {
+                description: `Photo jointe — ${problemNote.value.trim()}`,
+                type: 'info',
+                status: 'information',
+            });
+        }
         problemDeliveryId.value = null;
         problemNote.value = '';
+        incidentType.value = '';
+        photoFile.value = null;
         await fetchData();
     } catch (e) {
         console.error('Failed to report problem', e);
+    } finally {
+        statusLoading.value = false;
+    }
+}
+
+async function acceptDelivery(id: string) {
+    statusLoading.value = true;
+    try {
+        await patch(`/deliveries/${id}/status`, { status: 'delivering' });
+        await fetchData();
+    } catch (e) {
+        console.error('Failed to accept delivery', e);
+    } finally {
+        statusLoading.value = false;
+    }
+}
+
+async function declineDelivery(id: string) {
+    statusLoading.value = true;
+    try {
+        await patch(`/deliveries/${id}/status`, { status: 'cancelled', note: 'Refusé par le chauffeur' });
+        await fetchData();
+    } catch (e) {
+        console.error('Failed to decline delivery', e);
+    } finally {
+        statusLoading.value = false;
+    }
+}
+
+async function markDeliveredWithComment(id: string) {
+    statusLoading.value = true;
+    try {
+        const note = commentForDelivery.value ? `Livré — ${commentForDelivery.value}` : 'Livré';
+        await patch(`/deliveries/${id}/status`, { status: 'delivered', note });
+        if (photoFile.value) {
+            await post(`/deliveries/${id}/events`, {
+                description: `Photo livraison — ${commentForDelivery.value || 'sans commentaire'}`,
+                type: 'info',
+                status: 'information',
+            });
+        }
+        showCompleteDialog.value = null;
+        commentForDelivery.value = '';
+        photoFile.value = null;
+        await fetchData();
+    } catch (e) {
+        console.error('Failed to complete delivery', e);
     } finally {
         statusLoading.value = false;
     }

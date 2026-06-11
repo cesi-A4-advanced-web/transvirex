@@ -10,9 +10,10 @@ import type { UpdateDeliveryDto } from './dto/update-delivery.dto';
 const deliveryInclude = {
     invoice: {
         include: {
-            customer: { select: { id: true, customer_name: true } },
+            customer: { select: { id: true, customer_name: true, contact_firstname: true, contact_lastname: true, phone_number: true, email: true } },
             hub: { select: { id: true, name: true } },
-            delivery_address: { select: { address: true, city: true, postal_code: true } },
+            delivery_address: { select: { id: true, address: true, street: true, city: true, postal_code: true } },
+            parcels: { select: { id: true, reference: true, weight: true } },
         },
     },
     driver: {

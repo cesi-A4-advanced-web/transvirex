@@ -31,9 +31,23 @@ const collapsed = ref(false);
 const notifOpen = ref(false);
 
 // ── Notifications (dispatcher only) ──────────────────────────────────────────
-const { notifications, unreadCount, markRead, markAllRead, startPolling } = useNotifications();
+const { notifications, unreadCount, missionAlerts, missionUnreadCount, markRead, markAllRead, startPolling, startDriverPolling, clearMissionAlerts } = useNotifications();
+function parseUserIdFromToken(token: string): string | null {
+    try {
+        const b64 = token.split('.')[1]?.replace(/-/g, '+').replace(/_/g, '/');
+        if (!b64) return null;
+        return (JSON.parse(atob(b64)).sub as string) || null;
+    } catch {
+        return null;
+    }
+}
+
 onMounted(() => {
     if (userRole.value === 'dispatcher') startPolling();
+    if (userRole.value === 'driver' && accessToken.value) {
+        const driverId = parseUserIdFromToken(accessToken.value);
+        if (driverId) startDriverPolling(driverId, 30000);
+    }
 });
 
 // ── Auth ──────────────────────────────────────────────────────────────────────
@@ -80,6 +94,8 @@ const roleLabels: Record<Role, string> = {
 };
 /** Localized label for the current user role. */
 const roleLabel = computed(() => roleLabels[userRole.value] ?? userRole.value);
+
+const totalUnread = computed(() => unreadCount.value + missionUnreadCount.value);
 
 /** Tailwind classes for the role badge in the sidebar. */
 const roleBadgeClass = computed(
@@ -459,10 +475,10 @@ onMounted(() => {
                         >
                             <Bell class="w-5 h-5" />
                             <span
-                                v-if="unreadCount > 0"
+                                v-if="totalUnread > 0"
                                 class="absolute top-1 right-1 min-w-4 h-4 px-0.5 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center ring-2 ring-white"
                             >
-                                {{ unreadCount > 9 ? '9+' : unreadCount }}
+                                {{ totalUnread > 9 ? '9+' : totalUnread }}
                             </span>
                             <span
                                 v-else
@@ -474,6 +490,37 @@ onMounted(() => {
                             v-if="notifOpen"
                             class="absolute right-0 top-10 w-80 bg-white border border-gray-200 rounded-xl shadow-lg z-50 overflow-hidden"
                         >
+                            <template v-if="userRole === 'driver'">
+                                <div class="flex items-center justify-between px-4 py-3 border-b border-gray-100">
+                                    <span class="font-semibold text-sm text-gray-800">Missions</span>
+                                    <button
+                                        v-if="missionUnreadCount > 0"
+                                        @click="clearMissionAlerts"
+                                        class="text-xs text-blue-600 hover:underline"
+                                    >
+                                        Effacer
+                                    </button>
+                                </div>
+                                <div class="max-h-36 overflow-y-auto divide-y divide-gray-50">
+                                    <div
+                                        v-if="missionAlerts.length === 0"
+                                        class="px-4 py-4 text-center text-sm text-muted-foreground"
+                                    >
+                                        Aucune nouvelle mission
+                                    </div>
+                                    <div
+                                        v-for="alert in missionAlerts"
+                                        :key="alert.id"
+                                        class="px-4 py-2.5 text-xs"
+                                        :class="alert.type === 'assigned' ? 'bg-green-50/60' : 'bg-red-50/60'"
+                                    >
+                                        <p class="text-gray-800">{{ alert.message }}</p>
+                                        <p class="text-[10px] text-gray-400 mt-0.5">
+                                            {{ new Date(alert.timestamp).toLocaleTimeString('fr-FR') }}
+                                        </p>
+                                    </div>
+                                </div>
+                            </template>
                             <div class="flex items-center justify-between px-4 py-3 border-b border-gray-100">
                                 <span class="font-semibold text-sm text-gray-800">Incidents signalés</span>
                                 <button
@@ -484,10 +531,10 @@ onMounted(() => {
                                     Tout marquer lu
                                 </button>
                             </div>
-                            <div class="max-h-72 overflow-y-auto divide-y divide-gray-50">
+                            <div class="max-h-36 overflow-y-auto divide-y divide-gray-50">
                                 <div
                                     v-if="notifications.length === 0"
-                                    class="px-4 py-6 text-center text-sm text-muted-foreground"
+                                    class="px-4 py-4 text-center text-sm text-muted-foreground"
                                 >
                                     Aucun incident signalé
                                 </div>
@@ -495,7 +542,7 @@ onMounted(() => {
                                     v-for="n in notifications"
                                     :key="n.id"
                                     @click="markRead(n.id)"
-                                    class="px-4 py-3 cursor-pointer hover:bg-gray-50 transition-colors"
+                                    class="px-4 py-2.5 cursor-pointer hover:bg-gray-50 transition-colors"
                                     :class="!n.read ? 'bg-orange-50/60' : ''"
                                 >
                                     <div class="flex items-start gap-2">

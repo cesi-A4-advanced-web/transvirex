@@ -37,6 +37,18 @@ export interface ApiDelivery {
     position_history: unknown;
     invoice: ApiInvoice;
     driver: ApiDriver | null;
+    delivery_events?: Array<{
+        id: string;
+        delivery_id: string;
+        description: string | null;
+        latitude: number | null;
+        longitude: number | null;
+        type: string;
+        status: string;
+        resolution_description: string | null;
+        created_at: string | null;
+        resolution_date: string | null;
+    }>;
 }
 
 export interface ApiDriver {
