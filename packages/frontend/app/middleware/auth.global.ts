@@ -39,7 +39,7 @@ export default defineNuxtRouteMiddleware(async (to) => {
     }
 
     // Routes protégées : rediriger vers le login si pas connecté
-    if (!user.value) return navigateTo('/');
+    if (!user.value) return navwigateTo('/');
 
     // Vérifier que l'utilisateur accède uniquement aux pages de son rôle
     const allowedPrefix = ROLE_ALLOWED_PREFIX[user.value.role];
