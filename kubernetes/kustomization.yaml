@@ -20,6 +20,7 @@ resources:
     - services/backend/delivery-service.yaml
     - services/backend/users-service.yaml
     - services/backend/gateway-service.yaml
+    - services/backend/ai-service.yaml
     - services/frontend.yaml
 
     # Traefik

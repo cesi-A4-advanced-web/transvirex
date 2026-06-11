@@ -259,6 +259,77 @@ jobs:
                   cache-from: type=gha,scope=users
                   cache-to: type=gha,scope=users,mode=max
 
+    build-ai:
+        name: 🏗️ Build & Test AI Image
+        runs-on: ubuntu-latest
+        permissions:
+            contents: read
+            packages: write
+        steps:
+            - uses: actions/checkout@v4
+            - uses: docker/setup-buildx-action@v3
+            - uses: docker/login-action@v3
+              if: github.event_name != 'pull_request'
+              with:
+                  registry: ${{ env.REGISTRY }}
+                  username: ${{ github.actor }}
+                  password: ${{ secrets.GITHUB_TOKEN }}
+            - id: meta
+              uses: docker/metadata-action@v5
+              with:
+                  images: ${{ env.REGISTRY }}/${{ github.repository_owner }}/transvirex-ai-service
+                  tags: |
+                      type=ref,event=branch
+                      type=ref,event=pr
+                      type=sha,prefix=sha-
+                      type=raw,value=latest,enable={{is_default_branch}}
+
+            # Build locally (load into the runner's Docker) so we can smoke-test
+            # the container before pushing a potentially broken image.
+            - name: 🏗️ Build AI image (load for test)
+              uses: docker/build-push-action@v5
+              with:
+                  context: ./packages/backend/apps/ai
+                  file: ./packages/backend/apps/ai/Dockerfile
+                  target: runtime
+                  load: true
+                  push: false
+                  tags: transvirex-ai-service:ci-test
+                  cache-from: type=gha,scope=ai
+                  cache-to: type=gha,scope=ai,mode=max
+
+            - name: 🧪 Smoke-test AI container (/health)
+              run: |
+                  docker run -d --name ai-test \
+                    -e DEEPSEEK_API_KEY=ci-test-key \
+                    -p 5000:5000 transvirex-ai-service:ci-test
+                  ok=0
+                  for i in $(seq 1 30); do
+                    if curl -fsS http://localhost:5000/health | grep -q '"status":"ok"'; then
+                      echo "✅ AI service healthy"; ok=1; break
+                    fi
+                    sleep 2
+                  done
+                  echo "----- container logs -----"
+                  docker logs ai-test || true
+                  docker rm -f ai-test
+                  if [ "$ok" != "1" ]; then
+                    echo "❌ AI container failed its /health check"; exit 1
+                  fi
+
+            - name: 📤 Push AI image
+              if: github.event_name != 'pull_request'
+              uses: docker/build-push-action@v5
+              with:
+                  context: ./packages/backend/apps/ai
+                  file: ./packages/backend/apps/ai/Dockerfile
+                  target: runtime
+                  push: true
+                  tags: ${{ steps.meta.outputs.tags }}
+                  labels: ${{ steps.meta.outputs.labels }}
+                  cache-from: type=gha,scope=ai
+                  cache-to: type=gha,scope=ai,mode=max
+
     deploy:
         name: 🚀 Deploy to Production
         runs-on: ubuntu-latest
@@ -271,6 +342,7 @@ jobs:
                 build-stock,
                 build-delivery,
                 build-users,
+                build-ai,
             ]
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
 
@@ -289,12 +361,13 @@ jobs:
                   GHCR_USERNAME: ${{ github.actor }}
                   GHCR_TOKEN: ${{ secrets.GHCR_PAT }}
                   JWT_SECRET: ${{ secrets.JWT_SECRET }}
+                  DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
               with:
                   host: ${{ secrets.VPS_HOST }}
                   username: github-actions
                   key: ${{ secrets.VPS_SSH_KEY }}
                   port: 22
-                  envs: GHCR_USERNAME,GHCR_TOKEN,JWT_SECRET
+                  envs: GHCR_USERNAME,GHCR_TOKEN,JWT_SECRET,DEEPSEEK_API_KEY
                   script: |
                       kubectl create namespace production --kubeconfig ~/.kube/config 2>/dev/null || true
                       kubectl delete secret ghcr-secret -n production --kubeconfig ~/.kube/config 2>/dev/null || true
@@ -307,6 +380,7 @@ jobs:
                       kubectl delete secret transvirex-secrets -n production --kubeconfig ~/.kube/config 2>/dev/null || true
                       kubectl create secret generic transvirex-secrets \
                         --from-literal=JWT_SECRET=$JWT_SECRET \
+                        --from-literal=DEEPSEEK_API_KEY=$DEEPSEEK_API_KEY \
                         -n production \
                         --kubeconfig ~/.kube/config
                       rm -rf /tmp/k8s-manifests && mkdir -p /tmp/k8s-manifests
@@ -340,6 +414,7 @@ jobs:
                       kubectl rollout restart deployment/transvirex-stock -n production --kubeconfig ~/.kube/config
                       kubectl rollout restart deployment/transvirex-delivery -n production --kubeconfig ~/.kube/config
                       kubectl rollout restart deployment/transvirex-users -n production --kubeconfig ~/.kube/config
+                      kubectl rollout restart deployment/transvirex-ai -n production --kubeconfig ~/.kube/config
 
                       kubectl rollout status deployment/transvirex-frontend -n production --timeout=10m --kubeconfig ~/.kube/config
                       kubectl rollout status deployment/transvirex-gateway -n production --timeout=10m --kubeconfig ~/.kube/config
@@ -348,6 +423,7 @@ jobs:
                       kubectl rollout status deployment/transvirex-stock -n production --timeout=10m --kubeconfig ~/.kube/config
                       kubectl rollout status deployment/transvirex-delivery -n production --timeout=10m --kubeconfig ~/.kube/config
                       kubectl rollout status deployment/transvirex-users -n production --timeout=10m --kubeconfig ~/.kube/config
+                      kubectl rollout status deployment/transvirex-ai -n production --timeout=10m --kubeconfig ~/.kube/config
 
                       kubectl delete job transvirex-seed -n production --kubeconfig ~/.kube/config --ignore-not-found=true
                       kubectl apply -f /tmp/k8s-manifests/kubernetes/jobs/seed.yaml --kubeconfig ~/.kube/config
@@ -367,6 +443,7 @@ jobs:
                 build-stock,
                 build-delivery,
                 build-users,
+                build-ai,
                 deploy,
             ]
         if: always()
