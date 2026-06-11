@@ -81,9 +81,12 @@ export class DeliveryService {
      * - Creates a DeliveryEvent audit trail entry
      * - Emits delivery.status_changed on RabbitMQ when status reaches "delivered"
      */
-    async updateDeliveryStatus(id: string, status: string, note?: string) {
+    async updateDeliveryStatus(id: string, status: string, note?: string, user?: DeliveryRequestUser) {
         const delivery = await this.prisma.delivery.findUnique({ where: { id } });
         if (!delivery) throw new NotFoundException('Livraison non trouvée');
+
+        // A driver may only change the status of their own deliveries.
+        await this.assertDriverAccess(delivery, user);
 
         const currentStatus = delivery.status ?? 'planned';
         const allowed = ALLOWED_TRANSITIONS[currentStatus];

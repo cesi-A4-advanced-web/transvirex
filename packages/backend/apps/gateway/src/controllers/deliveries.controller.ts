@@ -16,6 +16,7 @@ import { ApiBearerAuth, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags }
 import type { Request } from 'express';
 import { CreateDeliveryDto, DeliveryStatusDto } from '../dto/create-delivery.dto';
 import { UpdateDeliveryDto } from '../dto/update-delivery.dto';
+import { UpdateDeliveryStatusDto } from '../dto/update-delivery-status.dto';
 import { GatewayService } from '../gateway.service';
 
 @Controller()
@@ -115,6 +116,24 @@ export class DeliveriesController {
     @ApiResponse({ status: 404, description: 'Delivery not found' })
     updateDelivery(@Param('id') id: string, @Body() body: UpdateDeliveryDto, @Req() req: Request) {
         return this.gatewayService.updateDelivery(id, body, (req as any).user);
+    }
+
+    @ApiTags('Deliveries')
+    @Patch('deliveries/:id/status')
+    @ApiBearerAuth('JWT-auth')
+    @Roles('admin', 'dispatcher', 'driver')
+    @ApiOperation({
+        summary: 'Update a delivery status',
+        description:
+            'Advances a delivery to a new status with transition validation. Drivers can only update their own deliveries.',
+    })
+    @ApiParam({ name: 'id', description: 'Delivery UUID' })
+    @ApiResponse({ status: 200, description: 'Delivery status updated' })
+    @ApiResponse({ status: 400, description: 'Invalid status transition' })
+    @ApiResponse({ status: 403, description: 'Driver access denied' })
+    @ApiResponse({ status: 404, description: 'Delivery not found' })
+    updateDeliveryStatus(@Param('id') id: string, @Body() body: UpdateDeliveryStatusDto, @Req() req: Request) {
+        return this.gatewayService.updateDeliveryStatus(id, body, (req as any).user);
     }
 
     @ApiTags('Deliveries')

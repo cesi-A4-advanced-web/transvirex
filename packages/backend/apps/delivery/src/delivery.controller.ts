@@ -72,8 +72,13 @@ export class DeliveryController {
     @ApiResponse({ status: 200, description: 'Delivery status updated' })
     @ApiResponse({ status: 400, description: 'Invalid status transition' })
     @ApiResponse({ status: 404, description: 'Delivery not found' })
-    async updateStatus(@Param('id') id: string, @Body() body: { status: string; note?: string }) {
-        return this.deliveryService.updateDeliveryStatus(id, body.status, body.note);
+    async updateStatus(
+        @Param('id') id: string,
+        @Body() body: { status: string; note?: string },
+        @Headers('x-user-id') userId?: string,
+        @Headers('x-user-role') userRole?: string,
+    ) {
+        return this.deliveryService.updateDeliveryStatus(id, body.status, body.note, { id: userId, role: userRole });
     }
 
     /** Consume delivery.created (emitted by billing when an invoice is confirmed) and create a Delivery record with planned status. */

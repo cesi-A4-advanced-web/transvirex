@@ -77,6 +77,27 @@
                                         >
                                             ⚠ {{ delivery.note }}
                                         </div>
+                                        <div
+                                            v-if="actionsFor(delivery.rawStatus).length"
+                                            class="mt-3 flex flex-wrap gap-2"
+                                        >
+                                            <Button
+                                                v-for="action in actionsFor(delivery.rawStatus)"
+                                                :key="action.status"
+                                                size="sm"
+                                                variant="outline"
+                                                class="h-7 text-xs"
+                                                :class="action.class"
+                                                :disabled="updating === delivery.id"
+                                                @click="updateStatus(delivery.id, action.status)"
+                                            >
+                                                <Loader2
+                                                    v-if="updating === delivery.id"
+                                                    class="w-3 h-3 mr-1 animate-spin"
+                                                />
+                                                {{ action.label }}
+                                            </Button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -161,6 +182,7 @@
 <script setup lang="ts">
 import { useCookie } from '#app';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useApi, type ApiDriverDashboard, type ApiDriverDashboardDelivery } from '@/composables/useApi';
 import { Loader2, MapPin } from '@lucide/vue';
@@ -168,7 +190,7 @@ import { Loader2, MapPin } from '@lucide/vue';
 definePageMeta({ layout: false });
 useHead({ title: 'Dashboard Livreur — Transvirex' });
 
-const { get } = useApi();
+const { get, patch } = useApi();
 
 const accessToken = useCookie('access_token');
 /** Decode a JWT payload without validation. */
@@ -240,12 +262,56 @@ const myDeliveries = computed(() =>
         address: d.address ?? '—',
         city: [d.postal_code, d.city].filter(Boolean).join(' ') || '—',
         client: d.customer ?? '—',
+        rawStatus: d.status ?? '',
         status: STATUS_LABELS[d.status ?? ''] ?? d.status ?? '—',
         time: formatTime(d.due_date),
         note: d.notes ?? undefined,
         parcels: d.parcels,
     })),
 );
+
+/**
+ * Status transitions a driver can trigger from a given backend status.
+ * Mirrors the backend's ALLOWED_TRANSITIONS so only valid actions are shown.
+ */
+const DRIVER_ACTIONS: Record<string, { label: string; status: string; class?: string }[]> = {
+    planned: [
+        { label: 'Démarrer', status: 'delivering', class: 'border-blue-300 text-blue-700 hover:bg-blue-50' },
+        { label: 'Bloquer', status: 'blocked', class: 'border-red-300 text-red-700 hover:bg-red-50' },
+        { label: 'Annuler', status: 'cancelled' },
+    ],
+    delivering: [
+        { label: '✓ Livré', status: 'delivered', class: 'border-green-300 text-green-700 hover:bg-green-50' },
+        { label: 'Retard', status: 'delayed', class: 'border-orange-300 text-orange-700 hover:bg-orange-50' },
+        { label: 'Problème', status: 'blocked', class: 'border-red-300 text-red-700 hover:bg-red-50' },
+    ],
+    delayed: [
+        { label: 'Reprendre', status: 'delivering', class: 'border-blue-300 text-blue-700 hover:bg-blue-50' },
+        { label: '✓ Livré', status: 'delivered', class: 'border-green-300 text-green-700 hover:bg-green-50' },
+    ],
+    blocked: [{ label: 'Reprendre', status: 'delivering', class: 'border-blue-300 text-blue-700 hover:bg-blue-50' }],
+};
+
+/** Return the list of valid status actions for a backend delivery status. */
+function actionsFor(rawStatus: string) {
+    return DRIVER_ACTIONS[rawStatus] ?? [];
+}
+
+/** Id of the delivery whose status is currently being updated (for button disabling). */
+const updating = ref<string | null>(null);
+
+/** Send a status change for a delivery, then refresh the dashboard. */
+async function updateStatus(id: string, status: string) {
+    updating.value = id;
+    try {
+        await patch(`/deliveries/${id}/status`, { status });
+        await fetchData();
+    } catch (e) {
+        console.error('Failed to update delivery status', e);
+    } finally {
+        updating.value = null;
+    }
+}
 
 /** Currently active delivery being performed (first one in `delivering` status). */
 const current = computed(() => myDeliveries.value.find((d) => d.status === 'En cours') ?? null);
