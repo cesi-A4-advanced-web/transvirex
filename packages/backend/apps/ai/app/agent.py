@@ -1,9 +1,12 @@
 """Agentic assistant: DeepSeek drives the MCP tools in a tool-calling loop."""
 import json
+import logging
 
-from .mcp.host import host
+from .mcp.host import call_tool_text, mcp_session, to_openai_tools
 from .services.deepseek import chat_with_tools
 from .services.rag import rag_chat
+
+logger = logging.getLogger("uvicorn.error")
 
 _MAX_ITERATIONS = 6
 
@@ -28,11 +31,18 @@ Utilise toujours ce driver_id dans les appels d'outils."""
 
 
 async def run_agent(text: str, driver_id: str, delivery_id: str | None = None) -> dict:
-    tools = await host.list_openai_tools()
-    if not tools:
-        # MCP host unavailable: degrade to a plain knowledge-grounded answer.
+    try:
+        async with mcp_session() as session:
+            return await _run_loop(session, text, driver_id, delivery_id)
+    except Exception:
+        logger.exception("Agent run failed — falling back to plain chat")
         answer = await rag_chat(text)
         return {"type": "chat", "answer": answer, "incident": None}
+
+
+async def _run_loop(session, text: str, driver_id: str, delivery_id: str | None) -> dict:
+    tools_result = await session.list_tools()
+    tools = to_openai_tools(tools_result.tools)
 
     system = _SYSTEM_PROMPT.format(
         driver_id=driver_id, delivery_id=delivery_id or "(aucun — à déterminer)"
@@ -49,8 +59,11 @@ async def run_agent(text: str, driver_id: str, delivery_id: str | None = None) -
         tool_calls = getattr(message, "tool_calls", None)
 
         if not tool_calls:
-            return {"type": "incident" if incident else "chat",
-                    "answer": message.content or "", "incident": incident}
+            return {
+                "type": "incident" if incident else "chat",
+                "answer": message.content or "",
+                "incident": incident,
+            }
 
         # Record the assistant turn (with its tool calls) before answering them.
         messages.append({
@@ -73,7 +86,7 @@ async def run_agent(text: str, driver_id: str, delivery_id: str | None = None) -
                 args = {}
             args.setdefault("driver_id", driver_id)
 
-            result = await host.call_tool(tc.function.name, args)
+            result = await call_tool_text(session, tc.function.name, args)
 
             if tc.function.name == "create_dispatcher_notification":
                 try:

@@ -12,7 +12,7 @@ class Settings(BaseSettings):
     mongodb_password: str = "mongo_password"
     mongodb_db: str = "transvirex"
 
-    delivery_service_url: str = "http://transvirex-delivery:3000"
+    delivery_service_url: str = "http://transvirex-delivery-service:3000"
 
     port: int = 5000
 

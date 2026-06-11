@@ -108,7 +108,7 @@
                     <div class="relative">
                         <button
                             @click="notifOpen = !notifOpen"
-                            class="relative p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                            class="relative p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-colors"
                         >
                             <Bell class="w-5 h-5" />
                             <span
@@ -117,7 +117,10 @@
                             >
                                 {{ unreadCount > 9 ? '9+' : unreadCount }}
                             </span>
-                            <span v-else class="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full ring-2 ring-white" />
+                            <span
+                                v-else
+                                class="absolute top-1.5 right-1.5 w-2 h-2 bg-destructive rounded-full ring-2 ring-background"
+                            />
                         </button>
                         <!-- Notification panel -->
                         <div
@@ -151,9 +154,11 @@
                                     <div class="flex items-start gap-2">
                                         <span
                                             class="flex-shrink-0 text-[10px] font-bold px-1.5 py-0.5 rounded uppercase"
-                                            :class="n.severity === 'CRITICAL'
-                                                ? 'bg-red-100 text-red-700'
-                                                : 'bg-orange-100 text-orange-700'"
+                                            :class="
+                                                n.severity === 'CRITICAL'
+                                                    ? 'bg-red-100 text-red-700'
+                                                    : 'bg-orange-100 text-orange-700'
+                                            "
                                         >
                                             {{ n.severity }}
                                         </span>
@@ -163,13 +168,16 @@
                                                 Livraison {{ n.delivery_id.slice(0, 8) }}
                                             </p>
                                         </div>
-                                        <span v-if="!n.read" class="w-2 h-2 rounded-full bg-orange-400 flex-shrink-0 mt-1" />
+                                        <span
+                                            v-if="!n.read"
+                                            class="w-2 h-2 rounded-full bg-orange-400 flex-shrink-0 mt-1"
+                                        />
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <div class="flex items-center gap-2 pl-3 border-l border-gray-200 ml-1">
+                    <div class="flex items-center gap-2 pl-3 border-l border-border ml-1">
                         <div
                             class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0"
                             :class="roleColor"

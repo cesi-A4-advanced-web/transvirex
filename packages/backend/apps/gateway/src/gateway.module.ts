@@ -40,6 +40,8 @@ import { GatewayService } from './gateway.service';
         GatewayController,
         HealthController,
         AuthController,
+        BillingController,
+        CustomersController,
         AiController,
         DebugController,
         DeliveriesController,
@@ -47,7 +49,6 @@ import { GatewayService } from './gateway.service';
         LoggingController,
         UsersController,
         VehiclesController,
-        HubsController,
         InvoicesController,
     ],
     providers: [

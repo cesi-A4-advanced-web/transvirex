@@ -57,9 +57,10 @@
                             <Bot class="w-4 h-4 text-blue-600" />
                         </div>
                         <div class="max-w-[80%] space-y-2">
-                            <div class="bg-white border border-gray-200 rounded-2xl rounded-tl-sm px-4 py-2.5 text-sm text-gray-800 shadow-sm">
-                                {{ msg.content }}
-                            </div>
+                            <div
+                                class="markdown-body bg-white border border-gray-200 rounded-2xl rounded-tl-sm px-4 py-2.5 text-sm text-gray-800 shadow-sm"
+                                v-html="renderMarkdown(msg.content)"
+                            />
                             <!-- Incident card -->
                             <div
                                 v-if="msg.incident"
@@ -227,3 +228,79 @@ function severityCardClass(s: string) {
     } as Record<string, string>)[s] ?? 'bg-gray-50 border-gray-200';
 }
 </script>
+
+<style scoped>
+/* Lightweight prose styling for rendered Markdown inside chat bubbles. */
+.markdown-body :deep(p) {
+    margin: 0;
+}
+.markdown-body :deep(p + p) {
+    margin-top: 0.5rem;
+}
+.markdown-body :deep(strong) {
+    font-weight: 600;
+}
+.markdown-body :deep(ul),
+.markdown-body :deep(ol) {
+    margin: 0.25rem 0;
+    padding-left: 1.1rem;
+}
+.markdown-body :deep(ul) {
+    list-style: disc;
+}
+.markdown-body :deep(ol) {
+    list-style: decimal;
+}
+.markdown-body :deep(li) {
+    margin: 0.15rem 0;
+}
+.markdown-body :deep(h1),
+.markdown-body :deep(h2),
+.markdown-body :deep(h3) {
+    font-weight: 600;
+    font-size: 0.95rem;
+    margin: 0.5rem 0 0.25rem;
+}
+.markdown-body :deep(a) {
+    color: #2563eb;
+    text-decoration: underline;
+}
+.markdown-body :deep(code) {
+    background: #f3f4f6;
+    border-radius: 0.25rem;
+    padding: 0.05rem 0.3rem;
+    font-size: 0.8em;
+}
+.markdown-body :deep(pre) {
+    background: #f3f4f6;
+    border-radius: 0.5rem;
+    padding: 0.5rem;
+    overflow-x: auto;
+    margin: 0.4rem 0;
+}
+.markdown-body :deep(table) {
+    display: block;
+    width: 100%;
+    overflow-x: auto;
+    border-collapse: collapse;
+    margin: 0.4rem 0;
+    font-size: 0.8rem;
+}
+.markdown-body :deep(th),
+.markdown-body :deep(td) {
+    border: 1px solid #e5e7eb;
+    padding: 0.25rem 0.5rem;
+    text-align: left;
+    white-space: nowrap;
+}
+.markdown-body :deep(th) {
+    background: #f9fafb;
+    font-weight: 600;
+}
+.markdown-body :deep(blockquote) {
+    border-left: 3px solid #dbeafe;
+    padding-left: 0.6rem;
+    color: #4b5563;
+    margin: 0.4rem 0;
+}
+</style>
