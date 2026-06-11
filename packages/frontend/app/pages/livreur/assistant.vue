@@ -1,6 +1,6 @@
 <template>
     <AppLayout>
-        <div class="flex flex-col h-[calc(100vh-3.5rem-3rem)] max-w-2xl mx-auto">
+        <div class="flex flex-col h-[calc(100vh-3.5rem-3rem)] -mx-6 px-10">
             <!-- Header -->
             <div class="mb-4 flex-shrink-0">
                 <h2 class="text-2xl font-bold tracking-tight">Assistant IA</h2>
@@ -23,7 +23,10 @@
 
             <!-- Messages -->
             <div ref="chatContainer" class="flex-1 overflow-y-auto space-y-3 pr-1 pb-2">
-                <div v-if="messages.length === 0" class="flex flex-col items-center justify-center h-full text-center gap-3 text-muted-foreground">
+                <div
+                    v-if="messages.length === 0"
+                    class="flex flex-col items-center justify-center h-full text-center gap-3 text-muted-foreground"
+                >
                     <div class="w-16 h-16 rounded-full bg-blue-100 flex items-center justify-center">
                         <Mic class="w-8 h-8 text-blue-500" />
                     </div>
@@ -53,7 +56,9 @@
 
                     <!-- Assistant message -->
                     <div v-else class="flex justify-start gap-2">
-                        <div class="w-7 h-7 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <div
+                            class="w-7 h-7 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0 mt-0.5"
+                        >
                             <Bot class="w-4 h-4 text-blue-600" />
                         </div>
                         <div class="max-w-[80%] space-y-2">
@@ -91,9 +96,18 @@
                     </div>
                     <div class="bg-white border border-gray-200 rounded-2xl rounded-tl-sm px-4 py-3 shadow-sm">
                         <div class="flex gap-1">
-                            <span class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay:0ms" />
-                            <span class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay:150ms" />
-                            <span class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay:300ms" />
+                            <span
+                                class="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
+                                style="animation-delay: 0ms"
+                            />
+                            <span
+                                class="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
+                                style="animation-delay: 150ms"
+                            />
+                            <span
+                                class="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
+                                style="animation-delay: 300ms"
+                            />
                         </div>
                     </div>
                 </div>
@@ -102,7 +116,10 @@
             <!-- Input zone -->
             <div class="flex-shrink-0 pt-3 border-t border-gray-200">
                 <!-- Transcript preview -->
-                <div v-if="listening || transcript" class="mb-2 px-3 py-2 bg-red-50 border border-red-200 rounded-lg flex items-center gap-2">
+                <div
+                    v-if="listening || transcript"
+                    class="mb-2 px-3 py-2 bg-red-50 border border-red-200 rounded-lg flex items-center gap-2"
+                >
                     <span class="w-2 h-2 rounded-full bg-red-500 animate-pulse flex-shrink-0" />
                     <span class="text-sm text-red-700 italic flex-1">
                         {{ transcript || 'En écoute...' }}
@@ -116,9 +133,11 @@
                         @click="toggleVoice"
                         :disabled="loading"
                         class="flex-shrink-0 w-11 h-11 rounded-full flex items-center justify-center transition-all"
-                        :class="listening
-                            ? 'bg-red-500 text-white shadow-lg shadow-red-200 scale-110'
-                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'"
+                        :class="
+                            listening
+                                ? 'bg-red-500 text-white shadow-lg shadow-red-200 scale-110'
+                                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                        "
                     >
                         <MicOff v-if="listening" class="w-5 h-5" />
                         <Mic v-else class="w-5 h-5" />
@@ -163,10 +182,13 @@ useHead({ title: 'Assistant IA — Transvirex' });
 // ── Auth ──────────────────────────────────────────────────────────────────────
 const accessToken = useCookie('access_token');
 function parseJwt(token: string) {
-    try { return JSON.parse(atob(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/'))); }
-    catch { return null; }
+    try {
+        return JSON.parse(atob(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
+    } catch {
+        return null;
+    }
 }
-const payload = computed(() => accessToken.value ? parseJwt(accessToken.value) : null);
+const payload = computed(() => (accessToken.value ? parseJwt(accessToken.value) : null));
 const driverId = computed<string>(() => payload.value?.sub ?? '');
 
 // ── State ─────────────────────────────────────────────────────────────────────
@@ -175,25 +197,44 @@ const inputText = ref('');
 const chatContainer = ref<HTMLElement | null>(null);
 
 const { messages, loading, sendMessage } = useAiAssistant();
-const { transcript, listening, supported: speechSupported, startListening, stopListening, resetTranscript } = useSpeechRecognition();
+const {
+    transcript,
+    listening,
+    supported: speechSupported,
+    startListening,
+    stopListening,
+    resetTranscript,
+} = useSpeechRecognition({
+    // Auto-send the message as soon as the voice session ends.
+    onEnd: (finalText) => {
+        inputText.value = finalText;
+        submit();
+    },
+});
 
 const suggestions = [
     'Comment gérer un client absent ?',
-    'J\'ai un problème avec mon véhicule',
+    "J'ai un problème avec mon véhicule",
     'Colis endommagé lors de la livraison',
     'Retard important sur ma tournée',
 ];
 
 // ── Sync transcript → input ───────────────────────────────────────────────────
-watch(transcript, (val) => { if (val) inputText.value = val; });
+watch(transcript, (val) => {
+    if (val) inputText.value = val;
+});
 
 // ── Auto-scroll ───────────────────────────────────────────────────────────────
-watch(messages, async () => {
-    await nextTick();
-    if (chatContainer.value) {
-        chatContainer.value.scrollTop = chatContainer.value.scrollHeight;
-    }
-}, { deep: true });
+watch(
+    messages,
+    async () => {
+        await nextTick();
+        if (chatContainer.value) {
+            chatContainer.value.scrollTop = chatContainer.value.scrollHeight;
+        }
+    },
+    { deep: true },
+);
 
 // ── Actions ───────────────────────────────────────────────────────────────────
 function toggleVoice() {
@@ -220,12 +261,16 @@ function severityLabel(s: string) {
     return ({ CRITICAL: 'critique', HIGH: 'élevé', MEDIUM: 'modéré', LOW: 'faible' } as Record<string, string>)[s] ?? s;
 }
 function severityCardClass(s: string) {
-    return ({
-        CRITICAL: 'bg-red-50 border-red-200 text-red-800',
-        HIGH: 'bg-orange-50 border-orange-200 text-orange-800',
-        MEDIUM: 'bg-yellow-50 border-yellow-200 text-yellow-800',
-        LOW: 'bg-gray-50 border-gray-200 text-gray-700',
-    } as Record<string, string>)[s] ?? 'bg-gray-50 border-gray-200';
+    return (
+        (
+            {
+                CRITICAL: 'bg-red-50 border-red-200 text-red-800',
+                HIGH: 'bg-orange-50 border-orange-200 text-orange-800',
+                MEDIUM: 'bg-yellow-50 border-yellow-200 text-yellow-800',
+                LOW: 'bg-gray-50 border-gray-200 text-gray-700',
+            } as Record<string, string>
+        )[s] ?? 'bg-gray-50 border-gray-200'
+    );
 }
 </script>
 
@@ -304,3 +349,4 @@ function severityCardClass(s: string) {
     margin: 0.4rem 0;
 }
 </style>
+
