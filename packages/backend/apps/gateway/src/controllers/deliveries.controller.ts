@@ -60,6 +60,19 @@ export class DeliveriesController {
     }
 
     @ApiTags('Deliveries')
+    @Get('deliveries/mine')
+    @ApiBearerAuth('JWT-auth')
+    @Roles('driver')
+    @ApiOperation({
+        summary: "Get the authenticated driver's today dashboard",
+        description: "Returns the driver's info (reference, rating) and today's deliveries. Scoped to the caller via the JWT.",
+    })
+    @ApiResponse({ status: 200, description: 'Driver dashboard: { driver, deliveries }' })
+    getMyDashboard(@Req() req: Request) {
+        return this.gatewayService.getMyDriverDashboard((req as any).user);
+    }
+
+    @ApiTags('Deliveries')
     @Get('deliveries/:id')
     @ApiBearerAuth('JWT-auth')
     @Roles('admin', 'dispatcher', 'business_manager', 'driver')

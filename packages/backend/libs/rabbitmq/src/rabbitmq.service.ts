@@ -95,7 +95,10 @@ export class RabbitMQService implements OnModuleDestroy {
         const messages: MessageInfo[] = [];
 
         try {
-            await channel.assertQueue(queue, { durable: true });
+            // Passive check only — monitoring must never (re)declare a queue, or its
+            // arguments would conflict with the owning service's declaration (e.g. the
+            // x-dead-letter-exchange on delivery_queue/billing_queue) and crash it.
+            await channel.checkQueue(queue);
 
             for (let i = 0; i < count; i++) {
                 const msg = await channel.get(queue, { noAck: true });

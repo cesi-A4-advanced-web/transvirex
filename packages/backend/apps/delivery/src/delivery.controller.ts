@@ -142,6 +142,12 @@ export class DeliveryController {
         return this.deliveryService.listDriverDeliveries(userId);
     }
 
+    /** Build the driver's "today" dashboard (driver info + today's deliveries), identified by their User id (JWT sub). */
+    @Get('drivers/:userId/dashboard')
+    getDriverDashboard(@Param('userId') userId: string) {
+        return this.deliveryService.getDriverDashboard(userId);
+    }
+
     /** Create a DeliveryEvent (incident / status update) on a delivery. */
     @Post('deliveries/:id/events')
     createDeliveryEvent(

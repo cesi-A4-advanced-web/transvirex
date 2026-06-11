@@ -118,3 +118,21 @@ export interface ApiParcel {
     reference: string;
     weight: number;
 }
+
+export interface ApiDriverDashboardDelivery {
+    id: string;
+    reference: string;
+    status: string | null;
+    notes: string | null;
+    customer: string | null;
+    address: string | null;
+    city: string | null;
+    postal_code: string | null;
+    due_date: string | null;
+    parcels: number;
+}
+
+export interface ApiDriverDashboard {
+    driver: { reference: string; rating: number | null } | null;
+    deliveries: ApiDriverDashboardDelivery[];
+}

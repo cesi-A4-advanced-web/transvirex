@@ -174,6 +174,61 @@ export class DeliveryService {
         };
     }
 
+    /**
+     * Build the driver's "today" dashboard, identified by their **User id** (JWT `sub`).
+     * Resolves User -> Driver, then returns the driver (reference, rating) and the
+     * deliveries whose invoice `due_date` falls on the current day, enriched with
+     * customer name, delivery address, due date and parcel count. Read-only — stays
+     * within the delivery domain on the shared PostgreSQL database (no RabbitMQ).
+     */
+    async getDriverDashboard(userId: string) {
+        const driver = await this.prisma.driver.findUnique({
+            where: { user_id: userId },
+            select: { reference: true, rating: true, id: true },
+        });
+        if (!driver) {
+            return { driver: null, deliveries: [] };
+        }
+
+        const startOfDay = new Date();
+        startOfDay.setHours(0, 0, 0, 0);
+        const endOfDay = new Date(startOfDay);
+        endOfDay.setDate(endOfDay.getDate() + 1);
+
+        const deliveries = await this.prisma.delivery.findMany({
+            where: {
+                driver_id: driver.id,
+                invoice: { due_date: { gte: startOfDay, lt: endOfDay } },
+            },
+            include: {
+                invoice: {
+                    include: {
+                        customer: { select: { customer_name: true } },
+                        delivery_address: { select: { address: true, city: true, postal_code: true } },
+                        _count: { select: { parcels: true } },
+                    },
+                },
+            },
+            orderBy: { invoice: { due_date: 'asc' } },
+        });
+
+        return {
+            driver: { reference: driver.reference, rating: driver.rating },
+            deliveries: deliveries.map((d) => ({
+                id: d.id,
+                reference: d.reference,
+                status: d.status,
+                notes: d.notes,
+                customer: d.invoice?.customer?.customer_name ?? null,
+                address: d.invoice?.delivery_address?.address ?? null,
+                city: d.invoice?.delivery_address?.city ?? null,
+                postal_code: d.invoice?.delivery_address?.postal_code ?? null,
+                due_date: d.invoice?.due_date ?? null,
+                parcels: d.invoice?._count?.parcels ?? 0,
+            })),
+        };
+    }
+
     /** Create a DeliveryEvent (incident, status update, note...) on a delivery. */
     async createDeliveryEvent(
         deliveryId: string,
