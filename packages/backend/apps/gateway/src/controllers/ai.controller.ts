@@ -12,7 +12,15 @@ export class AiController {
 
     /** Unified endpoint: detects intent (incident vs chat) and routes accordingly. */
     @Post('process')
-    process(@Body() body: { text: string; driver_id: string; delivery_id?: string }) {
+    process(
+        @Body()
+        body: {
+            text: string;
+            driver_id: string;
+            delivery_id?: string;
+            history?: Array<{ role: string; content: string }>;
+        },
+    ) {
         return this.gatewayService.aiPost('process', body);
     }
 

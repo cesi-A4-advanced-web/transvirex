@@ -204,7 +204,10 @@ const refreshToken = useCookie('refresh_token');
 
 const { notifications, unreadCount, markRead, markAllRead, startPolling } = useNotifications();
 onMounted(() => {
-    if (!accessToken.value) return navigateTo('/');
+    // L'auth et la redirection sont gérées par le middleware global (qui peut
+    // rafraîchir silencieusement un access token expiré). On ne redirige pas ici
+    // sur l'absence du cookie access_token : le refresh_token httpOnly peut encore
+    // être valide, et rediriger ici provoquait des boucles déco/reco.
     if (userRole.value === 'dispatcher') startPolling();
 });
 
