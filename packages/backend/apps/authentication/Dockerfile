@@ -25,7 +25,7 @@ COPY --from=build /app/prisma ./prisma
 COPY --from=build /app/dist/prisma/ ./prisma/
 COPY --from=build /app/prisma.config.ts ./prisma.config.ts
 COPY --from=build /app/tsconfig.json ./tsconfig.json
-CMD ["sh", "-c", "node_modules/.bin/prisma migrate deploy && node -r tsconfig-paths/register apps/authentication/src/main.js"]
+CMD ["sh", "-c", "node -r tsconfig-paths/register apps/authentication/src/main.js"]
 
 # +--------------------------------------------------------+
 # |                      DEVELOPMENT                       |
@@ -40,4 +40,4 @@ RUN pnpm install --frozen-lockfile
 COPY . .
 RUN pnpm exec prisma generate
 # Run migrations then start the development server
-CMD ["sh", "-c", "pnpm exec prisma migrate dev && pnpm run dev:authentication"]
+CMD ["sh", "-c", "pnpm run dev:authentication"]

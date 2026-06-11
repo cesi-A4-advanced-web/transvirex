@@ -38,4 +38,4 @@ RUN pnpm install --frozen-lockfile
 COPY . .
 RUN pnpm exec prisma generate
 # Start the development server
-CMD ["sh", "-c", "pnpm exec prisma migrate dev && pnpm run dev:gateway"]
+CMD ["sh", "-c", "pnpm exec prisma migrate deploy && pnpm run dev:gateway"]
