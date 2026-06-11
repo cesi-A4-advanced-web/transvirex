@@ -1,0 +1,34 @@
+- 1.1 OK
+- 1.2 OK
+- 2.1 KO
+    - manque d'information sur les livraisons
+- 2.2 KO
+    - Pas de bouton d'acceptation et de refus
+    - Pas de notification pour le livreur
+- 2.3 KO
+    - Pas de détails sur la livraison
+    - Pas de bouton pour signaler un incident ou une livraison effectuée
+- 2.4 KO
+    - Pas de possibilité de faire un rapport d'incident hormis en utilisant l'assistant IA
+- 2.5 KO
+    - Pas de détails sur les missions
+    - Pas de filtre par date
+- 3.1 KO
+    - Champ "Référence livraison" obligatoire, modifiable et non auto-généré
+    - Pas de champ de sélection d'une date
+- 3.2 KO
+    - Pas d'actualisation des données en temps réel
+- 3.3 OK
+- 3.4 KO
+    - Pas d'alerte
+
+- 5.1 OK
+- 5.2 KO
+    - Pas de filtres
+    - Export non fonctionnel
+- 5.3 OK
+
+- 6.1 OK
+- 6.2
+- 6.3 OK
+- 6.4 KO
