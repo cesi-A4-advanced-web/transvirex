@@ -15,14 +15,20 @@ export class CreateDeliveryDto {
     @IsUUID()
     invoices_id: string;
 
-    @ApiProperty({ description: 'Delivery reference', example: 'DEL-021' })
+    @ApiPropertyOptional({ description: 'Delivery reference (auto-généré si omis)', example: 'LIV-20260611-A1B2' })
+    @IsOptional()
     @IsString()
-    reference: string;
+    reference?: string;
 
     @ApiPropertyOptional({ description: 'Assigned driver UUID' })
     @IsOptional()
     @IsUUID()
     driver_id?: string;
+
+    @ApiPropertyOptional({ description: 'Scheduled delivery date (ISO 8601)' })
+    @IsOptional()
+    @IsString()
+    scheduled_at?: string;
 
     @ApiPropertyOptional({ description: 'Delivery status', enum: DeliveryStatusDto })
     @IsOptional()

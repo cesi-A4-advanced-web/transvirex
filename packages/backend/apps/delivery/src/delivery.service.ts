@@ -10,7 +10,16 @@ import type { UpdateDeliveryDto } from './dto/update-delivery.dto';
 const deliveryInclude = {
     invoice: {
         include: {
-            customer: { select: { id: true, customer_name: true, contact_firstname: true, contact_lastname: true, phone_number: true, email: true } },
+            customer: {
+                select: {
+                    id: true,
+                    customer_name: true,
+                    contact_firstname: true,
+                    contact_lastname: true,
+                    phone_number: true,
+                    email: true,
+                },
+            },
             hub: { select: { id: true, name: true } },
             delivery_address: { select: { id: true, address: true, street: true, city: true, postal_code: true } },
             parcels: { select: { id: true, reference: true, weight: true } },
@@ -56,6 +65,13 @@ const ALLOWED_TRANSITIONS: Record<string, string[]> = {
 
 /** Delivery statuses considered "in progress" for a driver's current tour. */
 const ACTIVE_DELIVERY_STATUSES = ['planned', 'delivering', 'delayed', 'blocked'] as const;
+
+/** Auto-generate a delivery reference in the format LIV-{YYYYMMDD}-{XXXX}. */
+function generateDeliveryReference(): string {
+    const date = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+    const random = Math.random().toString(36).substring(2, 6).toUpperCase();
+    return `LIV-${date}-${random}`;
+}
 
 @Injectable()
 export class DeliveryService {
@@ -365,13 +381,15 @@ export class DeliveryService {
     }
 
     async createDelivery(dto: CreateDeliveryDto) {
+        const reference = dto.reference ?? generateDeliveryReference();
         return this.prisma.delivery.create({
             data: {
                 invoices_id: dto.invoices_id,
-                reference: dto.reference,
+                reference,
                 driver_id: dto.driver_id ?? null,
-                status: dto.status,
+                status: dto.status ?? 'planned',
                 notes: dto.notes,
+                scheduled_at: dto.scheduled_at ? new Date(dto.scheduled_at) : null,
                 position_history: dto.position_history ?? undefined,
             },
             include: deliveryInclude,
@@ -390,6 +408,9 @@ export class DeliveryService {
         if (dto.notes !== undefined) updateData.notes = dto.notes;
         if (dto.position_history !== undefined) {
             updateData.position_history = dto.position_history;
+        }
+        if (dto.scheduled_at !== undefined) {
+            updateData.scheduled_at = dto.scheduled_at ? new Date(dto.scheduled_at) : null;
         }
 
         return this.prisma.delivery.update({

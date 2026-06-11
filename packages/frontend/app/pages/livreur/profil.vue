@@ -20,7 +20,9 @@
                                 {{ initials }}
                             </div>
                             <div>
-                                <h2 class="text-lg font-bold">{{ user?.firstname ?? '' }} {{ user?.lastname ?? '' }}</h2>
+                                <h2 class="text-lg font-bold">
+                                    {{ user?.firstname ?? '' }} {{ user?.lastname ?? '' }}
+                                </h2>
                                 <p class="text-sm text-muted-foreground">Chauffeur · {{ hubName }}</p>
                                 <div class="flex items-center gap-1 mt-1">
                                     <span
@@ -30,7 +32,9 @@
                                         :class="i <= Math.round(driverRating) ? '' : 'opacity-30'"
                                         >★</span
                                     >
-                                    <span class="text-sm text-muted-foreground ml-1">{{ driverRatingDisplay }} / 5</span>
+                                    <span class="text-sm text-muted-foreground ml-1"
+                                        >{{ driverRatingDisplay }} / 5</span
+                                    >
                                 </div>
                             </div>
                         </div>
@@ -102,8 +106,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Loader2, Truck } from '@lucide/vue';
 import { useApi, type ApiDelivery } from '@/composables/useApi';
+import { Loader2, Truck } from '@lucide/vue';
 
 definePageMeta({ layout: false });
 useHead({ title: 'Mon profil — Livreur' });
@@ -112,7 +116,8 @@ const { get, patch } = useApi();
 
 function parseJwt(token: string): Record<string, unknown> | null {
     try {
-        const b64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+        const b64 = token.split('.')[1]?.replace(/-/g, '+').replace(/_/g, '/');
+        if (!b64) return null;
         return JSON.parse(atob(b64));
     } catch {
         return null;
@@ -130,8 +135,19 @@ const initials = computed(() => {
 
 const loading = ref(true);
 const saving = ref(false);
-const user = ref<{ id: string; firstname: string | null; lastname: string | null; email: string | null; phone_number: string | null; hub: { name: string | null } | null } | null>(null);
-const driverProfile = ref<{ reference: string; rating: number | null; vehicle: { type: string | null; license_plate: string | null } | null } | null>(null);
+const user = ref<{
+    id: string;
+    firstname: string | null;
+    lastname: string | null;
+    email: string | null;
+    phone_number: string | null;
+    hub: { name: string | null } | null;
+} | null>(null);
+const driverProfile = ref<{
+    reference: string;
+    rating: number | null;
+    vehicle: { type: string | null; license_plate: string | null } | null;
+} | null>(null);
 const deliveries = ref<ApiDelivery[]>([]);
 
 const editName = ref('');
@@ -142,7 +158,7 @@ const saveError = ref(false);
 
 const hubName = computed(() => user.value?.hub?.name ?? 'Hub principal');
 const driverRating = computed(() => driverProfile.value?.rating ?? 0);
-const driverRatingDisplay = computed(() => driverRating.value ? driverRating.value.toFixed(1) : '—');
+const driverRatingDisplay = computed(() => (driverRating.value ? driverRating.value.toFixed(1) : '—'));
 
 const vehicleName = computed(() => driverProfile.value?.vehicle?.type ?? 'Véhicule non assigné');
 const vehiclePlate = computed(() => driverProfile.value?.vehicle?.license_plate ?? '—');
@@ -160,7 +176,10 @@ async function fetchData() {
         const [userRes, driverRes, delRes] = await Promise.all([
             get(`/users/${userId.value}`).catch(() => null),
             get(`/users/${userId.value}/driver`).catch(() => null),
-            get<{ data: ApiDelivery[]; total: number }>('/deliveries', { limit: 200 }).catch(() => ({ data: [], total: 0 })),
+            get<{ data: ApiDelivery[]; total: number }>('/deliveries', { limit: 200 }).catch(() => ({
+                data: [],
+                total: 0,
+            })),
         ]);
         user.value = userRes as typeof user.value;
         driverProfile.value = driverRes as typeof driverProfile.value;
@@ -190,7 +209,9 @@ async function saveProfile() {
             phone_number: editPhone.value || undefined,
         });
         saveMessage.value = 'Profil mis à jour ✓';
-        setTimeout(() => { saveMessage.value = ''; }, 3000);
+        setTimeout(() => {
+            saveMessage.value = '';
+        }, 3000);
     } catch (e) {
         console.error('Failed to save profile', e);
         saveMessage.value = 'Erreur lors de la sauvegarde';
@@ -202,3 +223,4 @@ async function saveProfile() {
 
 onMounted(fetchData);
 </script>
+

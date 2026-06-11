@@ -31,6 +31,7 @@ export type DeliveryMinAggregateOutputType = {
   reference: string | null
   status: $Enums.DeliveryStatus | null
   notes: string | null
+  scheduled_at: Date | null
 }
 
 export type DeliveryMaxAggregateOutputType = {
@@ -40,6 +41,7 @@ export type DeliveryMaxAggregateOutputType = {
   reference: string | null
   status: $Enums.DeliveryStatus | null
   notes: string | null
+  scheduled_at: Date | null
 }
 
 export type DeliveryCountAggregateOutputType = {
@@ -49,6 +51,7 @@ export type DeliveryCountAggregateOutputType = {
   reference: number
   status: number
   notes: number
+  scheduled_at: number
   position_history: number
   _all: number
 }
@@ -61,6 +64,7 @@ export type DeliveryMinAggregateInputType = {
   reference?: true
   status?: true
   notes?: true
+  scheduled_at?: true
 }
 
 export type DeliveryMaxAggregateInputType = {
@@ -70,6 +74,7 @@ export type DeliveryMaxAggregateInputType = {
   reference?: true
   status?: true
   notes?: true
+  scheduled_at?: true
 }
 
 export type DeliveryCountAggregateInputType = {
@@ -79,6 +84,7 @@ export type DeliveryCountAggregateInputType = {
   reference?: true
   status?: true
   notes?: true
+  scheduled_at?: true
   position_history?: true
   _all?: true
 }
@@ -162,6 +168,7 @@ export type DeliveryGroupByOutputType = {
   reference: string
   status: $Enums.DeliveryStatus | null
   notes: string | null
+  scheduled_at: Date | null
   position_history: runtime.JsonValue | null
   _count: DeliveryCountAggregateOutputType | null
   _min: DeliveryMinAggregateOutputType | null
@@ -193,6 +200,7 @@ export type DeliveryWhereInput = {
   reference?: Prisma.StringFilter<"Delivery"> | string
   status?: Prisma.EnumDeliveryStatusNullableFilter<"Delivery"> | $Enums.DeliveryStatus | null
   notes?: Prisma.StringNullableFilter<"Delivery"> | string | null
+  scheduled_at?: Prisma.DateTimeNullableFilter<"Delivery"> | Date | string | null
   position_history?: Prisma.JsonNullableFilter<"Delivery">
   invoice?: Prisma.XOR<Prisma.InvoiceScalarRelationFilter, Prisma.InvoiceWhereInput>
   driver?: Prisma.XOR<Prisma.DriverNullableScalarRelationFilter, Prisma.DriverWhereInput> | null
@@ -206,6 +214,7 @@ export type DeliveryOrderByWithRelationInput = {
   reference?: Prisma.SortOrder
   status?: Prisma.SortOrderInput | Prisma.SortOrder
   notes?: Prisma.SortOrderInput | Prisma.SortOrder
+  scheduled_at?: Prisma.SortOrderInput | Prisma.SortOrder
   position_history?: Prisma.SortOrderInput | Prisma.SortOrder
   invoice?: Prisma.InvoiceOrderByWithRelationInput
   driver?: Prisma.DriverOrderByWithRelationInput
@@ -222,6 +231,7 @@ export type DeliveryWhereUniqueInput = Prisma.AtLeast<{
   reference?: Prisma.StringFilter<"Delivery"> | string
   status?: Prisma.EnumDeliveryStatusNullableFilter<"Delivery"> | $Enums.DeliveryStatus | null
   notes?: Prisma.StringNullableFilter<"Delivery"> | string | null
+  scheduled_at?: Prisma.DateTimeNullableFilter<"Delivery"> | Date | string | null
   position_history?: Prisma.JsonNullableFilter<"Delivery">
   invoice?: Prisma.XOR<Prisma.InvoiceScalarRelationFilter, Prisma.InvoiceWhereInput>
   driver?: Prisma.XOR<Prisma.DriverNullableScalarRelationFilter, Prisma.DriverWhereInput> | null
@@ -235,6 +245,7 @@ export type DeliveryOrderByWithAggregationInput = {
   reference?: Prisma.SortOrder
   status?: Prisma.SortOrderInput | Prisma.SortOrder
   notes?: Prisma.SortOrderInput | Prisma.SortOrder
+  scheduled_at?: Prisma.SortOrderInput | Prisma.SortOrder
   position_history?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.DeliveryCountOrderByAggregateInput
   _max?: Prisma.DeliveryMaxOrderByAggregateInput
@@ -251,6 +262,7 @@ export type DeliveryScalarWhereWithAggregatesInput = {
   reference?: Prisma.StringWithAggregatesFilter<"Delivery"> | string
   status?: Prisma.EnumDeliveryStatusNullableWithAggregatesFilter<"Delivery"> | $Enums.DeliveryStatus | null
   notes?: Prisma.StringNullableWithAggregatesFilter<"Delivery"> | string | null
+  scheduled_at?: Prisma.DateTimeNullableWithAggregatesFilter<"Delivery"> | Date | string | null
   position_history?: Prisma.JsonNullableWithAggregatesFilter<"Delivery">
 }
 
@@ -259,6 +271,7 @@ export type DeliveryCreateInput = {
   reference: string
   status?: $Enums.DeliveryStatus | null
   notes?: string | null
+  scheduled_at?: Date | string | null
   position_history?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   invoice: Prisma.InvoiceCreateNestedOneWithoutDeliveriesInput
   driver?: Prisma.DriverCreateNestedOneWithoutDeliveriesInput
@@ -272,6 +285,7 @@ export type DeliveryUncheckedCreateInput = {
   reference: string
   status?: $Enums.DeliveryStatus | null
   notes?: string | null
+  scheduled_at?: Date | string | null
   position_history?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   delivery_events?: Prisma.DeliveryEventUncheckedCreateNestedManyWithoutDeliveryInput
 }
@@ -281,6 +295,7 @@ export type DeliveryUpdateInput = {
   reference?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.NullableEnumDeliveryStatusFieldUpdateOperationsInput | $Enums.DeliveryStatus | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scheduled_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   position_history?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   invoice?: Prisma.InvoiceUpdateOneRequiredWithoutDeliveriesNestedInput
   driver?: Prisma.DriverUpdateOneWithoutDeliveriesNestedInput
@@ -294,6 +309,7 @@ export type DeliveryUncheckedUpdateInput = {
   reference?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.NullableEnumDeliveryStatusFieldUpdateOperationsInput | $Enums.DeliveryStatus | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scheduled_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   position_history?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   delivery_events?: Prisma.DeliveryEventUncheckedUpdateManyWithoutDeliveryNestedInput
 }
@@ -305,6 +321,7 @@ export type DeliveryCreateManyInput = {
   reference: string
   status?: $Enums.DeliveryStatus | null
   notes?: string | null
+  scheduled_at?: Date | string | null
   position_history?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
 }
 
@@ -313,6 +330,7 @@ export type DeliveryUpdateManyMutationInput = {
   reference?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.NullableEnumDeliveryStatusFieldUpdateOperationsInput | $Enums.DeliveryStatus | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scheduled_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   position_history?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
 }
 
@@ -323,6 +341,7 @@ export type DeliveryUncheckedUpdateManyInput = {
   reference?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.NullableEnumDeliveryStatusFieldUpdateOperationsInput | $Enums.DeliveryStatus | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scheduled_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   position_history?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
 }
 
@@ -343,6 +362,7 @@ export type DeliveryCountOrderByAggregateInput = {
   reference?: Prisma.SortOrder
   status?: Prisma.SortOrder
   notes?: Prisma.SortOrder
+  scheduled_at?: Prisma.SortOrder
   position_history?: Prisma.SortOrder
 }
 
@@ -353,6 +373,7 @@ export type DeliveryMaxOrderByAggregateInput = {
   reference?: Prisma.SortOrder
   status?: Prisma.SortOrder
   notes?: Prisma.SortOrder
+  scheduled_at?: Prisma.SortOrder
 }
 
 export type DeliveryMinOrderByAggregateInput = {
@@ -362,6 +383,7 @@ export type DeliveryMinOrderByAggregateInput = {
   reference?: Prisma.SortOrder
   status?: Prisma.SortOrder
   notes?: Prisma.SortOrder
+  scheduled_at?: Prisma.SortOrder
 }
 
 export type DeliveryScalarRelationFilter = {
@@ -476,6 +498,7 @@ export type DeliveryCreateWithoutDriverInput = {
   reference: string
   status?: $Enums.DeliveryStatus | null
   notes?: string | null
+  scheduled_at?: Date | string | null
   position_history?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   invoice: Prisma.InvoiceCreateNestedOneWithoutDeliveriesInput
   delivery_events?: Prisma.DeliveryEventCreateNestedManyWithoutDeliveryInput
@@ -487,6 +510,7 @@ export type DeliveryUncheckedCreateWithoutDriverInput = {
   reference: string
   status?: $Enums.DeliveryStatus | null
   notes?: string | null
+  scheduled_at?: Date | string | null
   position_history?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   delivery_events?: Prisma.DeliveryEventUncheckedCreateNestedManyWithoutDeliveryInput
 }
@@ -527,6 +551,7 @@ export type DeliveryScalarWhereInput = {
   reference?: Prisma.StringFilter<"Delivery"> | string
   status?: Prisma.EnumDeliveryStatusNullableFilter<"Delivery"> | $Enums.DeliveryStatus | null
   notes?: Prisma.StringNullableFilter<"Delivery"> | string | null
+  scheduled_at?: Prisma.DateTimeNullableFilter<"Delivery"> | Date | string | null
   position_history?: Prisma.JsonNullableFilter<"Delivery">
 }
 
@@ -535,6 +560,7 @@ export type DeliveryCreateWithoutInvoiceInput = {
   reference: string
   status?: $Enums.DeliveryStatus | null
   notes?: string | null
+  scheduled_at?: Date | string | null
   position_history?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   driver?: Prisma.DriverCreateNestedOneWithoutDeliveriesInput
   delivery_events?: Prisma.DeliveryEventCreateNestedManyWithoutDeliveryInput
@@ -546,6 +572,7 @@ export type DeliveryUncheckedCreateWithoutInvoiceInput = {
   reference: string
   status?: $Enums.DeliveryStatus | null
   notes?: string | null
+  scheduled_at?: Date | string | null
   position_history?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   delivery_events?: Prisma.DeliveryEventUncheckedCreateNestedManyWithoutDeliveryInput
 }
@@ -581,6 +608,7 @@ export type DeliveryCreateWithoutDelivery_eventsInput = {
   reference: string
   status?: $Enums.DeliveryStatus | null
   notes?: string | null
+  scheduled_at?: Date | string | null
   position_history?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   invoice: Prisma.InvoiceCreateNestedOneWithoutDeliveriesInput
   driver?: Prisma.DriverCreateNestedOneWithoutDeliveriesInput
@@ -593,6 +621,7 @@ export type DeliveryUncheckedCreateWithoutDelivery_eventsInput = {
   reference: string
   status?: $Enums.DeliveryStatus | null
   notes?: string | null
+  scheduled_at?: Date | string | null
   position_history?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
 }
 
@@ -617,6 +646,7 @@ export type DeliveryUpdateWithoutDelivery_eventsInput = {
   reference?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.NullableEnumDeliveryStatusFieldUpdateOperationsInput | $Enums.DeliveryStatus | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scheduled_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   position_history?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   invoice?: Prisma.InvoiceUpdateOneRequiredWithoutDeliveriesNestedInput
   driver?: Prisma.DriverUpdateOneWithoutDeliveriesNestedInput
@@ -629,6 +659,7 @@ export type DeliveryUncheckedUpdateWithoutDelivery_eventsInput = {
   reference?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.NullableEnumDeliveryStatusFieldUpdateOperationsInput | $Enums.DeliveryStatus | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scheduled_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   position_history?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
 }
 
@@ -638,6 +669,7 @@ export type DeliveryCreateManyDriverInput = {
   reference: string
   status?: $Enums.DeliveryStatus | null
   notes?: string | null
+  scheduled_at?: Date | string | null
   position_history?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
 }
 
@@ -646,6 +678,7 @@ export type DeliveryUpdateWithoutDriverInput = {
   reference?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.NullableEnumDeliveryStatusFieldUpdateOperationsInput | $Enums.DeliveryStatus | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scheduled_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   position_history?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   invoice?: Prisma.InvoiceUpdateOneRequiredWithoutDeliveriesNestedInput
   delivery_events?: Prisma.DeliveryEventUpdateManyWithoutDeliveryNestedInput
@@ -657,6 +690,7 @@ export type DeliveryUncheckedUpdateWithoutDriverInput = {
   reference?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.NullableEnumDeliveryStatusFieldUpdateOperationsInput | $Enums.DeliveryStatus | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scheduled_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   position_history?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   delivery_events?: Prisma.DeliveryEventUncheckedUpdateManyWithoutDeliveryNestedInput
 }
@@ -667,6 +701,7 @@ export type DeliveryUncheckedUpdateManyWithoutDriverInput = {
   reference?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.NullableEnumDeliveryStatusFieldUpdateOperationsInput | $Enums.DeliveryStatus | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scheduled_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   position_history?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
 }
 
@@ -676,6 +711,7 @@ export type DeliveryCreateManyInvoiceInput = {
   reference: string
   status?: $Enums.DeliveryStatus | null
   notes?: string | null
+  scheduled_at?: Date | string | null
   position_history?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
 }
 
@@ -684,6 +720,7 @@ export type DeliveryUpdateWithoutInvoiceInput = {
   reference?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.NullableEnumDeliveryStatusFieldUpdateOperationsInput | $Enums.DeliveryStatus | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scheduled_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   position_history?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   driver?: Prisma.DriverUpdateOneWithoutDeliveriesNestedInput
   delivery_events?: Prisma.DeliveryEventUpdateManyWithoutDeliveryNestedInput
@@ -695,6 +732,7 @@ export type DeliveryUncheckedUpdateWithoutInvoiceInput = {
   reference?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.NullableEnumDeliveryStatusFieldUpdateOperationsInput | $Enums.DeliveryStatus | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scheduled_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   position_history?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   delivery_events?: Prisma.DeliveryEventUncheckedUpdateManyWithoutDeliveryNestedInput
 }
@@ -705,6 +743,7 @@ export type DeliveryUncheckedUpdateManyWithoutInvoiceInput = {
   reference?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.NullableEnumDeliveryStatusFieldUpdateOperationsInput | $Enums.DeliveryStatus | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scheduled_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   position_history?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
 }
 
@@ -746,6 +785,7 @@ export type DeliverySelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   reference?: boolean
   status?: boolean
   notes?: boolean
+  scheduled_at?: boolean
   position_history?: boolean
   invoice?: boolean | Prisma.InvoiceDefaultArgs<ExtArgs>
   driver?: boolean | Prisma.Delivery$driverArgs<ExtArgs>
@@ -760,6 +800,7 @@ export type DeliverySelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exte
   reference?: boolean
   status?: boolean
   notes?: boolean
+  scheduled_at?: boolean
   position_history?: boolean
   invoice?: boolean | Prisma.InvoiceDefaultArgs<ExtArgs>
   driver?: boolean | Prisma.Delivery$driverArgs<ExtArgs>
@@ -772,6 +813,7 @@ export type DeliverySelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exte
   reference?: boolean
   status?: boolean
   notes?: boolean
+  scheduled_at?: boolean
   position_history?: boolean
   invoice?: boolean | Prisma.InvoiceDefaultArgs<ExtArgs>
   driver?: boolean | Prisma.Delivery$driverArgs<ExtArgs>
@@ -784,10 +826,11 @@ export type DeliverySelectScalar = {
   reference?: boolean
   status?: boolean
   notes?: boolean
+  scheduled_at?: boolean
   position_history?: boolean
 }
 
-export type DeliveryOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "invoices_id" | "driver_id" | "reference" | "status" | "notes" | "position_history", ExtArgs["result"]["delivery"]>
+export type DeliveryOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "invoices_id" | "driver_id" | "reference" | "status" | "notes" | "scheduled_at" | "position_history", ExtArgs["result"]["delivery"]>
 export type DeliveryInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   invoice?: boolean | Prisma.InvoiceDefaultArgs<ExtArgs>
   driver?: boolean | Prisma.Delivery$driverArgs<ExtArgs>
@@ -817,6 +860,7 @@ export type $DeliveryPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
     reference: string
     status: $Enums.DeliveryStatus | null
     notes: string | null
+    scheduled_at: Date | null
     position_history: runtime.JsonValue | null
   }, ExtArgs["result"]["delivery"]>
   composites: {}
@@ -1250,6 +1294,7 @@ export interface DeliveryFieldRefs {
   readonly reference: Prisma.FieldRef<"Delivery", 'String'>
   readonly status: Prisma.FieldRef<"Delivery", 'DeliveryStatus'>
   readonly notes: Prisma.FieldRef<"Delivery", 'String'>
+  readonly scheduled_at: Prisma.FieldRef<"Delivery", 'DateTime'>
   readonly position_history: Prisma.FieldRef<"Delivery", 'Json'>
 }
     

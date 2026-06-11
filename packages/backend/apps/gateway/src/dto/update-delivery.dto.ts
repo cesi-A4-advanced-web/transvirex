@@ -18,6 +18,11 @@ export class UpdateDeliveryDto {
     @IsUUID()
     driver_id?: string | null;
 
+    @ApiPropertyOptional({ description: 'Scheduled delivery date (ISO 8601)' })
+    @IsOptional()
+    @IsString()
+    scheduled_at?: string;
+
     @ApiPropertyOptional({ description: 'Delivery status', enum: DeliveryStatusDto })
     @IsOptional()
     @IsEnum(DeliveryStatusDto)

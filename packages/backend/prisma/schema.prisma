@@ -197,6 +197,7 @@ model Delivery {
     reference        String
     status           DeliveryStatus?
     notes            String?
+    scheduled_at     DateTime?
     position_history Json?
 
     invoice         Invoice         @relation(fields: [invoices_id], references: [id])

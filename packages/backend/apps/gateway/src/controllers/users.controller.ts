@@ -12,14 +12,7 @@ import {
     Query,
     Req,
 } from '@nestjs/common';
-import {
-    ApiBearerAuth,
-    ApiOperation,
-    ApiParam,
-    ApiQuery,
-    ApiResponse,
-    ApiTags,
-} from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import type { Request } from 'express';
 import { CreateDriverDto } from '../dto/create-driver.dto';
 import { CreateUserDto, UserRoleDto, UserStatusDto } from '../dto/create-user.dto';
@@ -55,12 +48,7 @@ export class UsersController {
         @Query('status') status: UserStatusDto | undefined,
         @Req() req: Request,
     ) {
-        return this.gatewayService.getUsers(
-            page,
-            limit,
-            { hub_id, role, status },
-            (req as any).user,
-        );
+        return this.gatewayService.getUsers(page, limit, { hub_id, role, status }, (req as any).user);
     }
 
     @ApiTags('Users')
@@ -69,8 +57,7 @@ export class UsersController {
     @Roles('admin', 'dispatcher', 'business_manager')
     @ApiOperation({
         summary: 'Create a user',
-        description:
-            'Creates a user. Reference is auto-generated if omitted. Password is hashed before storage.',
+        description: 'Creates a user. Reference is auto-generated if omitted. Password is hashed before storage.',
     })
     @ApiResponse({ status: 201, description: 'User created' })
     @ApiResponse({ status: 400, description: 'Validation error' })
@@ -84,8 +71,7 @@ export class UsersController {
     @Roles('admin', 'dispatcher', 'driver')
     @ApiOperation({
         summary: 'Create driver profile',
-        description:
-            'Create a Driver profile for the specified user. The user must have the driver role.',
+        description: 'Create a Driver profile for the specified user. The user must have the driver role.',
     })
     @ApiParam({ name: 'id', description: 'User UUID' })
     @ApiResponse({ status: 201, description: 'Driver profile created' })
@@ -94,11 +80,7 @@ export class UsersController {
         description: 'User does not have driver role or profile already exists',
     })
     @ApiResponse({ status: 404, description: 'User not found' })
-    createDriver(
-        @Param('id') id: string,
-        @Body() body: CreateDriverDto,
-        @Req() req: Request,
-    ) {
+    createDriver(@Param('id') id: string, @Body() body: CreateDriverDto, @Req() req: Request) {
         return this.gatewayService.createDriver(id, body, (req as any).user);
     }
 
@@ -120,7 +102,7 @@ export class UsersController {
     @ApiTags('Users')
     @Get('users/:id')
     @ApiBearerAuth('JWT-auth')
-    @Roles('admin', 'dispatcher', 'business_manager')
+    @Roles('admin', 'dispatcher', 'business_manager', 'driver')
     @ApiOperation({
         summary: 'Get user by ID',
         description: 'Returns user details without password hash.',
@@ -129,6 +111,9 @@ export class UsersController {
     @ApiResponse({ status: 200, description: 'User detail' })
     @ApiResponse({ status: 404, description: 'User not found' })
     getUser(@Param('id') id: string, @Req() req: Request) {
+        if ((req as any).user.role === 'driver' && (req as any).user.sub !== id) {
+            return { statusCode: 403, message: 'Forbidden' };
+        }
         return this.gatewayService.getUser(id, (req as any).user);
     }
 
@@ -143,11 +128,7 @@ export class UsersController {
     @ApiParam({ name: 'id', description: 'User UUID' })
     @ApiResponse({ status: 200, description: 'User updated' })
     @ApiResponse({ status: 404, description: 'User not found' })
-    updateUser(
-        @Param('id') id: string,
-        @Body() body: UpdateUserDto,
-        @Req() req: Request,
-    ) {
+    updateUser(@Param('id') id: string, @Body() body: UpdateUserDto, @Req() req: Request) {
         return this.gatewayService.updateUser(id, body, (req as any).user);
     }
 

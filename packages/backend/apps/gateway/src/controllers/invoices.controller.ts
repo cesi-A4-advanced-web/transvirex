@@ -51,7 +51,10 @@ export class InvoicesController {
     @Delete('invoices/:id/parcels/:parcelId')
     @ApiBearerAuth('JWT-auth')
     @Roles('admin', 'dispatcher')
-    @ApiOperation({ summary: 'Delete a parcel', description: 'Remove a parcel from an invoice and recalculate amount.' })
+    @ApiOperation({
+        summary: 'Delete a parcel',
+        description: 'Remove a parcel from an invoice and recalculate amount.',
+    })
     @ApiParam({ name: 'id', description: 'Invoice UUID' })
     @ApiParam({ name: 'parcelId', description: 'Parcel UUID' })
     @ApiResponse({ status: 200, description: 'Parcel deleted' })

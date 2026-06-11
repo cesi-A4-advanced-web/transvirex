@@ -1,24 +1,6 @@
 import { Roles } from '@app/guards/roles.decorator';
-import {
-    Body,
-    Controller,
-    DefaultValuePipe,
-    Get,
-    Param,
-    ParseIntPipe,
-    Patch,
-    Post,
-    Query,
-    Req,
-} from '@nestjs/common';
-import {
-    ApiBearerAuth,
-    ApiOperation,
-    ApiParam,
-    ApiQuery,
-    ApiResponse,
-    ApiTags,
-} from '@nestjs/swagger';
+import { Body, Controller, DefaultValuePipe, Get, Param, ParseIntPipe, Patch, Post, Query, Req } from '@nestjs/common';
+import { ApiBearerAuth, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import type { Request } from 'express';
 import { CreateInvoiceDto, InvoiceStatusDto } from '../dto/create-invoice.dto';
 import { UpdateInvoiceDto } from '../dto/update-invoice.dto';
@@ -72,8 +54,7 @@ export class BillingController {
     @Roles('business_manager', 'dispatcher')
     @ApiOperation({
         summary: 'Get invoice by ID',
-        description:
-            'Returns invoice details with customer, hub, business manager, parcels, and deliveries.',
+        description: 'Returns invoice details with customer, hub, business manager, parcels, and deliveries.',
     })
     @ApiParam({ name: 'id', description: 'Invoice UUID' })
     @ApiResponse({ status: 200, description: 'Invoice detail' })
@@ -109,11 +90,7 @@ export class BillingController {
     @ApiResponse({ status: 200, description: 'Invoice status updated' })
     @ApiResponse({ status: 400, description: 'Invalid status transition' })
     @ApiResponse({ status: 404, description: 'Invoice not found' })
-    updateInvoiceStatus(
-        @Param('id') id: string,
-        @Body() body: UpdateInvoiceStatusDto,
-        @Req() req: Request,
-    ) {
+    updateInvoiceStatus(@Param('id') id: string, @Body() body: UpdateInvoiceStatusDto, @Req() req: Request) {
         return this.gatewayService.updateInvoiceStatus(id, body, (req as any).user);
     }
 
@@ -128,11 +105,7 @@ export class BillingController {
     @ApiParam({ name: 'id', description: 'Invoice UUID' })
     @ApiResponse({ status: 200, description: 'Invoice updated' })
     @ApiResponse({ status: 404, description: 'Invoice not found' })
-    updateInvoice(
-        @Param('id') id: string,
-        @Body() body: UpdateInvoiceDto,
-        @Req() req: Request,
-    ) {
+    updateInvoice(@Param('id') id: string, @Body() body: UpdateInvoiceDto, @Req() req: Request) {
         return this.gatewayService.updateInvoice(id, body, (req as any).user);
     }
 }

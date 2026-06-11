@@ -78,4 +78,3 @@ export class CreateUserDto {
     @IsEnum(UserRoleDto)
     role?: UserRoleDto;
 }
-

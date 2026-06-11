@@ -137,7 +137,38 @@
                     </div>
                     <div class="space-y-2">
                         <Label>Référence livraison</Label>
-                        <Input v-model="planForm.reference" placeholder="ex: LIV-021" />
+                        <Input v-model="planForm.reference" readonly placeholder="Généré automatiquement" />
+                    </div>
+                    <div class="space-y-2">
+                        <Label>Chauffeur (optionnel)</Label>
+                        <div v-if="driverOptions.length > 0" class="border rounded-lg max-h-36 overflow-y-auto divide-y">
+                            <div
+                                v-for="driver in driverOptions"
+                                :key="driver.id"
+                                class="flex items-center justify-between px-3 py-2 cursor-pointer hover:bg-muted/50 transition-colors text-sm"
+                                :class="planForm.driver_id === driver.id ? 'bg-primary/5 border-l-2 border-l-primary' : 'border-l-2 border-l-transparent'"
+                                @click="planForm.driver_id = planForm.driver_id === driver.id ? '' : driver.id"
+                            >
+                                <div>
+                                    <p class="text-xs font-medium">{{ driver.name }}</p>
+                                    <p class="text-xs text-muted-foreground">{{ driver.email }}</p>
+                                </div>
+                                <Badge v-if="planForm.driver_id === driver.id" variant="outline" class="text-[10px]">Sélectionné</Badge>
+                            </div>
+                            <div
+                                class="flex items-center px-3 py-2 cursor-pointer hover:bg-muted/50 transition-colors text-sm"
+                                :class="!planForm.driver_id ? 'bg-primary/5 border-l-2 border-l-primary' : 'border-l-2 border-l-transparent'"
+                                @click="planForm.driver_id = ''"
+                            >
+                                <span class="text-xs text-muted-foreground">Non assigné</span>
+                                <Badge v-if="!planForm.driver_id" variant="outline" class="text-[10px] ml-auto">Sélectionné</Badge>
+                            </div>
+                        </div>
+                        <div v-else class="text-center text-xs text-muted-foreground py-2">Aucun chauffeur disponible</div>
+                    </div>
+                    <div class="space-y-2">
+                        <Label>Date planifiée (optionnel)</Label>
+                        <Input v-model="planForm.scheduled_at" type="datetime-local" />
                     </div>
                     <div class="space-y-2">
                         <Label>Notes (optionnel)</Label>
@@ -146,7 +177,7 @@
                 </div>
                 <DialogFooter>
                     <Button variant="outline" @click="showPlanifier = false">Annuler</Button>
-                    <Button :disabled="!planForm.invoices_id || !planForm.reference || creating" @click="confirmPlanifier">
+                    <Button :disabled="!planForm.invoices_id || creating" @click="confirmPlanifier">
                         <Loader2 v-if="creating" class="w-4 h-4 mr-2 animate-spin" />
                         Créer
                     </Button>
@@ -284,7 +315,13 @@ const detailData = ref<{
     notes: string | null;
 } | null>(null);
 
-const planForm = ref({ invoices_id: '', reference: '', notes: '' });
+const planForm = ref({ invoices_id: '', reference: '', notes: '', driver_id: '', scheduled_at: '' });
+
+function generateRef(): string {
+    const date = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+    const rand = Math.random().toString(36).substring(2, 6).toUpperCase();
+    return `LIV-${date}-${rand}`;
+}
 
 const tabs = computed(() => [
     { label: 'Toutes', value: 'all', count: deliveries.value.length },
@@ -395,7 +432,7 @@ async function fetchData() {
 }
 
 async function openPlanifier() {
-    planForm.value = { invoices_id: '', reference: '', notes: '' };
+    planForm.value = { invoices_id: '', reference: generateRef(), notes: '', driver_id: '', scheduled_at: '' };
     invoiceSearch.value = '';
     showPlanifier.value = true;
     if (invoices.value.length === 0) {
@@ -412,14 +449,16 @@ async function openPlanifier() {
 }
 
 async function confirmPlanifier() {
-    if (!planForm.value.invoices_id || !planForm.value.reference) return;
+    if (!planForm.value.invoices_id) return;
     creating.value = true;
     try {
-        await post('/deliveries', {
+        const payload: Record<string, unknown> = {
             invoices_id: planForm.value.invoices_id,
-            reference: planForm.value.reference,
             notes: planForm.value.notes || undefined,
-        });
+        };
+        if (planForm.value.driver_id) payload.driver_id = planForm.value.driver_id;
+        if (planForm.value.scheduled_at) payload.scheduled_at = new Date(planForm.value.scheduled_at).toISOString();
+        await post('/deliveries', payload);
         showPlanifier.value = false;
         await fetchData();
     } catch (e) {

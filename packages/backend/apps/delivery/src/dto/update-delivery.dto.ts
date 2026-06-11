@@ -6,5 +6,6 @@ export type UpdateDeliveryDto = {
     driver_id?: string | null;
     status?: DeliveryStatus;
     notes?: string | null;
+    scheduled_at?: string;
     position_history?: unknown;
 };

@@ -324,10 +324,7 @@ export class GatewayService {
 
     /** List all parcels across all invoices. */
     listAllParcels(page: number, limit: number, user?: { sub: string; email: string; role: string }) {
-        return this.proxyGet(
-            this.appendQuery(`${this.serviceUrls.billing}/parcels`, { page, limit }),
-            user,
-        );
+        return this.proxyGet(this.appendQuery(`${this.serviceUrls.billing}/parcels`, { page, limit }), user);
     }
 
     /** List customers via the billing service. */

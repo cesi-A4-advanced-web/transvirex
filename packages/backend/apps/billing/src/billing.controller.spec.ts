@@ -31,13 +31,9 @@ describe('BillingController', () => {
     describe('findById', () => {
         it('should return an invoice', async () => {
             const invoice = { id: 'invoice-id', reference: 'INV-001' };
-            jest.spyOn(billingService, 'findById').mockResolvedValue(
-                invoice as never,
-            );
+            jest.spyOn(billingService, 'findById').mockResolvedValue(invoice as never);
 
-            await expect(
-                billingController.findById('invoice-id'),
-            ).resolves.toEqual(invoice);
+            await expect(billingController.findById('invoice-id')).resolves.toEqual(invoice);
             expect(billingService.findById).toHaveBeenCalledWith('invoice-id');
         });
     });
@@ -55,13 +51,9 @@ describe('BillingController', () => {
                 due_date: '2026-12-31T00:00:00.000Z',
             };
             const invoice = { id: 'invoice-id', ...body };
-            jest.spyOn(billingService, 'create').mockResolvedValue(
-                invoice as never,
-            );
+            jest.spyOn(billingService, 'create').mockResolvedValue(invoice as never);
 
-            await expect(billingController.create(body as never)).resolves.toEqual(
-                invoice,
-            );
+            await expect(billingController.create(body as never)).resolves.toEqual(invoice);
             expect(billingService.create).toHaveBeenCalledWith(body);
         });
     });
@@ -74,9 +66,7 @@ describe('BillingController', () => {
                 limit: 10,
                 total: 1,
             };
-            jest.spyOn(billingService, 'findAll').mockResolvedValue(
-                result as never,
-            );
+            jest.spyOn(billingService, 'findAll').mockResolvedValue(result as never);
             await expect(
                 billingController.findAll(1, 10, undefined, undefined, undefined, undefined, undefined),
             ).resolves.toEqual(result);

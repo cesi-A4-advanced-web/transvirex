@@ -1,9 +1,5 @@
 import { PrismaService } from '@app/database';
-import {
-    BadRequestException,
-    Injectable,
-    NotFoundException,
-} from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import * as bcrypt from 'bcryptjs';
 import type { CreateUserDto } from './dto/create-user.dto';
 import type { UpdateUserDto } from './dto/update-user.dto';
@@ -106,9 +102,7 @@ export class UsersService {
 
     async create(dto: CreateUserDto) {
         const reference = dto.reference ?? (await this.generateUserReference());
-        const hash_password = dto.password
-            ? await bcrypt.hash(dto.password, 10)
-            : null;
+        const hash_password = dto.password ? await bcrypt.hash(dto.password, 10) : null;
 
         return this.prisma.user.create({
             data: {

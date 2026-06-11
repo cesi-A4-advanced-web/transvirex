@@ -188,6 +188,7 @@ export const DeliveryScalarFieldEnum = {
   reference: 'reference',
   status: 'status',
   notes: 'notes',
+  scheduled_at: 'scheduled_at',
   position_history: 'position_history'
 } as const
 
