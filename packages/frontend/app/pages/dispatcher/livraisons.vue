@@ -282,6 +282,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Loader2, Plus, Search } from '@lucide/vue';
 import { useApi, type ApiDelivery, type ApiInvoice, type ApiUser } from '@/composables/useApi';
+import { useRealtime } from '@/composables/useRealtime';
 
 definePageMeta({ layout: false });
 useHead({ title: 'Livraisons — Dispatcher' });
@@ -509,5 +510,12 @@ async function openDetails(d: { id: string }) {
     }
 }
 
-onMounted(fetchData);
+onMounted(async () => {
+    await fetchData();
+
+    const realtime = useRealtime();
+    realtime.on('delivery:status', () => fetchData());
+    realtime.on('delivery:assigned', () => fetchData());
+    realtime.connect();
+});
 </script>

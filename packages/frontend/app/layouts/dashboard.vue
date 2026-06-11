@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { navigateTo, useCookie, useRoute } from '#app';
 import { useNotifications } from '@/composables/useNotifications';
+import { useRealtime } from '@/composables/useRealtime';
+import { useNotificationStore } from '@/stores/notification';
 import {
     BarChart3,
     Bell,
@@ -31,7 +33,7 @@ const collapsed = ref(false);
 const notifOpen = ref(false);
 
 // ── Notifications (dispatcher only) ──────────────────────────────────────────
-const { notifications, unreadCount, missionAlerts, missionUnreadCount, markRead, markAllRead, startPolling, startDriverPolling, clearMissionAlerts } = useNotifications();
+const { notifications, unreadCount, missionAlerts, missionUnreadCount, markRead, markAllRead, startPolling, startDriverPolling, clearMissionAlerts, onSseEvent, setSseConnected } = useNotifications();
 function parseUserIdFromToken(token: string): string | null {
     try {
         const b64 = token.split('.')[1]?.replace(/-/g, '+').replace(/_/g, '/');
@@ -48,6 +50,26 @@ onMounted(() => {
         const driverId = parseUserIdFromToken(accessToken.value);
         if (driverId) startDriverPolling(driverId, 30000);
     }
+
+    // Connect SSE for real-time events.
+    const realtime = useRealtime();
+    realtime.on('delivery:status', (data) => {
+        onSseEvent('delivery:status', data);
+    });
+    realtime.on('delivery:assigned', (data) => {
+        onSseEvent('delivery:assigned', data);
+        const notifStore = useNotificationStore();
+        notifStore.pushNotification({ type: 'assignment', deliveryId: data.deliveryId as string, message: (data.reference as string) ? `Livraison ${data.reference} assignée` : 'Nouvelle assignation' });
+        notifStore.pushToast(`Livraison ${data.reference as string ?? ''} assignée`, 'info');
+    });
+    realtime.on('delivery:incident', (data) => {
+        onSseEvent('delivery:incident', data);
+        const notifStore = useNotificationStore();
+        notifStore.pushNotification({ type: 'incident', deliveryId: data.deliveryId as string, message: data.description as string ?? 'Incident signalé' });
+        notifStore.pushToast(`Incident : ${data.description as string ?? ''}`, 'warning');
+    });
+    realtime.connect();
+    setSseConnected(true);
 });
 
 // ── Auth ──────────────────────────────────────────────────────────────────────

@@ -29,6 +29,7 @@ export function useNotifications() {
     let intervalId: ReturnType<typeof setInterval> | null = null;
     let driverDeliveryCache = new Set<string>();
     let missionPollingId: ReturnType<typeof setInterval> | null = null;
+    const sseConnected = ref(false);
 
     // ── AI Incident Notifications ────────────────────────────────────────────
 
@@ -67,6 +68,19 @@ export function useNotifications() {
     function stopPolling() {
         if (intervalId !== null) clearInterval(intervalId);
         if (missionPollingId !== null) clearInterval(missionPollingId);
+    }
+
+    function onSseEvent(event: string, data: Record<string, unknown>) {
+        if (event === 'delivery:status') {
+            fetchNotifications();
+        }
+        if (event === 'delivery:assigned' || event === 'delivery:incident') {
+            fetchNotifications();
+        }
+    }
+
+    function setSseConnected(v: boolean) {
+        sseConnected.value = v;
     }
 
     // ── Driver Mission Notifications ─────────────────────────────────────────
@@ -136,5 +150,8 @@ export function useNotifications() {
         fetchMissionNotifications,
         startDriverPolling,
         clearMissionAlerts,
+        onSseEvent,
+        sseConnected,
+        setSseConnected,
     };
 }

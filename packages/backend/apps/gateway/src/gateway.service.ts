@@ -4,6 +4,7 @@ import { MongoDBService } from '@app/mongodb';
 import { RabbitMQService } from '@app/rabbitmq';
 import { RedisService } from '@app/redis';
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { SseService } from './sse/sse.service';
 
 /** French labels for delivery statuses, used in driver notifications. */
 const DELIVERY_STATUS_LABELS: Record<string, string> = {
@@ -33,6 +34,7 @@ export class GatewayService {
         private readonly redisService: RedisService,
         private readonly rabbitMQService: RabbitMQService,
         private readonly mongoDBService: MongoDBService,
+        private readonly sseService: SseService,
     ) {}
 
     /** Fetch the health status of a downstream service. */
@@ -250,9 +252,17 @@ export class GatewayService {
         return this.proxyPatch(`${this.serviceUrls.delivery}/hubs/${id}`, body, user);
     }
 
-    /** Update driver GPS position via the delivery service. */
-    updatePosition(body: unknown, user?: { sub: string; email: string; role: string }) {
-        return this.proxyPatch(`${this.serviceUrls.delivery}/deliveries/position`, body, user);
+    /** Update driver GPS position via the delivery service, then broadcast to dispatchers. */
+    async updatePosition(body: unknown, user?: { sub: string; email: string; role: string }) {
+        const result = await this.proxyPatch(`${this.serviceUrls.delivery}/deliveries/position`, body, user);
+        if (user) {
+            this.sseService.broadcast('position:update', {
+                driverId: user.sub,
+                ...(body as { lat: number; lng: number }),
+                updatedAt: new Date().toISOString(),
+            });
+        }
+        return result;
     }
 
     /** Get driver position via the delivery service. */
@@ -263,9 +273,11 @@ export class GatewayService {
     /** Update delivery status via the delivery service, then notify the driver when changed by someone else. */
     async updateDeliveryStatus(id: string, body: unknown, user?: { sub: string; email: string; role: string }) {
         const result = await this.proxyPatch(`${this.serviceUrls.delivery}/deliveries/${id}/status`, body, user);
+        const status = (body as { status?: string })?.status ?? '';
+        // Broadcast status change to all connected dispatchers/admins.
+        this.sseService.broadcast('delivery:status', { deliveryId: id, status, timestamp: new Date().toISOString() });
         // Notify the assigned driver only when the change was made by a dispatcher/admin.
         if (user?.role !== 'driver') {
-            const status = (body as { status?: string })?.status ?? '';
             const delivery = await this.prisma.delivery.findUnique({
                 where: { id },
                 select: { reference: true, driver: { select: { user_id: true } } },
@@ -435,6 +447,12 @@ export class GatewayService {
                 id,
                 'assignment',
             );
+            this.sseService.broadcast('delivery:assigned', {
+                deliveryId: id,
+                reference,
+                driverId,
+                timestamp: new Date().toISOString(),
+            });
         }
         return result;
     }

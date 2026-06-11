@@ -79,6 +79,7 @@ import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Plus, Search } from '@lucide/vue';
 import type { ApiDelivery, PaginatedResponse } from '@/composables/useApi';
+import { useRealtime } from '@/composables/useRealtime';
 
 definePageMeta({ layout: false });
 useHead({ title: 'Livraisons — Transvirex' });
@@ -174,5 +175,12 @@ function priorityClass(p: string) {
     )[p] ?? '';
 }
 
-onMounted(fetchDeliveries);
+onMounted(async () => {
+    await fetchDeliveries();
+
+    const realtime = useRealtime();
+    realtime.on('delivery:status', () => fetchDeliveries());
+    realtime.on('delivery:assigned', () => fetchDeliveries());
+    realtime.connect();
+});
 </script>

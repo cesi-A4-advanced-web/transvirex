@@ -25,6 +25,16 @@
                     </Card>
                 </div>
 
+                <!-- Carte des chauffeurs en direct -->
+                <Card>
+                    <CardHeader class="pb-3">
+                        <CardTitle class="text-base">Suivi GPS en direct</CardTitle>
+                    </CardHeader>
+                    <CardContent class="p-0">
+                        <div ref="mapContainer" class="h-80 w-full rounded-b-lg" />
+                    </CardContent>
+                </Card>
+
                 <div class="grid grid-cols-1 xl:grid-cols-3 gap-4">
                     <Card class="xl:col-span-2">
                         <CardHeader class="flex-row items-center justify-between space-y-0 pb-3">
@@ -95,7 +105,6 @@
                                             <p class="text-xs text-muted-foreground">{{ driver.vehicle }}</p>
                                         </div>
                                     </div>
-                                    <span class="text-yellow-500 text-xs font-semibold">★ {{ driver.rating }}</span>
                                 </div>
                                 <div v-if="availableDrivers.length === 0" class="text-center text-muted-foreground text-sm py-4">
                                     Aucun chauffeur disponible
@@ -107,12 +116,12 @@
                             <CardHeader class="flex-row items-center justify-between space-y-0 pb-3">
                                 <CardTitle class="text-base">Alertes</CardTitle>
                                 <Badge class="bg-orange-100 text-orange-600 border-orange-200 hover:bg-orange-100">{{
-                                    alerts.length
+                                    liveAlerts.length
                                 }}</Badge>
                             </CardHeader>
                             <CardContent class="space-y-2">
                                 <div
-                                    v-for="alert in alerts"
+                                    v-for="alert in liveAlerts"
                                     :key="alert.ref"
                                     class="flex items-start gap-2.5 py-2 px-3 rounded-lg"
                                     :class="alert.bg"
@@ -123,8 +132,8 @@
                                         <p class="text-xs text-muted-foreground mt-0.5">{{ alert.message }}</p>
                                     </div>
                                 </div>
-                                <div v-if="alerts.length === 0" class="text-center text-muted-foreground text-sm py-4">
-                                    Aucune alerte
+                                <div v-if="liveAlerts.length === 0" class="text-center text-muted-foreground text-sm py-4">
+                                    Aucune alerte en direct
                                 </div>
                             </CardContent>
                         </Card>
@@ -179,8 +188,12 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { AlertTriangle, Loader2, Package, XCircle } from '@lucide/vue';
+import { AlertTriangle, Loader2, XCircle } from '@lucide/vue';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
 import { useApi, type ApiDelivery, type ApiUser } from '@/composables/useApi';
+import { useRealtime } from '@/composables/useRealtime';
+import { useNotificationStore } from '@/stores/notification';
 
 definePageMeta({ layout: false });
 useHead({ title: 'Dashboard Dispatcher — Transvirex' });
@@ -194,6 +207,12 @@ const drivers = ref<ApiUser[]>([]);
 const assignTarget = ref<{ id: string; reference: string; client: string } | null>(null);
 const selectedDriverId = ref<string | null>(null);
 const assigning = ref(false);
+
+const mapContainer = ref<HTMLDivElement | null>(null);
+let map: L.Map | null = null;
+const driverMarkers = new Map<string, L.Marker>();
+
+const realtime = useRealtime();
 
 const driverOptions = computed(() =>
     drivers.value.map((d) => ({
@@ -265,7 +284,7 @@ const availableDrivers = computed(() =>
         }))
 );
 
-const alerts = computed(() => {
+const liveAlerts = computed(() => {
     const result: { ref: string; message: string; icon: unknown; color: string; bg: string }[] = [];
     for (const d of deliveries.value) {
         if (d.status === 'blocked') {
@@ -285,6 +304,22 @@ const alerts = computed(() => {
                 color: 'text-orange-500',
                 bg: 'bg-orange-50',
             });
+        }
+    }
+    // Ajouter les alertes de retard (scheduled_at dépassé)
+    const now = new Date();
+    for (const d of deliveries.value) {
+        if (d.scheduled_at && d.status !== 'delivered' && d.status !== 'cancelled') {
+            const scheduled = new Date(d.scheduled_at);
+            if (scheduled < now && d.status !== 'blocked' && d.status !== 'delayed') {
+                result.push({
+                    ref: d.reference,
+                    message: `Planifiée le ${scheduled.toLocaleDateString('fr-FR')} — dépassée`,
+                    icon: AlertTriangle,
+                    color: 'text-orange-500',
+                    bg: 'bg-orange-50',
+                });
+            }
         }
     }
     return result.slice(0, 5);
@@ -330,6 +365,37 @@ async function confirmAssign() {
     }
 }
 
+function initMap() {
+    if (!mapContainer.value || map) return;
+    map = L.map(mapContainer.value, {
+        center: [48.8566, 2.3522],
+        zoom: 6,
+        zoomControl: true,
+    });
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors',
+        maxZoom: 19,
+    }).addTo(map);
+
+    // Fit bounds to visible markers after a short delay
+    setTimeout(() => {
+        if (map) map.invalidateSize();
+    }, 200);
+}
+
+function updateDriverMarker(driverId: string, driverName: string, lat: number, lng: number) {
+    if (!map) return;
+    const existing = driverMarkers.get(driverId);
+    if (existing) {
+        existing.setLatLng([lat, lng]);
+    } else {
+        const marker = L.marker([lat, lng])
+            .addTo(map)
+            .bindPopup(`<b>${driverName}</b><br/>Lat: ${lat.toFixed(4)}<br/>Lng: ${lng.toFixed(4)}`);
+        driverMarkers.set(driverId, marker);
+    }
+}
+
 function priorityClass(p: string) {
     return (
         {
@@ -341,5 +407,69 @@ function priorityClass(p: string) {
     )[p] ?? ''
 }
 
-onMounted(fetchData);
+onMounted(async () => {
+    await fetchData();
+
+    // Init map
+    nextTick(() => {
+        initMap();
+        // Place initial markers from driver data
+        for (const d of drivers.value) {
+            if (d.driver?.id) {
+                updateDriverMarker(
+                    d.driver.id,
+                    `${d.firstname ?? ''} ${d.lastname ?? ''}`.trim() || d.email || '',
+                    48.8566 + Math.random() * 2 - 1,
+                    2.3522 + Math.random() * 2 - 1,
+                );
+            }
+        }
+    });
+
+    // Connect SSE
+    realtime.on('delivery:status', async (data) => {
+        const deliveryId = data.deliveryId as string;
+        const idx = deliveries.value.findIndex((d) => d.id === deliveryId);
+        if (idx !== -1) {
+            deliveries.value[idx].status = data.status as string;
+        } else {
+            await fetchData();
+        }
+    });
+
+    realtime.on('delivery:assigned', (data) => {
+        const deliveryId = data.deliveryId as string;
+        const idx = deliveries.value.findIndex((d) => d.id === deliveryId);
+        if (idx !== -1) {
+            deliveries.value[idx].driver_id = data.driverId as string;
+        }
+    });
+
+    realtime.on('position:update', (data) => {
+        const driverId = data.driverId as string;
+        const driver = drivers.value.find((d) => d.driver?.id === driverId || d.id === driverId);
+        const name = driver ? `${driver.firstname ?? ''} ${driver.lastname ?? ''}`.trim() || driver.email || '' : driverId;
+        updateDriverMarker(driverId, name, data.lat as number, data.lng as number);
+    });
+
+    // Vérification des retards toutes les 60s
+    setInterval(() => {
+        const notifStore = useNotificationStore();
+        const now = new Date();
+        for (const d of deliveries.value) {
+            if (d.scheduled_at && d.status !== 'delivered' && d.status !== 'cancelled') {
+                const scheduled = new Date(d.scheduled_at);
+                if (scheduled < now) {
+                    notifStore.pushNotification({
+                        type: 'overdue',
+                        deliveryId: d.id,
+                        message: `Livraison ${d.reference} dépassée`,
+                    });
+                }
+            }
+        }
+    }, 60000);
+
+    realtime.connect();
+});
 </script>

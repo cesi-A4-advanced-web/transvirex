@@ -34,6 +34,7 @@ export interface ApiDelivery {
     reference: string;
     status: string;
     notes: string | null;
+    scheduled_at: string | null;
     position_history: unknown;
     invoice: ApiInvoice;
     driver: ApiDriver | null;

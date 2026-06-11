@@ -9,6 +9,7 @@ import { APP_GUARD } from '@nestjs/core';
 import { JwtModule } from '@nestjs/jwt';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { JwtAuthGuard } from '../../../libs/guards/src/jwt-auth.guard';
+import { SseModule } from './sse/sse.module';
 import { AiController } from './controllers/ai.controller';
 import { AuthController } from './controllers/auth.controller';
 import { BillingController } from './controllers/billing.controller';
@@ -35,6 +36,7 @@ import { GatewayService } from './gateway.service';
         JwtModule.register({}),
         LoggingModule,
         ThrottlerModule.forRoot([{ ttl: 60000, limit: 5 }]),
+        SseModule,
     ],
     controllers: [
         GatewayController,
