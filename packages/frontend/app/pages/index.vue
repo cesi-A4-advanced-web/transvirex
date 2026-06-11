@@ -4,10 +4,11 @@
         <div
             class="relative flex flex-col justify-between bg-primary-dark text-white md:w-[42%] md:min-h-screen px-8 py-8 md:px-12 md:py-12"
         >
-            <div>
+            <!-- <div>
                 <p class="text-xl font-bold leading-none">Transvirex</p>
                 <p class="text-sm text-primary-light mt-0.5">Moving Intelligence</p>
-            </div>
+            </div> -->
+            <NuxtImg src="/logo-color.svg" alt="Transvirex Logo" class="mb-8 w-full max-w-40" />
             <div class="hidden md:block">
                 <h1 class="text-5xl font-extrabold leading-tight mb-4">La logistique,<br />repensée.</h1>
                 <p class="text-primary-light text-base leading-relaxed max-w-xs">
@@ -36,7 +37,7 @@
         </div>
 
         <!-- Form panel -->
-        <div class="flex-1 flex flex-col bg-muted px-6 py-8 md:px-0 md:py-0 md:items-center md:justify-center">
+        <div class="flex-1 flex flex-col bg-muted px-6 py-8 md:px-0 md:py-0 items-center md:justify-center">
             <Card class="w-full max-w-md shadow-sm">
                 <CardHeader class="pb-4">
                     <CardTitle class="text-2xl">Connexion</CardTitle>
@@ -57,7 +58,7 @@
                         <div class="space-y-1.5">
                             <div class="flex justify-between items-center">
                                 <Label for="password">Mot de passe</Label>
-                                <a href="#" class="text-xs text-primary hover:underline">Mot de passe oublié ?</a>
+                                <!-- <a href="#" class="text-xs text-primary hover:underline">Mot de passe oublié ?</a> -->
                             </div>
                             <Input
                                 id="password"
@@ -76,15 +77,6 @@
                             {{ loading ? 'Connexion...' : 'Se connecter' }}
                         </Button>
                     </form>
-
-                    <div class="md:hidden mt-6">
-                        <div class="flex items-center gap-3 my-4">
-                            <Separator />
-                            <span class="text-xs text-muted-foreground whitespace-nowrap">Ou continuer avec</span>
-                            <Separator />
-                        </div>
-                        <Button variant="outline" class="w-full">Face ID</Button>
-                    </div>
                 </CardContent>
             </Card>
 
@@ -101,7 +93,6 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Separator } from '@/components/ui/separator';
 
 definePageMeta({ layout: false });
 

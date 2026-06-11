@@ -19,7 +19,7 @@ export default defineNuxtConfig({
         },
     },
     /** Nuxt modules: shadcn-vue UI components and Pinia state management. */
-    modules: ['shadcn-nuxt', '@pinia/nuxt'],
+    modules: ['shadcn-nuxt', '@pinia/nuxt', '@nuxt/image'],
     /** Global CSS entry point (Tailwind). */
     css: ['~/assets/css/main.css'],
     devServer: {
@@ -53,6 +53,11 @@ export default defineNuxtConfig({
         },
         optimizeDeps: {
             include: ['@vueuse/core', 'class-variance-authority', 'clsx', 'reka-ui', '@lucide/vue', 'tailwind-merge'],
+        },
+    },
+    app: {
+        head: {
+            link: [{ rel: 'icon', type: 'image/svg+xml', href: '/icon-color.svg' }],
         },
     },
 });
