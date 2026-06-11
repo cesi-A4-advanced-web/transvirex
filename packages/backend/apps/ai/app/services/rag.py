@@ -20,6 +20,35 @@ async def ingest_document(content: str, metadata: dict | None = None) -> str:
     return str(result.inserted_id)
 
 
+async def seed_knowledge(documents: list[dict]) -> int:
+    """Upsert seed documents into the knowledge base (idempotent).
+
+    Each document must carry a unique ``metadata.slug`` used as the upsert key,
+    so restarting the service updates content in place instead of duplicating it.
+    Returns the number of documents processed.
+    """
+    db = await get_db()
+    # Ensure the text index exists once (idempotent).
+    await db[_RAG_COLLECTION].create_index([("content", "text")], background=True)
+
+    now = datetime.now(timezone.utc)
+    count = 0
+    for doc in documents:
+        slug = (doc.get("metadata") or {}).get("slug")
+        if not slug:
+            continue
+        await db[_RAG_COLLECTION].update_one(
+            {"metadata.slug": slug},
+            {
+                "$set": {"content": doc["content"], "metadata": doc["metadata"]},
+                "$setOnInsert": {"created_at": now},
+            },
+            upsert=True,
+        )
+        count += 1
+    return count
+
+
 async def _keyword_search(query: str, top_k: int = 5) -> list[dict]:
     """Search documents using MongoDB $text index; fall back to full scan."""
     db = await get_db()
