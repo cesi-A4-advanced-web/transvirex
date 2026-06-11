@@ -27,6 +27,13 @@ export default defineNuxtRouteMiddleware(async (to) => {
     // Pages toujours accessibles sans authentification
     if (to.path.startsWith('/debug')) return;
 
+    // L'authentification repose sur des cookies (refresh_token httpOnly + access
+    // token court rafraîchi côté client). Le refresh n'est fiable que dans le
+    // navigateur : exécuter ces redirections pendant le SSR diverge du rendu client
+    // (mismatch d'hydratation + boucles de redirection). On applique donc l'auth
+    // uniquement côté client.
+    if (import.meta.server) return;
+
     const { user, fetchMe } = useAuth();
 
     // Tenter une reconnexion silencieuse si pas de session en mémoire

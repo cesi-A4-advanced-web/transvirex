@@ -19,8 +19,17 @@ export function useAiAssistant() {
     const loading = ref(false);
     const error = ref<string | null>(null);
 
+    /** Generate a unique id, with a fallback for non-secure contexts where
+     * `crypto.randomUUID` is unavailable (e.g. http://transvirex.local). */
+    function makeId(): string {
+        if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+            return crypto.randomUUID();
+        }
+        return `m-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    }
+
     function addMessage(msg: Omit<ChatMessage, 'id' | 'timestamp'>): ChatMessage {
-        const full: ChatMessage = { ...msg, id: crypto.randomUUID(), timestamp: new Date() };
+        const full: ChatMessage = { ...msg, id: makeId(), timestamp: new Date() };
         messages.value.push(full);
         return full;
     }
@@ -28,6 +37,12 @@ export function useAiAssistant() {
     async function sendMessage(text: string, driverId: string, deliveryId?: string) {
         if (!text.trim()) return;
         error.value = null;
+
+        // Conversation context: snapshot the prior turns (before adding the new
+        // user message) so the assistant keeps track of the discussion.
+        const history = messages.value
+            .slice(-10)
+            .map((m) => ({ role: m.role, content: m.content }));
 
         addMessage({ role: 'user', content: text });
         loading.value = true;
@@ -39,7 +54,8 @@ export function useAiAssistant() {
                 incident?: ChatMessage['incident'];
             }>('/api/ai/process', {
                 method: 'POST',
-                body: { text, driver_id: driverId, delivery_id: deliveryId },
+                credentials: 'include',
+                body: { text, driver_id: driverId, delivery_id: deliveryId, history },
             });
 
             addMessage({
