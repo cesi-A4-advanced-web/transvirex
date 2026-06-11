@@ -37,3 +37,4 @@ resources:
     - ingresses/redis-commander-ingress.yaml
     - ingresses/kubernetes-ingress.yaml
     - ingresses/traefik-ingress.yaml
+
