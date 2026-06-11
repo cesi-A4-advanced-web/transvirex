@@ -14,6 +14,7 @@ export async function seedVehicles(prisma: PrismaClient, count: number, hubIds: 
                 type: faker.helpers.arrayElement(types),
                 license_plate: faker.vehicle.vrm(),
                 hub_id: faker.helpers.arrayElement(hubIds),
+                status: faker.helpers.arrayElement(['available', 'in_maintenance', 'assigned']),
             },
         });
         vehicles.push({ id: vehicle.id, hub_id: vehicle.hub_id });

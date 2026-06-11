@@ -40,4 +40,4 @@ RUN pnpm install --frozen-lockfile
 COPY . .
 RUN pnpm exec prisma generate
 # Run migrations then start the development server
-CMD ["sh", "-c", "pnpm exec prisma migrate deploy && pnpm run dev:authentication"]
+CMD ["sh", "-c", "pnpm exec prisma migrate dev && pnpm run dev:authentication"]

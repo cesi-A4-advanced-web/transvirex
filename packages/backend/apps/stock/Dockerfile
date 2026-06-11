@@ -36,4 +36,4 @@ COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 RUN pnpm install --frozen-lockfile
 COPY . .
 RUN pnpm exec prisma generate
-CMD ["sh", "-c", "pnpm exec prisma migrate deploy && pnpm run dev:stock"]
+CMD ["sh", "-c", "pnpm exec prisma migrate dev && pnpm run dev:stock"]

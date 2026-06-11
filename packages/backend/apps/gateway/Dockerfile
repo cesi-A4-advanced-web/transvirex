@@ -23,7 +23,7 @@ COPY --from=build /app/dist/libs/ ./libs/
 COPY --from=build /app/prisma ./prisma
 COPY --from=build /app/dist/prisma/ ./prisma/
 COPY --from=build /app/tsconfig.json ./tsconfig.json
-CMD ["node", "-r", "tsconfig-paths/register", "apps/gateway/src/main.js"]
+CMD ["sh", "-c", "node_modules/.bin/prisma migrate deploy && node -r tsconfig-paths/register apps/gateway/src/main.js"]
 
 # +--------------------------------------------------------+
 # |                      DEVELOPMENT                       |
@@ -38,4 +38,4 @@ RUN pnpm install --frozen-lockfile
 COPY . .
 RUN pnpm exec prisma generate
 # Start the development server
-CMD ["pnpm", "run", "dev:gateway"]
+CMD ["sh", "-c", "pnpm exec prisma migrate dev && pnpm run dev:gateway"]
