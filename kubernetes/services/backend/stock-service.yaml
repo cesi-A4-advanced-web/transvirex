@@ -77,6 +77,26 @@ spec:
                             configMapKeyRef:
                                 name: transvirex-config
                                 key: LOG_LEVEL
+                      - name: REDIS_HOST
+                        valueFrom:
+                            configMapKeyRef:
+                                name: transvirex-config
+                                key: REDIS_HOST
+                      - name: REDIS_PORT
+                        valueFrom:
+                            configMapKeyRef:
+                                name: transvirex-config
+                                key: REDIS_PORT
+                      - name: REDIS_PASSWORD
+                        valueFrom:
+                            configMapKeyRef:
+                                name: transvirex-config
+                                key: REDIS_PASSWORD
+                      - name: REDIS_DB
+                        valueFrom:
+                            configMapKeyRef:
+                                name: transvirex-config
+                                key: REDIS_DB
                   ports:
                       - containerPort: 3000
                         name: http
