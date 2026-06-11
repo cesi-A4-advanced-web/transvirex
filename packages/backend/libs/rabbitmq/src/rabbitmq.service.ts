@@ -112,7 +112,8 @@ export class RabbitMQService implements OnModuleDestroy {
                 });
             }
         } finally {
-            await channel.close();
+            // checkQueue closes the channel on a missing queue; closing again would throw.
+            await channel.close().catch(() => undefined);
         }
 
         return messages;
