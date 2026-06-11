@@ -33,7 +33,7 @@
                                     <TableHead>Montant</TableHead>
                                     <TableHead>Échéance</TableHead>
                                     <TableHead>Statut</TableHead>
-                                    <TableHead class="w-12 text-right">PDF</TableHead>
+                                    <TableHead class="w-24 text-right">Actions</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
@@ -47,17 +47,26 @@
                                         <Badge :class="statusClass(f.status)">{{ f.statusLabel }}</Badge>
                                     </TableCell>
                                     <TableCell class="text-right">
-                                        <Button
-                                            variant="ghost"
-                                            size="icon"
-                                            class="h-7 w-7 text-muted-foreground hover:text-primary"
-                                            :disabled="exporting === f.ref"
-                                            @click="download(f)"
-                                            :title="`Télécharger ${f.statusLabel} — ${f.ref}`"
-                                        >
-                                            <Loader2 v-if="exporting === f.ref" class="w-3.5 h-3.5 animate-spin" />
-                                            <FileDown v-else class="w-3.5 h-3.5" />
-                                        </Button>
+                <Button
+                    variant="ghost"
+                    size="icon"
+                    class="h-7 w-7 text-blue-600 hover:text-blue-700"
+                    @click="openPlanifier(f)"
+                    :title="`Planifier une livraison — ${f.ref}`"
+                >
+                    <Truck class="w-3.5 h-3.5" />
+                </Button>
+                <Button
+                    variant="ghost"
+                    size="icon"
+                    class="h-7 w-7 text-muted-foreground hover:text-primary"
+                    :disabled="exporting === f.ref"
+                    @click="download(f)"
+                    :title="`Télécharger ${f.statusLabel} — ${f.ref}`"
+                >
+                    <Loader2 v-if="exporting === f.ref" class="w-3.5 h-3.5 animate-spin" />
+                    <FileDown v-else class="w-3.5 h-3.5" />
+                </Button>
                                     </TableCell>
                                 </TableRow>
                                 <TableRow v-if="filtered.length === 0">
@@ -71,6 +80,37 @@
                 </Card>
             </template>
         </div>
+        <Dialog :open="showPlanifier" @update:open="showPlanifier = false">
+            <DialogContent class="sm:max-w-md">
+                <DialogHeader>
+                    <DialogTitle>Planifier une livraison</DialogTitle>
+                    <DialogDescription v-if="selectedInvoice">
+                        Facture {{ selectedInvoice.ref }} — {{ selectedInvoice.client }}
+                    </DialogDescription>
+                </DialogHeader>
+                <div class="space-y-4 py-4">
+                    <div class="space-y-2">
+                        <Label>Facture</Label>
+                        <Input :value="selectedInvoice?.ref ?? ''" disabled class="bg-muted" />
+                    </div>
+                    <div class="space-y-2">
+                        <Label>Référence livraison</Label>
+                        <Input v-model="planForm.reference" placeholder="ex: LIV-001" />
+                    </div>
+                    <div class="space-y-2">
+                        <Label>Notes (optionnel)</Label>
+                        <Textarea v-model="planForm.notes" placeholder="Instructions particulières..." />
+                    </div>
+                </div>
+                <DialogFooter>
+                    <Button variant="outline" @click="showPlanifier = false">Annuler</Button>
+                    <Button :disabled="!planForm.reference || creating" @click="confirmPlanifier">
+                        <Loader2 v-if="creating" class="w-4 h-4 mr-2 animate-spin" />
+                        Créer
+                    </Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
     </AppLayout>
 </template>
 
@@ -78,21 +118,29 @@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { exportBonCommandePdf, exportFacturePdf } from '@/composables/usePdfExport';
 import { useApi, type ApiInvoice } from '@/composables/useApi';
-import { FileDown, Loader2, Search } from '@lucide/vue';
+import { FileDown, Loader2, Search, Truck } from '@lucide/vue';
 
 definePageMeta({ layout: false });
 useHead({ title: 'Factures — Dispatcher' });
 
-const { get } = useApi();
+const { get, post } = useApi();
 
 const loading = ref(true);
 const invoices = ref<ApiInvoice[]>([]);
 const search = ref('');
 const exporting = ref<string | null>(null);
+
+const showPlanifier = ref(false);
+const creating = ref(false);
+const selectedInvoice = ref<{ id: string; ref: string; client: string } | null>(null);
+const planForm = ref({ reference: '', notes: '' });
 
 const statusLabels: Record<string, string> = {
     quotation: 'Devis',
@@ -152,6 +200,29 @@ async function download(f: ReturnType<typeof computed>['value'][number]) {
         }
     } finally {
         exporting.value = null;
+    }
+}
+
+function openPlanifier(f: { id: string; ref: string; client: string }) {
+    selectedInvoice.value = f;
+    planForm.value = { reference: `LIV-${f.ref}`, notes: '' };
+    showPlanifier.value = true;
+}
+
+async function confirmPlanifier() {
+    if (!selectedInvoice.value || !planForm.value.reference) return;
+    creating.value = true;
+    try {
+        await post('/deliveries', {
+            invoices_id: selectedInvoice.value.id,
+            reference: planForm.value.reference,
+            notes: planForm.value.notes || undefined,
+        });
+        showPlanifier.value = false;
+    } catch (e) {
+        console.error('Failed to create delivery', e);
+    } finally {
+        creating.value = false;
     }
 }
 

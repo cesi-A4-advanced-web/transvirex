@@ -108,8 +108,32 @@
                 </DialogHeader>
                 <div class="space-y-4 py-4">
                     <div class="space-y-2">
-                        <Label>Référence facture</Label>
-                        <Input v-model="planForm.invoices_id" placeholder="UUID de la facture" />
+                        <Label>Sélectionner une facture</Label>
+                        <div class="relative">
+                            <Search class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                            <Input v-model="invoiceSearch" placeholder="Rechercher par référence ou client..." class="pl-9" />
+                        </div>
+                        <div v-if="invoiceOptions.length > 0" class="border rounded-lg max-h-48 overflow-y-auto divide-y">
+                            <div
+                                v-for="inv in invoiceOptions"
+                                :key="inv.id"
+                                class="flex items-center justify-between px-3 py-2.5 cursor-pointer hover:bg-muted/50 transition-colors text-sm"
+                                :class="planForm.invoices_id === inv.id ? 'bg-primary/5 border-l-2 border-l-primary' : 'border-l-2 border-l-transparent'"
+                                @click="planForm.invoices_id = inv.id"
+                            >
+                                <div>
+                                    <p class="font-mono text-xs font-medium">{{ inv.ref }}</p>
+                                    <p class="text-xs text-muted-foreground">{{ inv.client }}</p>
+                                </div>
+                                <Badge v-if="planForm.invoices_id === inv.id" variant="outline" class="text-[10px]">Sélectionné</Badge>
+                            </div>
+                        </div>
+                        <div v-else-if="loadingInvoices" class="flex items-center justify-center py-4">
+                            <Loader2 class="w-4 h-4 animate-spin text-muted-foreground" />
+                        </div>
+                        <div v-else class="text-center text-xs text-muted-foreground py-4">
+                            Aucune facture trouvée
+                        </div>
                     </div>
                     <div class="space-y-2">
                         <Label>Référence livraison</Label>
@@ -226,7 +250,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Loader2, Plus, Search } from '@lucide/vue';
-import { useApi, type ApiDelivery, type ApiUser } from '@/composables/useApi';
+import { useApi, type ApiDelivery, type ApiInvoice, type ApiUser } from '@/composables/useApi';
 
 definePageMeta({ layout: false });
 useHead({ title: 'Livraisons — Dispatcher' });
@@ -244,6 +268,9 @@ const showAssign = ref(false);
 const showDetails = ref(false);
 const creating = ref(false);
 const assigning = ref(false);
+const invoices = ref<ApiInvoice[]>([]);
+const invoiceSearch = ref('');
+const loadingInvoices = ref(false);
 const selectedDriverId = ref<string | null>(null);
 const assignData = ref<{ id: string; reference: string } | null>(null);
 const detailData = ref<{
@@ -276,6 +303,19 @@ const driverOptions = computed(() =>
             email: d.email ?? '',
         }))
 );
+
+const invoiceOptions = computed(() => {
+    const all = invoices.value
+        .filter((inv) => inv.status === 'invoice')
+        .map((inv) => ({
+            id: inv.id,
+            ref: inv.reference,
+            client: inv.customer?.customer_name ?? '—',
+        }));
+    if (!invoiceSearch.value) return all;
+    const q = invoiceSearch.value.toLowerCase();
+    return all.filter((inv) => inv.ref.toLowerCase().includes(q) || inv.client.toLowerCase().includes(q));
+});
 
 const mappedDeliveries = computed(() =>
     deliveries.value.map((d) => ({
@@ -354,9 +394,21 @@ async function fetchData() {
     }
 }
 
-function openPlanifier() {
+async function openPlanifier() {
     planForm.value = { invoices_id: '', reference: '', notes: '' };
+    invoiceSearch.value = '';
     showPlanifier.value = true;
+    if (invoices.value.length === 0) {
+        loadingInvoices.value = true;
+        try {
+            const res = await get<{ data: ApiInvoice[]; total: number }>('/invoices', { limit: 200 });
+            invoices.value = res.data;
+        } catch (e) {
+            console.error('Failed to load invoices', e);
+        } finally {
+            loadingInvoices.value = false;
+        }
+    }
 }
 
 async function confirmPlanifier() {
