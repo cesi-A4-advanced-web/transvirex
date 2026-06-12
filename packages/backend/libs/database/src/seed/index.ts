@@ -46,14 +46,14 @@ export async function seedDatabase(prisma: PrismaClient, force: boolean = false)
     const addressIds = await seedAddresses(prisma, 30);
     const hubs = await seedHubs(prisma, 5, addressIds);
     const hubIds = hubs.map((h) => h.id);
-    const users = await seedUsers(prisma, hubIds, 160);
-    const vehicles = await seedVehicles(prisma, 40, hubIds);
+    const users = await seedUsers(prisma, hubIds, 30);
+    const vehicles = await seedVehicles(prisma, 20, hubIds);
     const driverUserIds = users.filter((u) => u.role === 'driver').map((u) => u.id);
     const drivers = await seedDrivers(prisma, driverUserIds, vehicles);
-    const customers = await seedCustomers(prisma, 50, hubIds, addressIds);
+    const customers = await seedCustomers(prisma, 30, hubIds, addressIds);
     const businessManagerUsers = users.filter((u) => u.role === 'business_manager');
-    const invoices = await seedInvoices(prisma, 600, customers, hubs, addressIds, businessManagerUsers);
-    const deliveries = await seedDeliveries(prisma, 600, invoices, drivers);
+    const invoices = await seedInvoices(prisma, 80, customers, hubs, addressIds, businessManagerUsers);
+    const deliveries = await seedDeliveries(prisma, 80, invoices, drivers);
     await seedParcels(prisma, invoices);
     await seedDeliveryEvents(prisma, deliveries, 1, 3);
 
@@ -68,3 +68,4 @@ export async function seedDatabase(prisma: PrismaClient, force: boolean = false)
         deliveries: deliveries.length,
     };
 }
+

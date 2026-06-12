@@ -45,7 +45,8 @@
                                 }}</Badge>
                             </div>
                             <NuxtLink to="/dispatcher/livraisons" class="text-xs text-primary hover-underline"
-                                >Voir tout →</NuxtLink>
+                                >Voir tout →</NuxtLink
+                            >
                         </CardHeader>
                         <CardContent class="p-0 overflow-x-auto">
                             <Table>
@@ -61,7 +62,9 @@
                                 </TableHeader>
                                 <TableBody>
                                     <TableRow v-for="d in pendingDeliveries" :key="d.id">
-                                        <TableCell class="font-mono text-xs text-muted-foreground">{{ d.reference }}</TableCell>
+                                        <TableCell class="font-mono text-xs text-muted-foreground">{{
+                                            d.reference
+                                        }}</TableCell>
                                         <TableCell class="font-medium">{{ d.client }}</TableCell>
                                         <TableCell>{{ d.destination }}</TableCell>
                                         <TableCell>
@@ -69,8 +72,13 @@
                                         </TableCell>
                                         <TableCell class="text-muted-foreground text-xs">{{ d.due }}</TableCell>
                                         <TableCell>
-                                            <Button variant="link" size="sm" class="p-0 h-auto text-primary" @click="openAssign(d)"
-                                                >Assigner</Button>
+                                            <Button
+                                                variant="link"
+                                                size="sm"
+                                                class="p-0 h-auto text-primary"
+                                                @click="openAssign(d)"
+                                                >Assigner</Button
+                                            >
                                         </TableCell>
                                     </TableRow>
                                     <TableRow v-if="pendingDeliveries.length === 0">
@@ -106,7 +114,10 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div v-if="availableDrivers.length === 0" class="text-center text-muted-foreground text-sm py-4">
+                                <div
+                                    v-if="availableDrivers.length === 0"
+                                    class="text-center text-muted-foreground text-sm py-4"
+                                >
                                     Aucun chauffeur disponible
                                 </div>
                             </CardContent>
@@ -126,13 +137,20 @@
                                     class="flex items-start gap-2.5 py-2 px-3 rounded-lg"
                                     :class="alert.bg"
                                 >
-                                    <component :is="alert.icon" class="w-4 h-4 flex-shrink-0 mt-0.5" :class="alert.color" />
+                                    <component
+                                        :is="alert.icon"
+                                        class="w-4 h-4 flex-shrink-0 mt-0.5"
+                                        :class="alert.color"
+                                    />
                                     <div>
                                         <p class="text-xs font-semibold" :class="alert.color">{{ alert.ref }}</p>
                                         <p class="text-xs text-muted-foreground mt-0.5">{{ alert.message }}</p>
                                     </div>
                                 </div>
-                                <div v-if="liveAlerts.length === 0" class="text-center text-muted-foreground text-sm py-4">
+                                <div
+                                    v-if="liveAlerts.length === 0"
+                                    class="text-center text-muted-foreground text-sm py-4"
+                                >
                                     Aucune alerte en direct
                                 </div>
                             </CardContent>
@@ -159,7 +177,9 @@
                         @click="selectedDriverId = driver.id"
                     >
                         <div class="flex items-center gap-3">
-                            <div class="w-8 h-8 rounded-full bg-green-600 flex items-center justify-center text-white text-xs font-bold">
+                            <div
+                                class="w-8 h-8 rounded-full bg-green-600 flex items-center justify-center text-white text-xs font-bold"
+                            >
                                 {{ driver.initials }}
                             </div>
                             <div>
@@ -186,14 +206,33 @@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { AlertTriangle, Loader2, XCircle } from '@lucide/vue';
-import L from 'leaflet';
-import 'leaflet/dist/leaflet.css';
 import { useApi, type ApiDelivery, type ApiUser } from '@/composables/useApi';
 import { useRealtime } from '@/composables/useRealtime';
 import { useNotificationStore } from '@/stores/notification';
+import { AlertTriangle, Loader2, XCircle } from '@lucide/vue';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
+
+/* ===================================================================
+    Fix Leaflet's default icon paths
+   =================================================================== */
+
+L.Icon.Default.mergeOptions({
+    iconRetinaUrl: '/marker-icon-2x.png',
+    iconUrl: '/marker-icon.png',
+});
+
+L.Icon.Default.prototype.options.iconUrl = '/marker-icon.png';
+/* =================================================================== */
 
 definePageMeta({ layout: false });
 useHead({ title: 'Dashboard Dispatcher — Transvirex' });
@@ -221,7 +260,7 @@ const driverOptions = computed(() =>
         initials: ((d.firstname?.[0] ?? '') + (d.lastname?.[0] ?? '')).toUpperCase() || '?',
         vehicle: d.reference,
         rating: '-',
-    }))
+    })),
 );
 
 const kpis = computed(() => [
@@ -252,9 +291,15 @@ const kpis = computed(() => [
 ]);
 
 const unassignedCount = computed(() => deliveries.value.filter((d) => d.status === 'planned' && !d.driver_id).length);
-const urgentUnassigned = computed(() => deliveries.value.filter((d) => d.status === 'planned' && !d.driver_id && d.invoice?.priority === 'urgent').length);
+const urgentUnassigned = computed(
+    () =>
+        deliveries.value.filter((d) => d.status === 'planned' && !d.driver_id && d.invoice?.priority === 'urgent')
+            .length,
+);
 const deliveringCount = computed(() => deliveries.value.filter((d) => d.status === 'delivering').length);
-const delayedCount = computed(() => deliveries.value.filter((d) => d.status === 'delayed' || d.status === 'blocked').length);
+const delayedCount = computed(
+    () => deliveries.value.filter((d) => d.status === 'delayed' || d.status === 'blocked').length,
+);
 const deliveredCount = computed(() => deliveries.value.filter((d) => d.status === 'delivered').length);
 
 const pendingDeliveries = computed(() =>
@@ -268,7 +313,7 @@ const pendingDeliveries = computed(() =>
             destination: d.invoice?.customer?.customer_name ?? '—',
             priority: d.invoice?.priority ?? 'standard',
             due: d.invoice?.due_date ? new Date(d.invoice.due_date).toLocaleDateString('fr-FR') : '—',
-        }))
+        })),
 );
 
 const availableDrivers = computed(() =>
@@ -281,7 +326,7 @@ const availableDrivers = computed(() =>
             initials: ((d.firstname?.[0] ?? '') + (d.lastname?.[0] ?? '')).toUpperCase() || '?',
             vehicle: d.reference,
             rating: '—',
-        }))
+        })),
 );
 
 const liveAlerts = computed(() => {
@@ -398,13 +443,15 @@ function updateDriverMarker(driverId: string, driverName: string, lat: number, l
 
 function priorityClass(p: string) {
     return (
-        {
-            urgent: 'bg-red-100 text-red-700 border-red-200 hover:bg-red-100',
-            high: 'bg-orange-100 text-orange-700 border-orange-200 hover:bg-orange-100',
-            standard: 'bg-blue-100 text-blue-700 border-blue-200 hover:bg-blue-100',
-            low: 'bg-gray-100 text-gray-500 border-gray-200 hover:bg-gray-100',
-        } as Record<string, string>
-    )[p] ?? ''
+        (
+            {
+                urgent: 'bg-red-100 text-red-700 border-red-200 hover:bg-red-100',
+                high: 'bg-orange-100 text-orange-700 border-orange-200 hover:bg-orange-100',
+                standard: 'bg-blue-100 text-blue-700 border-blue-200 hover:bg-blue-100',
+                low: 'bg-gray-100 text-gray-500 border-gray-200 hover:bg-gray-100',
+            } as Record<string, string>
+        )[p] ?? ''
+    );
 }
 
 onMounted(async () => {
@@ -448,7 +495,9 @@ onMounted(async () => {
     realtime.on('position:update', (data) => {
         const driverId = data.driverId as string;
         const driver = drivers.value.find((d) => d.driver?.id === driverId || d.id === driverId);
-        const name = driver ? `${driver.firstname ?? ''} ${driver.lastname ?? ''}`.trim() || driver.email || '' : driverId;
+        const name = driver
+            ? `${driver.firstname ?? ''} ${driver.lastname ?? ''}`.trim() || driver.email || ''
+            : driverId;
         updateDriverMarker(driverId, name, data.lat as number, data.lng as number);
     });
 
@@ -473,3 +522,4 @@ onMounted(async () => {
     realtime.connect();
 });
 </script>
+
